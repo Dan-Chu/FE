@@ -1,11 +1,14 @@
 import styled from "styled-components";
 import "./App.css";
 import Navar from "../src/components/Navar.jsx";
+import Nowpage from "./components/Nowpage.jsx";
 
 function App() {
   return (
     <Phone>
-      <Contents></Contents>
+      <Contents>
+        <Nowpage pageName="AI 추천"/>
+      </Contents>
       <Navar />
     </Phone>
   );
@@ -17,7 +20,7 @@ const Phone = styled.div`
   min-height: 100vh;
   margin-left: auto;
   margin-right: auto;
-  background-color: #ffff;
+  background-color: #FAF8F8;
   display: flex;
   flex-direction: column;
   flex: 1;
