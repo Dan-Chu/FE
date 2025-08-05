@@ -1,13 +1,13 @@
 import styled from "styled-components";
 import "./App.css";
 import Navar from "../src/components/Navar.jsx";
-import Nowpage from "./components/Nowpage.jsx";
+import Home from "./pages/Home/Home.jsx";
 
 function App() {
   return (
     <Phone>
       <Contents>
-        <Nowpage pageName="AI 추천"/>
+        <Home/>
       </Contents>
       <Navar />
     </Phone>
@@ -26,6 +26,9 @@ const Phone = styled.div`
   flex: 1;
   overflow-y: auto;
 `;
-const Contents = styled.div``;
+const Contents = styled.div`
+  padding-left: 28px;
+  padding-top: 21px;
+`;
 
 export default App;

@@ -13,8 +13,6 @@ export default function Nowpage({ pageName }) {
 const Header = styled.header`
   display: flex;
   justify-content: flex-start;
-  padding-left: 28px;
-  padding-top: 21px;
   gap: 15px;
 
   color: #141414;
