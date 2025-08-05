@@ -94,14 +94,13 @@ export default function Navar() {
   );
 }
 
-const Bar = styled.div`
+const Bar = styled.footer`
   display: flex;
-  width: 95vw;
+  width: 393px;
   padding: 0;
   justify-content: space-between;
-  position: fixed;
+  position: absolute;
   bottom: 0%;
-  left: 0;
 `;
 const Button = styled.div`
   display: flex;
