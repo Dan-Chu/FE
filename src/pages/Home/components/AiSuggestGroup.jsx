@@ -45,19 +45,86 @@ export default function AiSuggestGroup() {
           </Hashtag>
         </Explain>
       </AiSuggestCard>
+            <AiSuggestCard>
+        <ShopImg src={ex_img} />
+        <Explain>
+          <ShopName>
+            아맛나 떡볶이
+            <RightButton />
+          </ShopName>
+          <Hashtag>
+            #매콤달콤 <br />
+            #분식
+          </Hashtag>
+        </Explain>
+      </AiSuggestCard>
+            <AiSuggestCard>
+        <ShopImg src={ex_img} />
+        <Explain>
+          <ShopName>
+            아맛나 떡볶이
+            <RightButton />
+          </ShopName>
+          <Hashtag>
+            #매콤달콤 <br />
+            #분식
+          </Hashtag>
+        </Explain>
+      </AiSuggestCard>
+            <AiSuggestCard>
+        <ShopImg src={ex_img} />
+        <Explain>
+          <ShopName>
+            아맛나 떡볶이
+            <RightButton />
+          </ShopName>
+          <Hashtag>
+            #매콤달콤 <br />
+            #분식
+          </Hashtag>
+        </Explain>
+      </AiSuggestCard>
+            <AiSuggestCard>
+        <ShopImg src={ex_img} />
+        <Explain>
+          <ShopName>
+            아맛나 떡볶이
+            <RightButton />
+          </ShopName>
+          <Hashtag>
+            #매콤달콤 <br />
+            #분식
+          </Hashtag>
+        </Explain>
+      </AiSuggestCard>
+            <AiSuggestCard>
+        <ShopImg src={ex_img} />
+        <Explain>
+          <ShopName>
+            아맛나 떡볶이
+            <RightButton />
+          </ShopName>
+          <Hashtag>
+            #매콤달콤 <br />
+            #분식
+          </Hashtag>
+        </Explain>
+      </AiSuggestCard>
+      
     </Group>
   );
 }
 const Group = styled.div`
   display: flex;
   height: 400px;
-  gap: 30px;
+  gap: 34px;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   flex: 0 0 auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;
+  padding-left: 60px;
 `;
 const ShopImg = styled.img`
   width: 271.789px;

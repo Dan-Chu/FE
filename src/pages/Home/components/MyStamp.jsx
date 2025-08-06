@@ -1,5 +1,6 @@
 import SmallRightButton from "../../../assets/icons/small_right_button.svg?react";
 import { Group, TextBox, Text, Button } from "../styles/Box";
+import StampCard from "../../../components/StampCard";
 
 export default function MyStamp() {
   return (
@@ -12,6 +13,7 @@ export default function MyStamp() {
           더보기 <SmallRightButton />
         </Button>
       </TextBox>
+      <StampCard/>
     </Group>
   );
 }

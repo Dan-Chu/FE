@@ -27,7 +27,6 @@ const Phone = styled.div`
   overflow-y: auto;
 `;
 const Contents = styled.div`
-  padding-left: 28px;
   padding-top: 21px;
 `;
 

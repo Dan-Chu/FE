@@ -3,10 +3,12 @@ import styled from "styled-components";
 export const Group = styled.div`
   display: flex;
   height: 200px;
+  gap: 24px;
+  flex-direction: column;
 `;
 export const TextBox = styled.div`
 display: flex;
-width: 347px;
+width: 345px;
 height: 30px;
 flex-direction: row;
 justify-content: space-between;

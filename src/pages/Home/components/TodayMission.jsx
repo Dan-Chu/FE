@@ -1,5 +1,6 @@
 import SmallRightButton from "../../../assets/icons/small_right_button.svg?react";
 import { Group, TextBox, Text, Button } from "../styles/Box";
+import MissionCard from "../../../components/MissionCard";
 
 export default function TodayMission() {
   return (
@@ -12,6 +13,7 @@ export default function TodayMission() {
           더보기 <SmallRightButton />
         </Button>
       </TextBox>
+      <MissionCard />
     </Group>
   );
 }

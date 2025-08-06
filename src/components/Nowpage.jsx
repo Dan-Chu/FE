@@ -14,6 +14,8 @@ const Header = styled.header`
   display: flex;
   justify-content: flex-start;
   gap: 15px;
+  height: 38px;
+  margin-left: 24px;
 
   color: #141414;
   font-family: Pretendard;

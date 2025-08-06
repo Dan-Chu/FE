@@ -6,7 +6,7 @@ import MyStamp from "./components/MyStamp";
 
 export default function Home() {
   return (
-    <>
+    <Page>
       <Nowpage pageName="AI 추천" />
       <Contents>
         <Text>
@@ -16,13 +16,30 @@ export default function Home() {
           위한 맞춤형 추천
         </Text>
         <AiSuggestGroup />
-        <TodayMission />
-        <MyStamp />
+        <Box>
+          <TodayMission />
+          <MyStamp />
+        </Box>
       </Contents>
-    </>
+    </Page>
   );
 }
-
+const Page = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 652px;
+`;
+const Contents = styled.div`
+  display: flex;
+  height: 621px;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  gap: 30px;
+`;
 const Text = styled.div`
   font-family: Pretendard;
   font-size: 24px;
@@ -32,15 +49,11 @@ const Text = styled.div`
   text-align: left;
 
   margin-top: 31px;
-  margin-bottom: 27px;
+  margin-left: 24px;
 `;
-const Contents = styled.div`
+const Box = styled.div`
   display: flex;
-  height: 700px;
   flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
-  white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;
+  gap: 30px;
+  margin-left: 24px;
 `;
