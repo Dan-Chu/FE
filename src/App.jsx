@@ -28,6 +28,7 @@ const Phone = styled.div`
 `;
 const Contents = styled.div`
   padding-top: 21px;
+  height: calc(100vh - 111px);
 `;
 
 export default App;

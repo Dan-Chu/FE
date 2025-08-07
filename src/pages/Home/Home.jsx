@@ -27,11 +27,11 @@ export default function Home() {
 const Page = styled.div`
   display: flex;
   flex-direction: column;
-  height: 652px;
+  height: 100%;
 `;
 const Contents = styled.div`
   display: flex;
-  height: 621px;
+  height: 100%;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
@@ -56,4 +56,5 @@ const Box = styled.div`
   flex-direction: column;
   gap: 30px;
   margin-left: 24px;
+  padding-bottom: 10px;
 `;

@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 export const Group = styled.div`
   display: flex;
-  height: 200px;
   gap: 24px;
   flex-direction: column;
 `;
