@@ -3,11 +3,13 @@ import "./App.css";
 import Navar from "../src/components/Navar.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Login1 from "./pages/Login/Login1.jsx";
+import Splash from "./pages/Splash/splash.jsx";
 
 function App() {
   return (
     <Phone>
-      <Login1 />
+      <Splash/>
+      {/* <Login1 /> */}
       {/* <Contents>
         <Home/>
       </Contents>
