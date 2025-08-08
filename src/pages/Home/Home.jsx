@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import Nowpage from "../../components/Nowpage";
+import TitleBar from "../../components/TitleBar";
 import AiSuggestGroup from "./components/AiSuggestGroup";
 import TodayMission from "./components/TodayMission";
 import MyStamp from "./components/MyStamp";
@@ -7,7 +7,7 @@ import MyStamp from "./components/MyStamp";
 export default function Home() {
   return (
     <Page>
-      <Nowpage pageName="AI 추천" />
+      <TitleBar pageName="AI 추천" />
       <Contents>
         <Text>
           <span style={{ color: "#CE4927", fontWeight: "600" }}>김단추</span>

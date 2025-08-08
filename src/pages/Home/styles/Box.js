@@ -30,4 +30,8 @@ export const Button = styled.div`
   font-weight: 400;
   line-height: 20px; /* 142.857% */
   letter-spacing: -0.14px;
+
+    &:hover{
+    cursor: pointer;
+  }
 `;

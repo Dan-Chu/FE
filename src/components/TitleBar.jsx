@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Logo from "../assets/logos/logo.svg?react";
 
-export default function Nowpage({ pageName }) {
+export default function TitleBar({ pageName }) {
   return (
     <Header>
       <Logo width="35px" height="33px" />

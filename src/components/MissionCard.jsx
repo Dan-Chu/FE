@@ -8,7 +8,7 @@ export default function MissionCard() {
         <MissionName>콩국수 한 그릇 먹기!</MissionName>
         <Button>참여하기</Button>
       </Mission>
-      <Text>보상: 탄산 음료 한 캔 쿠폰</Text>
+      <RewardText>보상: 탄산 음료 한 캔 쿠폰</RewardText>
     </Card>
   );
 }
@@ -66,4 +66,20 @@ const Button = styled.div`
   font-weight: 500;
   line-height: 30px; /* 214.286% */
   letter-spacing: -1px;
+
+    &:hover{
+    cursor: pointer;
+  }
+`;
+
+const RewardText = styled.div`
+  color: #5d5d5d;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 30px;
+  letter-spacing: -1px;
+  height: 30px;
+  margin-top: 15px; 
 `;

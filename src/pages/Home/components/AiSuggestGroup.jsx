@@ -141,6 +141,10 @@ const AiSuggestCard = styled.div`
   height: 368px;
   flex-shrink: 0;
   flex-direction: column;
+
+    &:hover{
+    cursor: pointer;
+  }
 `;
 const Explain = styled.div`
   display: flex;

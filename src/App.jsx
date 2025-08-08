@@ -2,14 +2,16 @@ import styled from "styled-components";
 import "./App.css";
 import Navar from "../src/components/Navar.jsx";
 import Home from "./pages/Home/Home.jsx";
+import Login1 from "./pages/Login/Login1.jsx";
 
 function App() {
   return (
     <Phone>
-      <Contents>
+      <Login1 />
+      {/* <Contents>
         <Home/>
       </Contents>
-      <Navar />
+      <Navar /> */}
     </Phone>
   );
 }
@@ -20,7 +22,7 @@ const Phone = styled.div`
   min-height: 100vh;
   margin-left: auto;
   margin-right: auto;
-  background-color: #FAF8F8;
+  background-color: #faf8f8;
   display: flex;
   flex-direction: column;
   flex: 1;
