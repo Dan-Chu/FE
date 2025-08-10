@@ -5,17 +5,19 @@ import Home from "./pages/Home/Home.jsx";
 import Login1 from "./pages/Login/Login1.jsx";
 import Splash from "./pages/Splash/splash.jsx";
 import Login2 from "./pages/Login/Login2.jsx";
+import StoreList from "./pages/Store/StoreList.jsx";
 
 function App() {
   return (
     <Phone>
       {/* <Splash/> */}
       {/* <Login1 /> */}
-      <Login2/>
-      {/* <Contents>
-        <Home/>
+      {/* <Login2/> */}
+      <Contents>
+        {/* <Home/> */}
+        <StoreList/>
       </Contents>
-      <Navar /> */}
+      <Navar />
     </Phone>
   );
 }
