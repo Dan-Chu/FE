@@ -17,8 +17,8 @@ export default function StoreCard() {
           <Hashtag>#해시태그</Hashtag>
         </HashtagBox>
         <Distance>
-          지금 위치에서 <span style={{ color: "#CF4721" }}>NNm</span>거리에
-          있어요!
+          지금 위치에서 &nbsp;<span style={{ color: "#CF4721" }}>NNm</span>
+          &nbsp; 거리에 있어요!
         </Distance>
       </TextBox>
     </Card>
