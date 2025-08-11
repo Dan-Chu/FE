@@ -5,7 +5,7 @@ import LeftButton from "../../assets/icons/beforepage_button.svg?react";
 import RightButton from "../../assets/icons/nextpage_button.svg?react";
 import StoreCard from "./components/StoreCard";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
-import Close from "../../assets/icons/close.svg?react";
+import Close from "../../assets/icons/close_button.svg?react";
 import FilterType from "./components/filterType";
 import { useState } from "react";
 
@@ -54,45 +54,45 @@ export default function StoreList() {
               <Close onClick={() => filterOn()} />
             </ModalHeader>
             <TypeBox>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
-              <FilterType/>
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
+              <FilterType />
             </TypeBox>
             <ApplyButton>적용하기</ApplyButton>
-            <SwipeBar/>
+            <SwipeBar />
           </ModalBox>
         </Modal>
       )}
@@ -223,7 +223,7 @@ const TypeBox = styled.div`
   row-gap: 18px;
   width: 345px;
   height: 290px;
-    overflow-x: hidden;
+  overflow-x: hidden;
   overflow-y: auto;
   white-space: nowrap;
   scrollbar-width: none; /* Firefox */
@@ -239,7 +239,6 @@ const ApplyButton = styled.div`
   align-items: center;
   justify-content: center;
 
-
   color: #fff;
   text-align: center;
   font-family: Pretendard;
@@ -253,15 +252,15 @@ const ApplyButton = styled.div`
     cursor: pointer;
   }
 `;
-const SwipeBar=styled.div`
+const SwipeBar = styled.div`
   width: 140px;
-height: 6px;
-border-radius: 20px;
-background: #D9D9D9;
-margin-left: 103px;
-margin-top: auto;
-margin-bottom: 16px;
-`
+  height: 6px;
+  border-radius: 20px;
+  background: #d9d9d9;
+  margin-left: 103px;
+  margin-top: auto;
+  margin-bottom: 16px;
+`;
 const ListBox = styled.div`
   display: flex;
   flex-direction: column;

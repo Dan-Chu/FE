@@ -1,11 +1,13 @@
 import styled from "styled-components";
 import "./App.css";
+import 'pretendard/dist/web/static/pretendard.css';
 import Navar from "../src/components/Navar.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Login1 from "./pages/Login/Login1.jsx";
 import Splash from "./pages/Splash/splash.jsx";
 import Login2 from "./pages/Login/Login2.jsx";
 import StoreList from "./pages/Store/StoreList.jsx";
+import StoreDetail from "./pages/Store/StoreDetail.jsx";
 
 function App() {
   return (
@@ -13,11 +15,12 @@ function App() {
       {/* <Splash/> */}
       {/* <Login1 /> */}
       {/* <Login2/> */}
-      <Contents>
-        {/* <Home/> */}
+      {/* <Contents>
+        <Home/>
         <StoreList/>
       </Contents>
-      <Navar />
+      <Navar /> */}
+      <StoreDetail/>
     </Phone>
   );
 }
