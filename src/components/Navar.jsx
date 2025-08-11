@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useState } from "react";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NormalShopList from "../assets/icons/normal_shop_list.svg?react";
 import NormalDailyMission from "../assets/icons/normal_daily_mission.svg?react";
 import NormalStamp from "../assets/icons/normal_stamp.svg?react";
@@ -12,83 +12,51 @@ import NowStamp from "../assets/icons/now_stamp.svg?react";
 import NowMypage from "../assets/icons/now_mypage.svg?react";
 
 export default function Navar() {
-  const [shopList, setShopList] = useState(0);
-  const [dailyMission, setDailyMission] = useState(0);
-  const [main, setMain] = useState(1);
-  const [stamp, setStamp] = useState(0);
-  const [mypage, setMypage] = useState(0);
+  const [page, setPage] = useState(3);
 
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const buttonClick = (button) => {
     switch (button) {
       case "shop":
-        setShopList(1);
-        setDailyMission(0);
-        setMain(0);
-        setStamp(0);
-        setMypage(0);
-
-        //navigate("/");
+        setPage(1);
+        navigate("/storeList");
         break;
       case "mission":
-        setShopList(0);
-        setDailyMission(1);
-        setMain(0);
-        setStamp(0);
-        setMypage(0);
-
-        //navigate("/");
+        setPage(2);
+        navigate("/mission");
         break;
       case "main":
-        setShopList(0);
-        setDailyMission(0);
-        setMain(1);
-        setStamp(0);
-        setMypage(0);
-
-        //navigate("/");
+        setPage(3);
+        navigate("/main");
         break;
       case "stamp":
-        setShopList(0);
-        setDailyMission(0);
-        setMain(0);
-        setStamp(1);
-        setMypage(0);
-
-        //navigate("/");
+        setPage(4);
+        navigate("/stamp");
         break;
       case "mypage":
-        setShopList(0);
-        setDailyMission(0);
-        setMain(0);
-        setStamp(0);
-        setMypage(1);
-
-        //navigate("/");
+        setPage(5);
+        navigate("/mypage");
         break;
     }
   };
 
   return (
     <Bar>
-      <Button onClick={() => buttonClick("shop")} color={shopList ? 1 : 0}>
-        {shopList ? <NowShopList /> : <NormalShopList />}가게목록
+      <Button onClick={() => buttonClick("shop")} color={page == 1 ? 1 : 0}>
+        {page == 1 ? <NowShopList /> : <NormalShopList />}가게목록
       </Button>
-      <Button
-        onClick={() => buttonClick("mission")}
-        color={dailyMission ? 1 : 0}
-      >
-        {dailyMission ? <NowDailyMission /> : <NormalDailyMission />}일일미션
+      <Button onClick={() => buttonClick("mission")} color={page == 2 ? 1 : 0}>
+        {page == 2 ? <NowDailyMission /> : <NormalDailyMission />}일일미션
       </Button>
-      <Button onClick={() => buttonClick("main")} line={main ? 1 : 0}>
-        {main ? <NowMain /> : <NormalMain />}
+      <Button onClick={() => buttonClick("main")} line={page == 3 ? 1 : 0}>
+        {page == 3 ? <NowMain /> : <NormalMain />}
       </Button>
-      <Button onClick={() => buttonClick("stamp")} color={stamp ? 1 : 0}>
-        {stamp ? <NowStamp /> : <NormalStamp />}스탬프
+      <Button onClick={() => buttonClick("stamp")} color={page == 4 ? 1 : 0}>
+        {page == 4 ? <NowStamp /> : <NormalStamp />}스탬프
       </Button>
-      <Button onClick={() => buttonClick("mypage")} color={mypage ? 1 : 0}>
-        {mypage ? <NowMypage /> : <NormalMypage />}마이페이지
+      <Button onClick={() => buttonClick("mypage")} color={page == 5 ? 1 : 0}>
+        {page == 5 ? <NowMypage /> : <NormalMypage />}마이페이지
       </Button>
     </Bar>
   );

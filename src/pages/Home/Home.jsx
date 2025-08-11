@@ -5,6 +5,7 @@ import TodayMission from "./components/TodayMission";
 import MyStamp from "./components/MyStamp";
 
 export default function Home() {
+
   return (
     <Page>
       <TitleBar pageName="AI 추천" />

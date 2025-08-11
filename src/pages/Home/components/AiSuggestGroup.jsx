@@ -1,12 +1,18 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 import ex_img from "../../../assets/images/example_shop_img.jpg";
 import RightButton from "../../../assets/icons/right_button.svg?react";
 
 export default function AiSuggestGroup() {
+    const navigate = useNavigate();
+
+    const toStoreDetail=()=>{
+      navigate("/storeList/storeDetail");
+    }
   return (
     <Group>
-      <AiSuggestCard>
+      <AiSuggestCard onClick={()=>toStoreDetail()}>
         <ShopImg src={ex_img} />
         <Explain>
           <ShopName>

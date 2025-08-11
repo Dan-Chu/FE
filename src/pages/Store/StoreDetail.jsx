@@ -4,47 +4,53 @@ import LeftButton from "../../assets/icons/left_button.svg?react";
 import ex_img from "../../assets/images/example_shop_img.jpg";
 import Open from "../../assets/icons/open.svg?react";
 import Close from "../../assets/icons/close.svg?react";
+import { useNavigate } from "react-router-dom";
 
 export default function StoreDetail() {
   const on = 1;
+  const navigate = useNavigate();
+
+  const toStoreList = () => {
+    navigate(-1);
+  };
 
   return (
     <Page>
       <Header>
-        <LeftButton />
+        <LeftButton onClick={() => toStoreList()} />
         가게정보
       </Header>
-        <Contents>
-      <OpenClose>{on ? <Open /> : <Close />}</OpenClose>
-      <StoreImg src={ex_img} />
-      <TextBox>
-        <StoreName>가게이름이름</StoreName>
-        <StoreInfo>
-          가게 설명 가게 설명 가게 설명 가게 설명 가게 설명 가게 설명 가게 설명
-          가게 설명 가게 설명
-        </StoreInfo>
-        <HashtagBox>
-          <Hashtag>해시태그</Hashtag>
-          <Hashtag>해시태그</Hashtag>
-          <Hashtag>해시태그</Hashtag>
-          <Hashtag>해시태그</Hashtag>
-        </HashtagBox>
-      </TextBox>
-      <InfoBox>
-        • 가게 주소 - 성북구 고길동 <br />
-        • 영업시간 - 10:00 ~ 22:00 <br />
-        • 전화번호 - 010-1234-5678 <br />
-      </InfoBox>
-      <Bar />
-      <Menu>
-        메뉴
-        <MenuBox>
-          <MenuCard />
-          <MenuCard />
-          <MenuCard />
-          <MenuCard />
-        </MenuBox>
-      </Menu>
+      <Contents>
+        <OpenClose>{on ? <Open /> : <Close />}</OpenClose>
+        <StoreImg src={ex_img} />
+        <TextBox>
+          <StoreName>가게이름이름</StoreName>
+          <StoreInfo>
+            가게 설명 가게 설명 가게 설명 가게 설명 가게 설명 가게 설명 가게
+            설명 가게 설명 가게 설명
+          </StoreInfo>
+          <HashtagBox>
+            <Hashtag>해시태그</Hashtag>
+            <Hashtag>해시태그</Hashtag>
+            <Hashtag>해시태그</Hashtag>
+            <Hashtag>해시태그</Hashtag>
+          </HashtagBox>
+        </TextBox>
+        <InfoBox>
+          • 가게 주소 - 성북구 고길동 <br />
+          • 영업시간 - 10:00 ~ 22:00 <br />
+          • 전화번호 - 010-1234-5678 <br />
+        </InfoBox>
+        <Bar />
+        <Menu>
+          메뉴
+          <MenuBox>
+            <MenuCard />
+            <MenuCard />
+            <MenuCard />
+            <MenuCard />
+          </MenuBox>
+        </Menu>
       </Contents>
     </Page>
   );
