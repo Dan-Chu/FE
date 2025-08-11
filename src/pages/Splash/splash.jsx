@@ -1,5 +1,4 @@
 import styled from "styled-components";
-
 import ToYou from "../../assets/icons/splash_to_you.svg?react";
 import DanchuService from "../../assets/icons/splash_danchu_service.svg?react";
 import TextDanchu from "../../assets/logos/text_danchu.svg?react";

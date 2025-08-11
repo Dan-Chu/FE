@@ -4,8 +4,15 @@ import Kakao from "../../assets/icons/icon_kakao.svg?react"
 import Google from "../../assets/icons/icon_google.svg?react"
 import Naver from "../../assets/icons/icon_naver.svg?react"
 import Apple from "../../assets/icons/icon_apple.svg?react"
+import { useNavigate } from "react-router-dom";
 
 export default function Login1() {
+  const navigate=useNavigate();
+
+  const login=()=>{
+    navigate("/main");
+  }
+
   return (
     <Page>
       <Logo />
@@ -30,7 +37,7 @@ export default function Login1() {
           <Apple/>애플 계정으로 시작하기
         </MethodCard>
       </Group>
-      <Test>테스트 계정으로 로그인</Test>
+      <Test onClick={()=>login()}>테스트 계정으로 로그인</Test>
     </Page>
   );
 }

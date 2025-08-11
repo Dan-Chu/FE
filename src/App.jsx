@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import "./App.css";
-import 'pretendard/dist/web/static/pretendard.css';
+import "pretendard/dist/web/static/pretendard.css";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router";
 import Navar from "../src/components/Navar.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Login1 from "./pages/Login/Login1.jsx";
@@ -10,17 +12,42 @@ import StoreList from "./pages/Store/StoreList.jsx";
 import StoreDetail from "./pages/Store/StoreDetail.jsx";
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000); // 2초 후 사라짐
+    return () => clearTimeout(timer); // 컴포넌트 언마운트 시 타이머 정리
+  }, []);
+
+  function WithNavar() {
+    return (
+      <>
+        <Contents>
+          <Outlet />
+        </Contents>
+        <Navar />
+      </>
+    );
+  }
+
   return (
     <Phone>
-      {/* <Splash/> */}
-      {/* <Login1 /> */}
-      {/* <Login2/> */}
-      {/* <Contents>
-        <Home/>
-        <StoreList/>
-      </Contents>
-      <Navar /> */}
-      <StoreDetail/>
+      {showSplash ? (
+        <Splash />
+      ) : (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Login1 />} />
+            <Route element={<WithNavar/>}>
+              <Route path="/main" element={<Home />} />
+              <Route path="/storeList" element={<StoreList />} />
+            </Route>
+            <Route path="/storeList/storeDetail" element={<StoreDetail />} />
+          </Routes>
+        </BrowserRouter>
+      )}
     </Phone>
   );
 }
