@@ -10,7 +10,7 @@ export default function Login1() {
   const navigate=useNavigate();
 
   const login=()=>{
-    navigate("/main");
+    navigate("/login2");
   }
 
   return (

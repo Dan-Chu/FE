@@ -91,7 +91,7 @@ export default function StoreList() {
               <FilterType />
               <FilterType />
             </TypeBox>
-            <ApplyButton>적용하기</ApplyButton>
+            <ApplyButton onClick={() => filterOn()}>적용하기</ApplyButton>
             <SwipeBar />
           </ModalBox>
         </Modal>
@@ -133,7 +133,7 @@ export default function StoreList() {
 const Page = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 `;
 const SearchBar = styled.div`
   display: flex;
