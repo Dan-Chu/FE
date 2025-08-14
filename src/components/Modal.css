@@ -1,0 +1,241 @@
+/* 공통: 화면 중앙 팝업 + 딤 */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3000;                 /* 네비보다 위로 */
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;                 /* 좁은 화면 좌우 여백 */
+}
+
+.modal-content { position: relative; }
+
+/* 미션 상세 모달 카드 */
+.mission-modal {
+  width: min(360px, 100%);       /* 캡처 느낌의 폭 + 반응형 */
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.20);
+  position: relative;
+  box-sizing: border-box;
+
+  /* 왼쪽 썸네일 공간 확보 (이미지 126 + 좌패딩 16 + 간격 10 ≈ 152) */
+  padding: 16px 16px 62px 160px; /* 상 우 하 좌 */
+  overflow: hidden;
+}
+
+/* 썸네일(왼쪽 고정) */
+.modal-image {
+  width: 126px;
+  height: 126px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #f3f3f3;
+}
+
+/* ✅ 텍스트는 절대포지션 제거하고 자연 흐름으로 */
+.modal-title {
+  /* position: absolute; top/left 제거 */
+  font-size: 20px;
+  font-weight: 800;
+  color: #ce4927;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
+  margin: 4px 0 6px;
+  word-break: keep-all;
+}
+
+.modal-store {
+  /* position: absolute; top/left 제거 */
+  font-size: 13px;
+  color: #7a7a7a;
+  margin: -2px 0 8px;
+}
+
+.modal-reward {
+  /* position: absolute; top/left 제거 */
+  font-size: 14px;
+  color: #333;
+  line-height: 22px;
+  white-space: pre-line;
+}
+
+/* 하단 버튼 2개 */
+.modal-button-group {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+}
+
+.modal-button {
+  flex: 1;                       /* 양쪽 1:1 */
+  height: 48px;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-store {
+  background-color: #ce4927;
+  color: #fff;
+  border-bottom-left-radius: 16px;
+}
+
+.btn-code {
+  background-color: #eaeaea;
+  color: #5d5d5d;
+  border-bottom-right-radius: 16px;
+}
+
+/* 아주 좁은 화면에서 썸네일 공간 살짝 줄이기(선택) */
+@media (max-width: 360px) {
+  .mission-modal { padding-left: 150px; }
+}
+
+
+/* 인증코드 모달 */
+.modal-code {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 90%;
+  max-width: 320px;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.modal-code-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ce4927;
+  margin-bottom: 16px;
+}
+
+/* 기존 한 줄 input */
+.modal-code-input {
+  width: 100%;
+  height: 48px;
+  font-size: 20px;
+  padding: 8px 12px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: Pretendard;
+  margin-bottom: 20px;
+}
+
+/* 인증코드 확인 버튼 */
+.btn-confirm {
+  background-color: #ce4927;
+  color: #fff;
+  border: none;
+  padding: 12px 0;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block; /* 삐져나오는 거 방지 */
+}
+
+.btn-confirm:hover {
+  background-color: #b73f22;
+}
+
+
+
+/* 쿠폰 성공 모달 */
+.modal-success {
+  background: white;
+  border-radius: 12px;
+  outline: 1px solid #dcdcdc;
+  padding: 24px;
+  width: 90%;
+  max-width: 320px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.modal-success-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.modal-success-desc {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.btn-close {
+  background-color: #ce4927;
+  color: white;
+  border: none;
+  padding: 12px 0;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* 쿠폰 모달 */
+.coupon-modal {
+  width: 320px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  padding: 16px;
+  text-align: center;
+}
+
+.coupon-modal .coupon-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.coupon-modal .coupon-store {
+  color: #5d5d5d;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.coupon-modal .coupon-name {
+  color: #141414;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.coupon-modal .coupon-code {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.coupon-modal .btn-primary {
+  width: 100%;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: #cf4721;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
