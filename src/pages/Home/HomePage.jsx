@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import Navar from "../../components/Navar";
 
-export default function StoreList() {
+export default function HomePage() {
   return (
     <Wrap>
-      가게목록
+      홈페이지
       <Navar />
     </Wrap>
   );
