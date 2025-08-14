@@ -3,13 +3,13 @@ import Logo from "../../../assets/logos/card_logo.svg?react";
 import ex_img from "../../../assets/images/example_shop_img.jpg";
 import { useNavigate } from "react-router-dom";
 
-export default function StoreCard() {
+export default function StoreCard({ data }) {
   const navigate = useNavigate();
 
   const toStoreDetail = () => {
-    navigate("/storeList/storeDetail");
+    navigate(`/storeList/storeDetail`);
   };
-  
+
   return (
     <Card onClick={() => toStoreDetail()}>
       <StoreImg src={ex_img} />

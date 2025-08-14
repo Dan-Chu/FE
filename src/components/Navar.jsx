@@ -61,7 +61,7 @@ export default function Navar() {
       <Button onClick={() => buttonClick("mission")} color={page == 2 ? 1 : 0}>
         {page == 2 ? <NowDailyMission /> : <NormalDailyMission />}일일미션
       </Button>
-      <Button onClick={() => buttonClick("main")} line={page == 3 ? 1 : 0}>
+      <Button onClick={() => buttonClick("main")} $line={page == 3 ? 1 : 0}>
         {page == 3 ? <MainButton><NowMain /></MainButton> : <NormalMain height="60px"/>}
       </Button>
       <Button onClick={() => buttonClick("stamp")} color={page == 4 ? 1 : 0}>
@@ -105,7 +105,7 @@ const Button = styled.div`
     width: 30px;
     height: 4px;
     border-radius: 15px;
-    background-color: ${({ line }) => (line ? "#D9D9D9" : "transparent")};
+    background-color: ${({ $line }) => ($line ? "#D9D9D9" : "transparent")};
   }
 `;
 const NowMain = styled(NormalMain)`

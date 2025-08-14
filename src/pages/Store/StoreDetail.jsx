@@ -4,11 +4,18 @@ import LeftButton from "../../assets/icons/left_button.svg?react";
 import ex_img from "../../assets/images/example_shop_img.jpg";
 import Open from "../../assets/icons/open.svg?react";
 import Close from "../../assets/icons/close.svg?react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { StoreDetailGet } from "../../shared/api/store";
 
 export default function StoreDetail() {
   const on = 1;
   const navigate = useNavigate();
+  const { storeId } = useParams();
+
+  // useEffect(()=>{
+  //   let data= StoreDetailGet(storeId);
+  // },[storeId]);
 
   const toStoreList = () => {
     navigate(-1);

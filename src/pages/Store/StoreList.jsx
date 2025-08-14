@@ -7,12 +7,19 @@ import StoreCard from "./components/StoreCard";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import Close from "../../assets/icons/close_button.svg?react";
 import FilterType from "./components/filterType";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { StoreListGet, SearchStoreGet } from "../../shared/api/store";
 
 export default function StoreList() {
   const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
   const [filter, setFilter] = useState(false);
-  const pageCount = 1;
+  const [data, setData] = useState();
+  const [searchName, setSearchName] = useState("");
+
+  // useEffect(()=>{
+  //   setData(StoreListGet(page));
+  // },[page])
 
   const pageOn = (what) => {
     switch (what) {
@@ -35,12 +42,36 @@ export default function StoreList() {
     setFilter(!filter);
   };
 
+  const pageChange = (upDown) => {
+    if (upDown) {
+      setPageCount(pageCount + 4);
+      setPage(pageCount + 4);
+      return;
+    } else if (pageCount == 1) {
+      return;
+    }
+    setPageCount(pageCount - 4);
+    setPage(pageCount - 4);
+  };
+
+  const search = (name) => {
+    setData(SearchStoreGet(name));
+  };
+
   return (
     <Page>
       <TitleBar pageName="가게목록" />
       <SearchBar>
-        <Input />
-        <Search />
+        <Input
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              search(searchName)
+            }
+          }}
+        />
+        <Search onClick={() => search(searchName)} />
       </SearchBar>
       <Filter onClick={() => filterOn()}>
         <FilterIcon />
@@ -102,29 +133,29 @@ export default function StoreList() {
         <StoreCard />
       </ListBox>
       <ListPage>
-        <LeftButton />
-        <PageNumber onClick={() => pageOn(1)} now={page == pageCount ? 1 : 0}>
+        <LeftButton onClick={() => pageChange(false)} />
+        <PageNumber onClick={() => pageOn(1)} $now={page == pageCount ? 1 : 0}>
           {pageCount}
         </PageNumber>
         <PageNumber
           onClick={() => pageOn(2)}
-          now={page == pageCount + 1 ? 1 : 0}
+          $now={page == pageCount + 1 ? 1 : 0}
         >
           {pageCount + 1}
         </PageNumber>
         <PageNumber
           onClick={() => pageOn(3)}
-          now={page == pageCount + 2 ? 1 : 0}
+          $now={page == pageCount + 2 ? 1 : 0}
         >
           {pageCount + 2}
         </PageNumber>
         <PageNumber
           onClick={() => pageOn(4)}
-          now={page == pageCount + 3 ? 1 : 0}
+          $now={page == pageCount + 3 ? 1 : 0}
         >
           {pageCount + 3}
         </PageNumber>
-        <RightButton />
+        <RightButton onClick={() => pageChange(true)} />
       </ListPage>
     </Page>
   );
@@ -279,11 +310,11 @@ const ListPage = styled.div`
   }
 `;
 const PageNumber = styled.div`
-  color: ${({ now }) => (now ? "#5D5D5D" : "#BDBDBD")};
+  color: ${({ $now }) => ($now ? "#5D5D5D" : "#BDBDBD")};
   font-family: Pretendard;
   font-size: 14px;
   font-style: normal;
-  font-weight: ${({ now }) => (now ? "600" : "400")};
+  font-weight: ${({ $now }) => ($now ? "600" : "400")};
   line-height: 0; /* 0% */
   letter-spacing: -1px;
 `;
