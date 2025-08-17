@@ -15,22 +15,22 @@
 
 .modal-content { position: relative; }
 
-/* 미션 상세 모달 카드 */
+/* ===== 미션 상세 모달 카드 ===== */
 .mission-modal {
-  width: min(360px, 100%);       /* 캡처 느낌의 폭 + 반응형 */
+  width: min(360px, 100%);
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.20);
   position: relative;
   box-sizing: border-box;
 
-  /* 왼쪽 썸네일 공간 확보 (이미지 126 + 좌패딩 16 + 간격 10 ≈ 152) */
-  padding: 16px 16px 62px 160px; /* 상 우 하 좌 */
+  /* 썸네일(126) + 좌패딩(16) + 간격(10) ≈ 152 확보 */
+  padding: 16px 16px 62px 160px; /* T R B L */
   overflow: hidden;
 }
 
-/* 썸네일(왼쪽 고정) */
-.modal-image {
+/* 썸네일 왼쪽 고정 */
+.mission-image {
   width: 126px;
   height: 126px;
   position: absolute;
@@ -41,66 +41,72 @@
   background: #f3f3f3;
 }
 
-/* ✅ 텍스트는 절대포지션 제거하고 자연 흐름으로 */
-.modal-title {
-  /* position: absolute; top/left 제거 */
+/* 텍스트 (피그마 값) */
+.mission-title {
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
   font-size: 20px;
-  font-weight: 800;
-  color: #ce4927;
-  line-height: 1.35;
-  letter-spacing: -0.3px;
-  margin: 4px 0 6px;
+  font-weight: 600;
+  color: #CE4927;
+  line-height: 30px;
+  margin: 2px 0 4px;
   word-break: keep-all;
 }
-
-.modal-store {
-  /* position: absolute; top/left 제거 */
-  font-size: 13px;
-  color: #7a7a7a;
-  margin: -2px 0 8px;
-}
-
-.modal-reward {
-  /* position: absolute; top/left 제거 */
+.mission-store {
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
   font-size: 14px;
-  color: #333;
-  line-height: 22px;
-  white-space: pre-line;
+  font-weight: 400;
+  color: #5D5D5D;
+  margin: 0 0 8px;
+}
+.mission-desc {
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #141414;
+  line-height: 24px;
+  white-space: pre-line;  /* 줄바꿈 유지 */
 }
 
-/* 하단 버튼 2개 */
-.modal-button-group {
+/* 하단 버튼 2개 고정 */
+.mission-btn-group {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   display: flex;
 }
 
-.modal-button {
-  flex: 1;                       /* 양쪽 1:1 */
+.mission-btn {
+  flex: 1;
   height: 48px;
   font-size: 15px;
   font-weight: 800;
-  text-align: center;
   border: none;
+  outline: none;                  /* 포커스 테두리 제거 */
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
+  text-align: center;
+
+  display: flex;                  /* 텍스트 가운데 정렬 */
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-store {
-  background-color: #ce4927;
+.mission-btn-store {
+  background: #CE4927;
   color: #fff;
   border-bottom-left-radius: 16px;
 }
-
-.btn-code {
-  background-color: #eaeaea;
-  color: #5d5d5d;
+.mission-btn-code {
+  background: #EAEAEA;
+  color: #5D5D5D;
   border-bottom-right-radius: 16px;
 }
 
-/* 아주 좁은 화면에서 썸네일 공간 살짝 줄이기(선택) */
+/* 아주 좁은 화면에서 왼쪽 여백만 살짝 줄이기 */
 @media (max-width: 360px) {
   .mission-modal { padding-left: 150px; }
 }
+
 
 
 /* 인증코드 모달 */
@@ -136,22 +142,111 @@
 }
 
 /* 인증코드 확인 버튼 */
-.btn-confirm {
-  background-color: #ce4927;
-  color: #fff;
-  border: none;
-  padding: 12px 0;
-  width: 100%;
-  font-size: 16px;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
-  display: block; /* 삐져나오는 거 방지 */
+/* ===== 백드롭: 화면 중앙 정렬 ===== */
+.modal-backdrop,
+.modal-wrapper,
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.5);
 }
 
-.btn-confirm:hover {
-  background-color: #b73f22;
+/* ===== 모달 본체 ===== */
+.modal-code {
+  width: 90%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  text-align: center;
+
+  /* 넘침/삐져나옴 방지 */
+  overflow: hidden;
+  box-sizing: border-box;
+
+  /* 내부 레이아웃 */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
+
+/* 모든 자식 폭/패딩 안전 */
+.modal-code * { box-sizing: border-box; }
+
+/* 제목 */
+.modal-title {
+  margin: 0;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ce4927;
+}
+
+/* 입력 */
+.modal-code-input {
+  width: 100%;
+  height: 48px;
+  padding: 8px 12px;
+  font-size: 20px;
+  font-family: Pretendard, system-ui, sans-serif;
+  text-align: center;
+  color: #141414;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+/* 버튼 래퍼(전역 스타일 초기화) */
+.modal-button-group {
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  position: static !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* 확인 버튼: 가로·세로 완전 중앙 + 부모 폭 딱 맞춤 */
+.btn-confirm {
+  display: flex;                 /* ← 텍스트 정중앙 */
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  max-width: 100%;
+  padding: 12px 0;
+
+  background: #ce4927;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: Pretendard, system-ui, sans-serif;
+
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-confirm:hover { background: #b73f22; }
+
+/* 폼 기본 마진 때문에 밀리는 현상 방지 (폼을 쓰는 경우) */
+.modal-code form { margin: 0; }
+
+/* 작은 안내문(힌트) */
+.modal-hint {
+  margin: -6px 0 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: #8F8F8F;
+}
+
 
 
 
@@ -239,3 +334,142 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ===== 스탬프 상세 모달 3종 ===== */
+
+/* 공통 컨테이너 */
+.stamp-modal {
+  width: min(360px, 92vw);
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  padding: 20px 24px 18px;
+  box-sizing: border-box;
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* 상단 이모지 */
+.stamp-hero {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 4px auto 12px;
+}
+
+/* (가게이름), */
+.stamp-sub {
+  color: #CE4927;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 30px;
+  margin-bottom: 4px;
+}
+.stamp-sub .comma { margin-left: 2px; }
+
+/* 단골 도장 꾹! / 스탬프 완성! */
+.stamp-title {
+  color: #CE4927;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 30px;
+  margin: 0 0 8px;
+}
+
+/* * 테스트용 인증코드 0000입니다. */
+.stamp-hint {
+  color: #797979;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  margin: 2px 0 12px;
+}
+
+/* AAAA 스타일 입력(숫자 4자리) */
+.stamp-code {
+  width: 100%;
+  height: 58px;
+  border: 1px solid #E3E3E3;
+  border-radius: 12px;
+  background: #fff;
+  text-align: center;
+
+  color: #141414;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 45px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 12px;            /* 칸을 띄운 느낌 */
+  padding: 0 8px;
+
+  outline: none;
+  box-sizing: border-box;
+  margin: 0 0 14px;
+}
+.stamp-code::placeholder { color: #D0D0D0; letter-spacing: 8px; }
+.stamp-code::-webkit-outer-spin-button,
+.stamp-code::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stamp-code[type="number"] { -moz-appearance: textfield; }
+
+/* 알림 모달 전용 */
+.stamp-modal--alert { padding-top: 24px; }
+.alert-sub {
+  color: #FF3400;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 8px 0 2px;
+}
+.alert-title {
+  color: #141414;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.alert-desc {
+  color: #5D5D5D;
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0 0 12px;
+}
+
+/* 프라이머리 버튼 (피그마 '두 덩이' 느낌 포함) */
+.btn-confirm {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+
+  background: linear-gradient(180deg, #f46a3d 0%, #e34e27 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
+}
+
+.btn-confirm::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 0;
+  transform: translateX(-.5px);
+  border-left: 1px solid rgba(255,255,255,.20);
+  border-right: 1px solid rgba(0,0,0,.06);
+  pointer-events: none;
+}
+
+.btn-confirm:hover   { filter: brightness(0.98); }
+.btn-confirm:active  { transform: translateY(1px); }
+.btn-confirm:disabled{ opacity: .6; cursor: not-allowed; }
