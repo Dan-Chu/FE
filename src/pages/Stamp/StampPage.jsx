@@ -1,12 +1,23 @@
-// src/pages/Stamp/Stamp.jsx
 import { useState } from "react";
 import styled from "styled-components";
 
 import TitleBar from "../../components/TitleBar";
 import Navar from "../../components/Navar";
 import MainStampCard from "../../components/MainStampCard";
-import { StampCodeModal, RewardCodeModal } from "../../components/Modal";
+import {
+  StampCodeModal,
+  RewardCodeModal,
+  AlreadyExistsModal,
+  CouponSuccessModal,
+} from "../../components/Modal";
 import { StampCircleButton } from "../../components/Button";
+
+// 임시: 인증코드 → 가게 인덱스 매핑 (API 오면 대체)
+const CODE_MAP = {
+  "1234": 0, // 동방손칼국수
+  "5678": 1, // 카페단추
+  "0000": 2, // 분식단추
+};
 
 export default function StampPage() {
   const [stores, setStores] = useState([
@@ -15,39 +26,46 @@ export default function StampPage() {
     { storeName: "분식단추",     stamps: 0,  cyclesCompleted: 0, hasUnclaimedReward: false },
   ]);
 
-  const [modalType, setModalType] = useState(null); // 'stamp' | 'claim'
+  // 'stamp' | 'claim' | 'exists' | 'success' | null
+  const [modalType, setModalType] = useState(null);
   const [activeIdx, setActiveIdx] = useState(null);
 
-  /* 상단 전역 도장 버튼: 항상 활성화 */
   const openGlobalStamp = () => setModalType("stamp");
+  const openClaim = (idx) => { setActiveIdx(idx); setModalType("claim"); };
 
-  const openClaim = (idx) => {
-    setActiveIdx(idx);
-    setModalType("claim");
-  };
-
-  // ===== 서버 연동 자리 =====
   const handleSubmitStamp = async (code) => {
-    // TODO: const { storeId } = await api.verifyStamp({ code });
+    const idxByCode = CODE_MAP[code];
+    if (idxByCode === undefined) {
+      alert("유효하지 않은 인증코드예요.");
+      return;
+    }
+    const target = stores[idxByCode];
+
+    if (target.hasUnclaimedReward || target.stamps >= 10) {
+      setModalType(null);
+      setActiveIdx(idxByCode);
+      setTimeout(() => setModalType("exists"), 0);
+      return;
+    }
+
     setStores((prev) => {
-      const idx = prev.findIndex((s) => s.stamps < 10);
-      const safeIdx = Math.max(0, idx);
       const next = [...prev];
-      const s = { ...next[safeIdx] };
+      const s = { ...next[idxByCode] };
       if (s.stamps >= 9) {
-        s.stamps = 10; s.hasUnclaimedReward = true;
+        s.stamps = 10;
+        s.hasUnclaimedReward = true;
       } else {
         s.stamps += 1;
       }
-      next[safeIdx] = s;
+      next[idxByCode] = s;
       return next;
     });
+
     setModalType(null);
     setActiveIdx(null);
   };
 
   const handleSubmitClaim = async (code) => {
-    // TODO: await api.claimReward(stores[activeIdx].storeName, { code });
     setStores((prev) => {
       const next = [...prev];
       const s = { ...next[activeIdx] };
@@ -59,23 +77,22 @@ export default function StampPage() {
     });
     setModalType(null);
     setActiveIdx(null);
+    setTimeout(() => setModalType("success"), 0);
   };
 
   const closeModal = () => { setModalType(null); setActiveIdx(null); };
 
   return (
     <Page>
-      {/* 상단 sticky 헤더 */}
       <Header>
         <HeaderInner>
           <TitleBar pageName="스탬프" />
           <TopRight>
-            <StampCircleButton size={28} onClick={openGlobalStamp} />
+            <StampCircleButton size={40} onClick={openGlobalStamp} />
           </TopRight>
         </HeaderInner>
       </Header>
 
-      {/* 본문 스크롤 영역 */}
       <ScrollArea>
         <List>
           {stores.map((store, idx) => (
@@ -88,10 +105,8 @@ export default function StampPage() {
         </List>
       </ScrollArea>
 
-      {/* 하단 고정 네비 */}
       <Navar />
 
-      {/* 모달들 */}
       {modalType === "stamp" && (
         <StampCodeModal
           storeName=""
@@ -99,6 +114,7 @@ export default function StampPage() {
           onSubmit={handleSubmitStamp}
         />
       )}
+
       {modalType === "claim" && activeIdx != null && (
         <RewardCodeModal
           storeName={stores[activeIdx].storeName}
@@ -106,55 +122,81 @@ export default function StampPage() {
           onSubmit={handleSubmitClaim}
         />
       )}
+
+      {modalType === "exists" && activeIdx != null && (
+        <AlreadyExistsModal
+          storeName={stores[activeIdx].storeName}
+          onClose={closeModal}
+        />
+      )}
+
+      {modalType === "success" && <CouponSuccessModal onClose={closeModal} />}
     </Page>
   );
 }
 
-/* ===== styles ===== */
-
-/* 화면 꽉 채우는 루트 */
+/* ========= styled ========= */
 const Page = styled.div`
-  position: fixed;   /* 뷰포트 전체 차지 */
-  inset: 0;
+  width: 100%;
+  max-width: 390px;
+  height: 100dvh;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  overflow: hidden;  /* 바깥 스크롤 방지 */
+  background: #faf8f8;
+  overflow: hidden;
 `;
 
-/* 상단 고정 헤더 */
 const Header = styled.div`
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #fff;
-  /* 데모용 경계선: 필요 없으면 지워도 됨 */
-  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+  background: #faf8f8;
+  box-shadow: none;
 `;
+
 const HeaderInner = styled.div`
   position: relative;
-  padding: 16px 16px 8px;
+  padding: 0;
+  min-height: 60px;
 `;
+
 const TopRight = styled.div`
   position: absolute;
-  right: 16px;
-  top: 16px;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
 `;
 
-/* 본문 스크롤 영역 (여기가 포인트: min-height:0) */
 const ScrollArea = styled.div`
   flex: 1 1 auto;
-  min-height: 0;                 /* ✅ 없으면 0px로 붕괴할 수 있음 */
+  min-height: 0;
+
   overflow-y: auto;
+  overflow-x: hidden;
+
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px calc(90px + env(safe-area-inset-bottom));
-  background: #fff;
+  overscroll-behavior: contain;
+
+  padding: 0 24px calc(90px + env(safe-area-inset-bottom));
+
+  /* 스크롤바 숨김 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar{ width:0!important; height:0!important; display:none!important; }
+
+  /* 오버레이 스크롤바 마스킹 */
+  --sbw: 14px;
+  margin-right: calc(var(--sbw) * -1);
+  padding-right: calc(24px + var(--sbw));
 `;
 
-/* 카드 리스트 */
 const List = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding-bottom: 8px;
+  align-items: center;
 `;
+

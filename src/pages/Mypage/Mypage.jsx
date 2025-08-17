@@ -1,151 +1,268 @@
-// src/pages/Mypage/Mypage.jsx
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TitleBar from "../../components/TitleBar";
 
-import tagOn from "../../assets/images/Hashtag_yes.svg";
-import basicProfile from "../../assets/images/basic_profile.svg";
-import editIcon from "../../assets/icons/edit.svg";        // ✅ 배경 이미지 import
+import TitleBar from "../../components/TitleBar";
 import Navar from "../../components/Navar";
+import basicProfile from "../../assets/images/basic_profile.svg";
+import { EditCircleButton } from "../../components/Button";
 
 export default function Mypage() {
   const nav = useNavigate();
+
+  const [nickname, setNickname] = useState("김단추");
+  const [email, setEmail] = useState("XXXXXX@skuniv.ac.kr");
+  const [avatar, setAvatar] = useState(null);
   const [myTags, setMyTags] = useState([]);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("myTags") || "[]");
-    setMyTags(saved.slice(0, 8));
+    const saved = JSON.parse(localStorage.getItem("profile") || "null");
+    if (saved) {
+      setNickname(saved.nickname ?? "김단추");
+      setEmail(saved.email ?? "XXXXXX@skuniv.ac.kr");
+      setAvatar(saved.avatar ?? null);
+
+      if (Array.isArray(saved.selectedIndices)) {
+        const count = saved.selectedIndices.length;
+        setMyTags(Array.from({ length: count }, () => "해시태그"));
+        return;
+      }
+    }
+    const legacy = JSON.parse(localStorage.getItem("myTags") || "[]");
+    if (Array.isArray(legacy) && legacy.length) setMyTags(legacy);
   }, []);
 
   return (
-    <Center>
-      <Wrap>
+    <Page>
+      <Header>
         <TitleBar pageName="마이페이지" />
+      </Header>
 
-        <Header>
-          <Avatar><img src={basicProfile} alt="" /></Avatar>
-          <Name>김단추</Name>
-          <Email>XXXXXX@skuniv.ac.kr</Email>
-          <EditBtn onClick={() => nav("/mypage/edit")} aria-label="정보 수정" />
-        </Header>
+      <ScrollArea>
+        <Profile>
+          <Avatar>
+            <img src={avatar || basicProfile} alt="" />
+          </Avatar>
 
-        <TagWrap>
-          {myTags.map((t, i) => (
-            <Tag key={i}>{t}</Tag>
-          ))}
-        </TagWrap>
+          <Info>
+            <Name>{nickname}</Name>
+            <Email>{email}</Email>
+          </Info>
 
-        <CouponStrip>
-          <Left>나의 쿠폰함</Left>
-          <Right onClick={() => nav("/mypage/coupons")}>확인하기</Right>
-        </CouponStrip>
+          <EditBtn size={70} onClick={() => nav("/mypage/edit")} />
+        </Profile>
 
-        <Hr />
+        {!!myTags.length && (
+          <TagGrid>
+            {myTags.map((t, i) => (
+              <TagChip key={i}>#{t}</TagChip>
+            ))}
+          </TagGrid>
+        )}
 
-        <BlockTitle>문의 및 알림</BlockTitle>
+        <CouponCard>
+          <CouponTitle>나의 쿠폰함</CouponTitle>
+          <CouponCTA type="button" onClick={() => nav("/mypage/coupons")}>
+            확인하기
+          </CouponCTA>
+        </CouponCard>
+
+        <Divider />
+
+        <SectionTitle>문의 및 알림</SectionTitle>
         <TwoCol>
           <Col>
             <Item>고객센터</Item>
             <Item>공지사항</Item>
-            <ItemSm>현재 버전 1.0.0</ItemSm>
+            <ItemSmall>현재 버전 1.0.0</ItemSmall>
           </Col>
           <Col>
             <Item>자주 묻는 질문</Item>
             <Item>약관 및 정책</Item>
           </Col>
         </TwoCol>
-      </Wrap>
+      </ScrollArea>
 
-      {/* ✅ 여기! 고정 네비게이션 렌더 */}
       <Navar />
-    </Center>
+    </Page>
   );
 }
 
-/* ===== styles ===== */
-
-const Center = styled.div`
-  width: 100vw;
-  min-height: 100svh;
-  display: flex;
-  justify-content: center;
-  background: #faf8f8;
-
-  /* ⚠️ fixed 요소가 잘리는 원인이라면 아래 속성들이 있으면 지우세요
-     overflow: hidden; transform: translateZ(0); filter: ...; */
-`;
-
-const Wrap = styled.div`
+/* ========= styled ========= */
+const Page = styled.div`
   width: 100%;
-  max-width: 480px;                       /* Navar의 max-width와 맞추면 좋아요 */
-  min-height: 100vh;
-  box-sizing: border-box;
-  background: #faf8f8;
-  padding: 16px;
-  padding-bottom: calc(90px + env(safe-area-inset-bottom)); /* 바텀 네비 여백 */
+  max-width: 390px;
+  height: 100dvh;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #FAF8F8;
+  overflow: hidden;
 `;
 
-/* 상단 */
 const Header = styled.div`
-  position: relative;
-  padding-top: 6px;
-  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #FAF8F8;
+  box-shadow: none;
 `;
+
+const ScrollArea = styled.div`
+  flex: 1 1 auto;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  padding: 0 24px calc(90px + env(safe-area-inset-bottom));
+
+  /* 스크롤바 숨김 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar{ width:0!important; height:0!important; display:none!important; }
+
+  /* 오버레이 스크롤바 마스킹 */
+  --sbw: 14px;
+  margin-right: calc(var(--sbw) * -1);
+  padding-right: calc(24px + var(--sbw));
+`;
+
+const Profile = styled.div`
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  padding: 8px 0 14px;
+`;
+
 const Avatar = styled.div`
   width: 70px; height: 70px; border-radius: 9999px;
   background: #fff9f2; overflow: hidden;
   img { width: 100%; height: 100%; object-fit: cover; }
 `;
+
+const Info = styled.div`
+  min-width: 0; display: flex; flex-direction: column; gap: 6px;
+`;
+
 const Name = styled.div`
-  margin-top: 12px; color: #ce4927; font-size: 32px; font-weight: 700; line-height: 30px;
+  color: #ce4927; font-size: 32px; font-weight: 700; line-height: 30px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 `;
+
 const Email = styled.div`
-  margin-top: 8px; color: #9a9a9a; font-size: 14px; font-weight: 500;
-`;
-const EditBtn = styled.button`
-  position: absolute; right: 6px; top: 8px;
-  width: 35px; height: 35px; border-radius: 50%;
-  border: 1.2px solid #e8512a;
-  background: #fff url(${editIcon}) center/16px no-repeat;   /* ✅ */
-  cursor: pointer;
+  color: #9a9a9a; font-size: 14px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 `;
 
-/* 태그 */
-const TagWrap = styled.div`
-  display: flex; flex-wrap: wrap; gap: 10px 12px; margin: 14px 0 10px;
-`;
-const Tag = styled.div`
-  width: 75px; height: 31px; border-radius: 18px;
-  background: url(${tagOn}) center/cover no-repeat;
-  display: grid; place-items: center;
-  color: #fff; font-size: 11px; font-weight: 500;
+const EditBtn = styled(EditCircleButton)`
+  margin-left: 12px; flex-shrink: 0;
 `;
 
-/* 쿠폰 스트립 */
-const CouponStrip = styled.div`
-  display: flex; align-items: stretch; width: 100%; height: 130px;
-  border-radius: 12px; overflow: hidden; background: #ffedd6;
+/* 해시태그 – 4열 그리드 */
+const TagGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 12px;
   margin: 6px 0 12px;
 `;
-const Left = styled.div`
-  flex: 1; display: flex; align-items: center; padding-left: 18px;
-  color: #141414; font-size: 24px; font-weight: 600;
+
+const TagChip = styled.div`
+  height: 31px;
+  padding: 0 12px;
+  border-radius: 18px;
+  background: #EC6541;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
 `;
-const Right = styled.button`
-  width: 120px; border: 0; background: #cf4721; color: #fff;
-  font-size: 14px; font-weight: 500; cursor: pointer; position: relative;
+
+const CouponCard = styled.div`
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 130px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffedd6;
+  margin: 16px 0 22px;
+`;
+
+const CouponTitle = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  color: #141414;
+  font-size: 24px;
+  font-weight: 600;
+`;
+
+const CouponCTA = styled.button`
+  width: 120px;
+  border: 0;
+  background: #cf4721;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+
   &:after {
-    content: ""; position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
-    width: 12px; height: 24px; background: #ffedd6; border-radius: 0 12px 12px 0;
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px; height: 24px;
+    background: #ffedd6;
+    border-radius: 0 12px 12px 0;
   }
 `;
 
-/* 하단 정보 */
-const Hr = styled.div`height: 1px; background: #d9d9d9; margin: 10px 0 12px;`;
-const BlockTitle = styled.div`color: #5d5d5d; font-size: 14px; font-weight: 600; margin-bottom: 10px;`;
-const TwoCol = styled.div`display: grid; grid-template-columns: 1fr 1fr; gap: 4px 30px;`;
-const Col = styled.div`display: grid; gap: 10px;`;
-const Item = styled.div`color: #141414; font-size: 13px; font-weight: 500;`;
-const ItemSm = styled.div`color: #141414; font-size: 13px;`;
+const Divider = styled.div`
+  height: 1px;
+  background: #e6e6e6;
+  margin: 8px 0 18px;
+`;
+
+const SectionTitle = styled.div`
+  color: #5d5d5d;
+  font-size: 14px;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans KR", sans-serif;
+  font-weight: 500;
+  margin-bottom: 12px;
+`;
+
+const TwoCol = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 48px;
+  row-gap: 12px;
+  align-items: start;
+`;
+
+const Col = styled.div`
+  display: grid;
+  gap: 12px;
+`;
+
+const Item = styled.div`
+  color: #141414;
+  font-size: 12px;
+  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans KR", sans-serif;
+  font-weight: 500;
+  line-height: 20px;
+`;
+
+const ItemSmall = styled(Item)``;

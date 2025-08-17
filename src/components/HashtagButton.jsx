@@ -1,57 +1,35 @@
-// src/components/common/HashtagButton.jsx
+// src/components/HashtagButton.jsx
 import styled from "styled-components";
 
-export default function HashtagButton({
-  selected,
-  onChange,
-  offSrc,
-  onSrc,
-  label = "해시태그",
-  width = 88,
-  height = 36,
-  disabled = false,
-  className,
-}) {
+/** 해시태그 토글 버튼 (상태는 부모가 관리)
+ *  props:
+ *   - on: boolean (선택됨)
+ *   - children: 버튼 텍스트 (기본 '# 해시태그')
+ */
+export default function HashtagButton({ on = false, children = "해시태그", ...props }) {
   return (
-    <Btn
-      type="button"
-      className={className}
-      onClick={() => !disabled && onChange?.(!selected)}
-      aria-pressed={selected}
-      aria-label={label}
-      title={label}
-      $bg={selected ? onSrc : offSrc}
-      $w={width}
-      $h={height}
-      disabled={disabled}
-    >
-      <Hidden>{label}</Hidden>
+    <Btn type="button" $on={on} {...props}>
+      # {children}
     </Btn>
   );
 }
 
 const Btn = styled.button`
-  border: 0;
-  background: transparent;
-  padding: 0;
+  min-width: 78px;          /* 한 줄 유지 */
+  height: 31px;
+  padding: 0 12px;
+  border-radius: 18px;
+  border: 1px solid #e8512a;
+  background: ${({ $on }) => ($on ? "#e8512a" : "#fff")};
+  color: ${({ $on }) => ($on ? "#fff" : "#e8512a")};
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 31px;
   cursor: pointer;
 
-  width: ${(p) => p.$w}px;
-  height: ${(p) => p.$h}px;
-  background-image: url(${(p) => p.$bg});
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  border-radius: 999px;
-
   &:focus-visible {
+    outline: none;
     box-shadow: 0 0 0 3px #ff5a2f33;
   }
-  &:disabled { opacity: 0.5; cursor: default; }
-`;
-
-const Hidden = styled.span`
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden; clip-path: inset(50%);
 `;
