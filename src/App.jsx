@@ -1,7 +1,9 @@
+// src/App.jsx
 import styled from "styled-components";
 import "./App.css";
 import "pretendard/dist/web/static/pretendard.css";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom"; // ⬅️ dom 로 변경
+
 import Navar from "../src/components/Navar.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Login1 from "./pages/Login/Login1.jsx";
@@ -34,12 +36,16 @@ export default function App() {
           <Route path="/" element={<Splash />} />
           <Route path="/login1" element={<Login1 />} />
           <Route path="/login2" element={<Login2 />} />
+
+          {/* 하단 네비가 필요한 페이지들 */}
           <Route element={<WithNavar />}>
             <Route path="/main" element={<Home />} />
             <Route path="/storeList" element={<StoreList />} />
             <Route path="/mission" element={<MissionPage />} />
             <Route path="/stamp" element={<StampPage />} />
             <Route path="/mypage" element={<Mypage />} />
+            <Route path="/mypage/edit" element={<EditProfile />} />
+            <Route path="/mypage/coupons" element={<CouponPage />} /> {/* ✅ 추가 */}
           </Route>
           <Route path="/storeList/storeDetail/:id" element={<StoreDetail />} />
           <Route path="/coupons" element={<CouponPage />} />
@@ -60,8 +66,9 @@ const Phone = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden; /* 바깥 스크롤 숨김 */
 `;
+
 const Contents = styled.div`
   padding-top: 21px;
   height: 674px;
