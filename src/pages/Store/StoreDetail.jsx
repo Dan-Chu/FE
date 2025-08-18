@@ -1,21 +1,24 @@
 import styled from "styled-components";
 import MenuCard from "./components/MenuCard";
 import LeftButton from "../../assets/icons/left_button.svg?react";
-import ex_img from "../../assets/images/example_shop_img.jpg";
 import Open from "../../assets/icons/open.svg?react";
 import Close from "../../assets/icons/close.svg?react";
-import { useNavigate,useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { StoreDetailGet } from "../../shared/api/store";
 
 export default function StoreDetail() {
-  const on = 1;
   const navigate = useNavigate();
-  const { storeId } = useParams();
+  const { id } = useParams();
+  const [data, setData] = useState([]);
 
-  // useEffect(()=>{
-  //   let data= StoreDetailGet(storeId);
-  // },[storeId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const storeData = await StoreDetailGet(id);
+      setData(storeData);
+    };
+    fetchData();
+  }, [id]);
 
   const toStoreList = () => {
     navigate(-1);
@@ -28,34 +31,34 @@ export default function StoreDetail() {
         가게정보
       </Header>
       <Contents>
-        <OpenClose>{on ? <Open /> : <Close />}</OpenClose>
-        <StoreImg src={ex_img} />
+        <OpenClose>{data.open ? <Open /> : <Close />}</OpenClose>
+        <StoreImg src={data.mainImageUrl} />
         <TextBox>
-          <StoreName>가게이름이름</StoreName>
-          <StoreInfo>
-            가게 설명 가게 설명 가게 설명 가게 설명 가게 설명 가게 설명 가게
-            설명 가게 설명 가게 설명
-          </StoreInfo>
+          <StoreName>{data.name}</StoreName>
+          <StoreInfo>{data.description}</StoreInfo>
           <HashtagBox>
-            <Hashtag>해시태그</Hashtag>
-            <Hashtag>해시태그</Hashtag>
-            <Hashtag>해시태그</Hashtag>
-            <Hashtag>해시태그</Hashtag>
+            {data.hashtags && data.hashtags.length > 0 ? (
+              data.hashtags.map((hashtag) => (
+                <Hashtag key={hashtag.id}>{hashtag.name}</Hashtag>
+              ))
+            ) : (
+              <p>태그가 없습니다.</p>
+            )}
           </HashtagBox>
         </TextBox>
         <InfoBox>
-          • 가게 주소 - 성북구 고길동 <br />
-          • 영업시간 - 10:00 ~ 22:00 <br />
-          • 전화번호 - 010-1234-5678 <br />
+          • 가게 주소 - {data.address} <br />• 영업시간 - {data.openTime} ~{" "}
+          {data.closeTime} <br />• 전화번호 - {data.phoneNumber} <br />
         </InfoBox>
         <Bar />
         <Menu>
           메뉴
           <MenuBox>
-            <MenuCard />
-            <MenuCard />
-            <MenuCard />
-            <MenuCard />
+            {data.menu && data.menu.length > 0 ? (
+              data.menu.map((menu) => <MenuCard key={menu.id} data={menu}/>)
+            ) : (
+              <p>메뉴가 없습니다.</p>
+            )}
           </MenuBox>
         </Menu>
       </Contents>
@@ -67,7 +70,7 @@ const Page = styled.div`
   display: flex;
   flex-direction: column;
   padding-top: 25px;
-  height: calc(100vh - 25px);
+  height: 740px;
 `;
 const Header = styled.div`
   display: flex;

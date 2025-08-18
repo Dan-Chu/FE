@@ -1,14 +1,13 @@
 import styled from "styled-components";
-import ex_img from "../../../assets/images/example_shop_img.jpg";
 
-export default function MenuCard() {
+export default function MenuCard({key,data}) {
   return (
     <Card>
       <TextBox>
-        <MenuName>맛있는 음식</MenuName>
-        <Price>10,000원</Price>
+        <MenuName>{data.name}</MenuName>
+        <Price>{data.priceFormatted}</Price>
       </TextBox>
-      <MenuImg src={ex_img} />
+      <MenuImg src={data.imageUrl} />
     </Card>
   );
 }

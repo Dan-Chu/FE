@@ -1,13 +1,13 @@
 import styled from "styled-components";
 import Stamp from "../assets/icons/stamp.svg?react";
 
-export default function StampCard() {
+export default function StampCard(data) {
   const TotalStamp = 10;
-  const stampCount = 7;
+  const stampCount = data.currentCount;
 
   return (
     <Card>
-      <StampName>국수가락</StampName>
+      <StampName>{data.storeName}</StampName>
       <StampGroup>
         {Array.from({ length: TotalStamp }).map((_, i) => (
           <StampBox key={i}>{i < stampCount ? <Stamp /> : null}</StampBox>

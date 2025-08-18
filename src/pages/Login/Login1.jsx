@@ -5,13 +5,19 @@ import Google from "../../assets/icons/icon_google.svg?react"
 import Naver from "../../assets/icons/icon_naver.svg?react"
 import Apple from "../../assets/icons/icon_apple.svg?react"
 import { useNavigate } from "react-router-dom";
+import { TestLogin } from "../../shared/api/auth";
 
 export default function Login1() {
   const navigate=useNavigate();
 
-  const login=()=>{
-    navigate("/login2");
-  }
+  const login = async () => {
+    const success = await TestLogin(); // 로그인 완료를 기다림
+    if (success) {
+      navigate("/login2");
+    } else {
+      alert("로그인 실패");
+    }
+  };
 
   return (
     <Page>
@@ -20,20 +26,20 @@ export default function Login1() {
         <span style={{ color: "#CE4927" }}>단추</span>에<br />잘 오셨어요!
       </Text>
       <Group>
-        <MethodCard backColor="#FDE402" color="#000">
+        <MethodCard $backColor="#FDE402" $color="#000">
           <Kakao/>카카오 계정으로 1초 만에 시작하기
         </MethodCard>
         <MethodCard
-          backColor="#FFF"
-          borderLine="1px solid #DCDCDC"
-          color="#000"
+          $backColor="#FFF"
+          $borderLine="1px solid #DCDCDC"
+          $color="#000"
         >
           <Google/>구글 계정으로 시작하기
         </MethodCard>
-        <MethodCard backColor="#03CE5C;" color="#FAF8F8">
+        <MethodCard $backColor="#03CE5C;" $color="#FAF8F8">
           <Naver/>네이버 계정으로 시작하기
         </MethodCard>
-        <MethodCard backColor="#000" color="#FAF8F8">
+        <MethodCard $backColor="#000" $color="#FAF8F8">
           <Apple/>애플 계정으로 시작하기
         </MethodCard>
       </Group>
@@ -75,13 +81,13 @@ const MethodCard = styled.div`
   height: 64px;
   flex-shrink: 0;
   border-radius: 12px;
-  background-color: ${({ backColor }) => backColor};
-  border: ${({ borderLine }) => borderLine};
+  background-color: ${({ $backColor }) => $backColor};
+  border: ${({ $borderLine }) => $borderLine};
   align-items: center;
   justify-content: center;
   gap: 15px;
 
-  color: ${({ color }) => color};
+  color: ${({ $color }) => $color};
   text-align: center;
   font-family: Pretendard;
   font-size: 16px;

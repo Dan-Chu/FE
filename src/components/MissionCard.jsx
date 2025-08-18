@@ -1,14 +1,14 @@
 import styled from "styled-components";
 
-export default function MissionCard() {
+export default function MissionCard(data) {
   return (
     <Card>
-      <Text>국수가락</Text>
+      <Text>{data.storeName}</Text>
       <Mission>
-        <MissionName>콩국수 한 그릇 먹기!</MissionName>
+        <MissionName>{data.title}</MissionName>
         <Button>참여하기</Button>
       </Mission>
-      <RewardText>보상: 탄산 음료 한 캔 쿠폰</RewardText>
+      <RewardText>보상: {data.reward}</RewardText>
     </Card>
   );
 }
