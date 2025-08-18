@@ -41,7 +41,7 @@ export default function App() {
             <Route path="/stamp" element={<StampPage />} />
             <Route path="/mypage" element={<Mypage />} />
           </Route>
-          <Route path="/storeList/storeDetail" element={<StoreDetail />} />
+          <Route path="/storeList/storeDetail/:id" element={<StoreDetail />} />
           <Route path="/coupons" element={<CouponPage />} />
           <Route path="/edit" element={<EditProfile />} />
         </Routes>

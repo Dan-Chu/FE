@@ -1,122 +1,39 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-
-import ex_img from "../../../assets/images/example_shop_img.jpg";
 import RightButton from "../../../assets/icons/right_button.svg?react";
 
-export default function AiSuggestGroup() {
-    const navigate = useNavigate();
+export default function AiSuggestGroup(data) {
+  const navigate = useNavigate();
 
-    const toStoreDetail=()=>{
-      navigate("/storeList/storeDetail");
-    }
+  const toStoreDetail = (id) => {
+    navigate(`/storeList/storeDetail/${id}`);
+  };
   return (
     <Group>
-      <AiSuggestCard onClick={()=>toStoreDetail()}>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-      <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-      <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-            <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-            <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-            <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-            <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-            <AiSuggestCard>
-        <ShopImg src={ex_img} />
-        <Explain>
-          <ShopName>
-            아맛나 떡볶이
-            <RightButton />
-          </ShopName>
-          <Hashtag>
-            #매콤달콤 <br />
-            #분식
-          </Hashtag>
-        </Explain>
-      </AiSuggestCard>
-      
+      {data && data.length > 0 ? (
+        data.map((store) => (
+          <AiSuggestCard onClick={() => toStoreDetail(store.id)}>
+            <ShopImg src={store.mainImageUrl} />
+            <Explain>
+              <ShopName>
+                {store.name}
+                <RightButton />
+              </ShopName>
+              <Hashtag>
+                {store.hashtags && store.hashtags.length > 0 ? (
+                  store.hashtags.map((tags) => {
+                    tags.name;
+                  })
+                ) : (
+                  <p>태그가 없습니다.</p>
+                )}
+              </Hashtag>
+            </Explain>
+          </AiSuggestCard>
+        ))
+      ) : (
+        <p>사용자 해시태그가 없어<br/>추천을 진행할 수 없습니다.</p>
+      )}
     </Group>
   );
 }
@@ -148,7 +65,7 @@ const AiSuggestCard = styled.div`
   flex-shrink: 0;
   flex-direction: column;
 
-    &:hover{
+  &:hover {
     cursor: pointer;
   }
 `;
@@ -189,4 +106,3 @@ const Hashtag = styled.p`
   max-width: 235px;
   margin: 0;
 `;
-

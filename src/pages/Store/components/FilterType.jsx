@@ -1,15 +1,9 @@
 import styled from "styled-components";
-import { useState } from "react";
 
-export default function FilterType() {
-  const [type, setType] = useState(false);
-
-  const typeOn = () => {
-    setType(!type);
-  };
+export default function FilterType({key,hashtag, selected, onClick}) {
   return (
-    <Filter onClick={() => typeOn()} on={type}>
-      해시태그
+    <Filter onClick={() => onClick} $on={selected}>
+      {hashtag}
     </Filter>
   );
 }
@@ -23,9 +17,9 @@ const Filter = styled.div`
   flex-shrink: 0;
   border-radius: 18px;
   border: 1px solid #e8512a;
-  background: ${({ on }) => (on ? "#E8512A" : "#FFF")};
+  background: ${({ $on }) => ($on ? "#E8512A" : "#FFF")};
 
-  color: ${({ on }) => (on ? "#FFF" : "#E8512A")};
+  color: ${({ $on }) => ($on ? "#FFF" : "#E8512A")};
   text-align: center;
   font-family: Pretendard;
   font-size: 11px;

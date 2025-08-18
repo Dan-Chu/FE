@@ -3,8 +3,20 @@ import TitleBar from "../../components/TitleBar";
 import AiSuggestGroup from "./components/AiSuggestGroup";
 import TodayMission from "./components/TodayMission";
 import MyStamp from "./components/MyStamp";
+import { useEffect, useState } from "react";
+import { AiStoreGet } from "../../shared/api/openAI";
 
 export default function Home() {
+  const [data,setData]=useState();
+
+    useEffect(() => {
+    const fetchData = async () => {
+        const result = await AiStoreGet();
+        setData(result);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <Page>
@@ -16,7 +28,7 @@ export default function Home() {
           <br />
           위한 맞춤형 추천
         </Text>
-        <AiSuggestGroup />
+        <AiSuggestGroup data={data}/>
         <Box>
           <TodayMission />
           <MyStamp />

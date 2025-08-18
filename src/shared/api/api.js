@@ -1,0 +1,40 @@
+import axios from "axios";
+import {jwtDecode}  from "jwt-decode";
+
+function isTokenExpired(token) {
+  if (!token) return true;
+  const decoded = jwtDecode(token);
+  const now = Date.now() / 1000;
+  return decoded.exp < now;
+}
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL, // 환경변수 사용
+});
+
+api.interceptors.request.use(async (config) => {
+  let oldToken = localStorage.getItem("token");
+
+  if (config.url.includes("/auth/login/test")) {
+    return config;
+  }
+
+  if (isTokenExpired(oldToken)) {
+    // 만료 → refresh API 요청
+    const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,{},{
+      headers: {
+        Authorization: `Bearer ${oldToken}`,
+      },
+    });
+    const token = res.headers["authorization"]?.split(" ")[1];
+    localStorage.setItem("token", token);
+    
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    config.headers.Authorization = `Bearer ${oldToken}`;
+  }
+  
+  return config;
+});
+
+export default api;
