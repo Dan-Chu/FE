@@ -5,16 +5,38 @@ import TodayMission from "./components/TodayMission";
 import MyStamp from "./components/MyStamp";
 import { useEffect, useState } from "react";
 import { AiStoreGet } from "../../shared/api/openAI";
+import { PopularMissionGet } from "../../shared/api/mission";
+import { ExpiringStampGet } from "../../shared/api/stamp";
 
 export default function Home() {
-  const [data,setData]=useState();
+  const [storeData,setStoreData]=useState();
+  const [missionData,setMissionData]=useState();
+  const [stampData,setStampData]=useState();
 
     useEffect(() => {
     const fetchData = async () => {
-        const result = await AiStoreGet();
-        setData(result);
-    };
+    try {
+      const storeResult = await AiStoreGet();
+      setStoreData(storeResult);
+    } catch (err) {
+      console.warn("AiStoreGet 실패:", err);
+      setStoreData(null); // 실패해도 기본값 세팅 가능
+    }
 
+    try {
+      const missionResult = await PopularMissionGet();
+      setMissionData(missionResult);
+    } catch (err) {
+      console.warn("PopularMissionGet 실패:", err);
+    }
+
+    try {
+      const stampResult = await ExpiringStampGet();
+      setStampData(stampResult);
+    } catch (err) {
+      console.warn("ExpiringStampGet 실패:", err);
+    }
+  };
     fetchData();
   }, []);
 
@@ -28,10 +50,10 @@ export default function Home() {
           <br />
           위한 맞춤형 추천
         </Text>
-        <AiSuggestGroup data={data}/>
+        <AiSuggestGroup data={storeData}/>
         <Box>
-          <TodayMission />
-          <MyStamp />
+          <TodayMission data={missionData}/>
+          <MyStamp data={stampData}/>
         </Box>
       </Contents>
     </Page>

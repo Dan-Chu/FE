@@ -3,7 +3,7 @@ import api from "./api";
 
 export const HashtagsGet = () => {
   const [data, setData] = useState([]);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     api

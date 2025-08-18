@@ -5,7 +5,7 @@ import RightButton from "../../assets/icons/nextpage_button.svg?react";
 import StoreCard from "./components/StoreCard";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import Close from "../../assets/icons/close_button.svg?react";
-import FilterType from "./components/filterType";
+import FilterType from "./components/FilterType";
 import {
   Page,
   SearchBar,

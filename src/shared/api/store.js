@@ -1,7 +1,7 @@
 import api from "./api";
 
 export const StoreListGet = async (pageNumber,lat,lng) => {//위치 기반 리스트
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   const res = await api.get(`/stores/nearby?lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -12,7 +12,7 @@ export const StoreListGet = async (pageNumber,lat,lng) => {//위치 기반 리�
 };
 
 export const StoreDetailGet = async (storeId) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   const res = await api.get(`/stores/${storeId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -23,7 +23,7 @@ export const StoreDetailGet = async (storeId) => {
 };
 
 export const SearchStoreGet = async (storeName, pageNumber) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   const res = await api.get(
     `/stores/search?keyword=${storeName}&page=${pageNumber}&size=3`,
     {
@@ -37,7 +37,7 @@ export const SearchStoreGet = async (storeName, pageNumber) => {
 };
 
 export const FilterStoreGet = async (tags) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   const params = new URLSearchParams();
   tags.forEach((tag) => params.append("tags", tag));
   params.append("page", 0);

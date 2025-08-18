@@ -53,7 +53,7 @@ export default function App() {
 const Phone = styled.div`
   position: relative;
   width: 393px;
-  min-height: 100vh;
+  height: 765px;
   margin-left: auto;
   margin-right: auto;
   background-color: #faf8f8;
@@ -64,5 +64,5 @@ const Phone = styled.div`
 `;
 const Contents = styled.div`
   padding-top: 21px;
-  height: calc(100vh - 91px);
+  height: 674px;
 `;

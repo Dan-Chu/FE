@@ -13,7 +13,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  let oldToken = localStorage.getItem("token");
+  let oldToken = localStorage.getItem("accessToken");
 
   if (config.url.includes("/auth/login/test")) {
     return config;
@@ -22,12 +22,10 @@ api.interceptors.request.use(async (config) => {
   if (isTokenExpired(oldToken)) {
     // 만료 → refresh API 요청
     const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,{},{
-      headers: {
-        Authorization: `Bearer ${oldToken}`,
-      },
+      withCredentials: true,
     });
     const token = res.headers["authorization"]?.split(" ")[1];
-    localStorage.setItem("token", token);
+    localStorage.setItem("accessToken", token);
     
     config.headers.Authorization = `Bearer ${token}`;
   } else {
