@@ -1,35 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.jsx
+import styled from "styled-components";
+import "./App.css";
+import "pretendard/dist/web/static/pretendard.css";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom"; // ⬅️ dom 로 변경
 
-function App() {
-  const [count, setCount] = useState(0)
+import Navar from "../src/components/Navar.jsx";
+import Home from "./pages/Home/Home.jsx";
+import Login1 from "./pages/Login/Login1.jsx";
+import Splash from "./pages/Splash/splash.jsx";
+import Login2 from "./pages/Login/Login2.jsx";
+import StoreList from "./pages/Store/StoreList.jsx";
+import StoreDetail from "./pages/Store/StoreDetail.jsx";
+import Mypage from "./pages/Mypage/Mypage";
+import EditProfile from "./pages/Mypage/EditProfile";
+import CouponPage from "./pages/Mypage/CouponPage";
+import MissionPage from "./pages/Mission/MissionPage";
+import StampPage from "./pages/Stamp/StampPage";
+
+export default function App() {
+  function WithNavar() {
+    return (
+      <>
+        <Contents>
+          <Outlet />
+        </Contents>
+        <Navar />
+      </>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Phone>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Splash />} />
+          <Route path="/login1" element={<Login1 />} />
+          <Route path="/login2" element={<Login2 />} />
+
+          {/* 하단 네비가 필요한 페이지들 */}
+          <Route element={<WithNavar />}>
+            <Route path="/main" element={<Home />} />
+            <Route path="/storeList" element={<StoreList />} />
+            <Route path="/mission" element={<MissionPage />} />
+            <Route path="/stamp" element={<StampPage />} />
+            <Route path="/mypage" element={<Mypage />} />
+            <Route path="/mypage/edit" element={<EditProfile />} />
+            <Route path="/mypage/coupons" element={<CouponPage />} /> {/* ✅ 추가 */}
+          </Route>
+
+          {/* 네비 없이 쓰는 단독 페이지들 */}
+          <Route path="/storeList/storeDetail" element={<StoreDetail />} />
+          {/* 불필요한 중복 라우트 정리 */}
+          {/* <Route path="/coupons" element={<CouponPage />} /> */}
+          {/* <Route path="/edit" element={<EditProfile />} /> */}
+        </Routes>
+      </BrowserRouter>
+    </Phone>
+  );
 }
 
-export default App
+const Phone = styled.div`
+  position: relative;
+  width: 393px;
+  min-height: 100vh;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #faf8f8;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden; /* 바깥 스크롤 숨김 */
+`;
+
+const Contents = styled.div`
+  padding-top: 21px;
+  height: calc(100vh - 91px); /* 네비 높이만큼 빼기 */
+  overflow: auto;            /* 안쪽만 스크롤 */
+`;
