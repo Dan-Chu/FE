@@ -141,8 +141,10 @@ export const ListPage = styled.div`
   flex-direction: row;
   gap: 10px;
   align-items: center;
-  margin-left: 145px;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 10px;
+
 
   &:hover {
     cursor: pointer;

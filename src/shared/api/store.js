@@ -8,7 +8,7 @@ export const StoreListGet = async (pageNumber,lat,lng) => {//위치 기반 리�
     },
   });
 
-  return res.data.data.content;
+  return res.data.data;
 };
 
 export const StoreDetailGet = async (storeId) => {
@@ -22,10 +22,10 @@ export const StoreDetailGet = async (storeId) => {
   return res.data.data;
 };
 
-export const SearchStoreGet = async (storeName, pageNumber) => {
+export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
   const token = localStorage.getItem("accessToken");
   const res = await api.get(
-    `/stores/search?keyword=${storeName}&page=${pageNumber}&size=3`,
+    `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -33,7 +33,7 @@ export const SearchStoreGet = async (storeName, pageNumber) => {
     }
   );
 
-  return res.data.data.content;
+  return res.data.data;
 };
 
 export const FilterStoreGet = async (tags) => {
@@ -48,5 +48,5 @@ export const FilterStoreGet = async (tags) => {
     },
   });
 
-  return res.data.data.content;
+  return res.data.data;
 };

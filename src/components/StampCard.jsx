@@ -25,8 +25,8 @@ const Card = styled.div`
 
   /* ✅ 가운데 정렬 + 반응형 폭 */
   width: 100%;
-  max-width: 315px;
-  margin: 0 auto;
+  max-width: 345px;
+  margin-right: auto;
 
   height: 183px;
   flex-shrink: 0;

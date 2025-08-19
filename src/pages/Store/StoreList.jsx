@@ -40,6 +40,7 @@ export default function StoreList() {
   const hashtags = HashtagsGet();
   const [selectFilter, setSelectFilter] = useState([]);
   const [debouncedSearch, setDebouncedSearch] = useState(searchName);
+  const [maxPage, setMaxPage] = useState();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -60,9 +61,16 @@ export default function StoreList() {
         setData(result);
       } else {
         // 검색어 있으면 검색 API 호출
-        const result = await SearchStoreGet(debouncedSearch, page - 1);
+        if (!location.lat || !location.lng) return;
+        const result = await SearchStoreGet(
+          debouncedSearch,
+          page - 1,
+          location.lat,
+          location.lng
+        );
         setData(result);
       }
+      setMaxPage(data.totalPages);
     };
 
     fetchData();
@@ -75,8 +83,14 @@ export default function StoreList() {
   };
 
   const filterApply = async () => {
-    const result = await FilterStoreGet(selectFilter);
-    setData(result);
+    if (selectFilter.length > 0) {
+      const result = await FilterStoreGet(selectFilter);
+      setData(result);
+    } else {
+      const result = await StoreListGet(0, location.lat, location.lng);
+      setData(result);
+    }
+    setMaxPage(data.totalPages);
   };
 
   const filterPlus = (hashtag) => {
@@ -87,6 +101,10 @@ export default function StoreList() {
       }
       return [...prev, hashtag.name];
     });
+  };
+
+  const filterOn = () => {
+    setFilter(!filter);
   };
 
   const pageOn = (what) => {
@@ -106,14 +124,13 @@ export default function StoreList() {
     }
   };
 
-  const filterOn = () => {
-    setFilter(!filter);
-  };
-
   const pageChange = (upDown) => {
     if (upDown) {
-      setPageCount(pageCount + 4);
-      setPage(pageCount + 4);
+      if (pageCount + 4 <= maxPage) {
+        setPageCount(pageCount + 4);
+        setPage(pageCount + 4);
+        return;
+      }
       return;
     } else if (pageCount == 1) {
       return;
@@ -175,8 +192,8 @@ export default function StoreList() {
         </Modal>
       )}
       <ListBox>
-        {data && data.length > 0 ? (
-          data.map((i) => (
+        {data.content && data.content.length > 0 ? (
+          data.content.map((i) => (
             <StoreCard
               key={i.store.id}
               id={i.store.id}
@@ -193,24 +210,36 @@ export default function StoreList() {
         <PageNumber onClick={() => pageOn(1)} $now={page == pageCount ? 1 : 0}>
           {pageCount}
         </PageNumber>
-        <PageNumber
-          onClick={() => pageOn(2)}
-          $now={page == pageCount + 1 ? 1 : 0}
-        >
-          {pageCount + 1}
-        </PageNumber>
-        <PageNumber
-          onClick={() => pageOn(3)}
-          $now={page == pageCount + 2 ? 1 : 0}
-        >
-          {pageCount + 2}
-        </PageNumber>
-        <PageNumber
-          onClick={() => pageOn(4)}
-          $now={page == pageCount + 3 ? 1 : 0}
-        >
-          {pageCount + 3}
-        </PageNumber>
+        {pageCount + 1 <= maxPage ? (
+          <PageNumber
+            onClick={() => pageOn(2)}
+            $now={page == pageCount + 1 ? 1 : 0}
+          >
+            {pageCount + 1}
+          </PageNumber>
+        ) : (
+          ""
+        )}
+        {pageCount + 2 <= maxPage ? (
+          <PageNumber
+            onClick={() => pageOn(3)}
+            $now={page == pageCount + 2 ? 1 : 0}
+          >
+            {pageCount + 2}
+          </PageNumber>
+        ) : (
+          ""
+        )}
+        {pageCount + 3 <= maxPage ? (
+          <PageNumber
+            onClick={() => pageOn(4)}
+            $now={page == pageCount + 3 ? 1 : 0}
+          >
+            {pageCount + 3}
+          </PageNumber>
+        ) : (
+          ""
+        )}
         <RightButton onClick={() => pageChange(true)} />
       </ListPage>
     </Page>
