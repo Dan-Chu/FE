@@ -7,46 +7,44 @@ import { useEffect, useState } from "react";
 import { AiStoreGet } from "../../shared/api/openAI";
 import { PopularMissionGet } from "../../shared/api/mission";
 import { ExpiringStampGet } from "../../shared/api/stamp";
-import TextLogo from "../../assets/logos/text_danchu.svg?react"
+import TextLogo from "../../assets/logos/text_danchu.svg?react";
 
 export default function Home() {
-  const [storeData,setStoreData]=useState("");
-  const [missionData,setMissionData]=useState("");
-  const [stampData,setStampData]=useState("");
+  const [storeData, setStoreData] = useState("");
+  const [missionData, setMissionData] = useState("");
+  const [stampData, setStampData] = useState("");
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
-    try {
-      const [storeResult,missionResult,stampResult] = await Promise.all([
-        AiStoreGet(),
-        PopularMissionGet(),
-         ExpiringStampGet(),
-      ])
-      setStoreData(storeResult);
-      setMissionData(missionResult);
-      setStampData(stampResult);
-    } catch (err) {
-      console.warn("Get 실패:", err);
-      setStoreData(null); // 실패해도 기본값 세팅 가능
-    }
-  };
+      try {
+        const [storeResult, missionResult, stampResult] = await Promise.all([
+          AiStoreGet(),
+          PopularMissionGet(),
+          ExpiringStampGet(),
+        ]);
+        setStoreData(storeResult);
+        setMissionData(missionResult);
+        setStampData(stampResult);
+      } catch (err) {
+        console.warn("Get 실패:", err);
+        setStoreData(null); // 실패해도 기본값 세팅 가능
+      }
+    };
     fetchData();
   }, []);
 
   return (
     <Page>
-      <TitleBar pageName={<TextLogo width="51.859px" height="26.878px"/>} />
+      <TitleBar pageName={<TextLogo width="51.859px" height="26.878px" />} />
       <Contents>
         <Text>
-          <span style={{ color: "#CE4927", fontWeight: "600" }}>김단추</span>
-          <span style={{ fontWeight: "600" }}>님을</span>
-          <br />
-          위한 맞춤형 추천
+          김단골님을 위한 단추 &nbsp;
+          <span style={{ color: "#CE4927"}}>PICK</span>
         </Text>
-        <AiSuggestGroup data={storeData}/>
+        <AiSuggestGroup data={storeData} />
         <Box>
-          <TodayMission data={missionData}/>
-          <MyStamp data={stampData}/>
+          <TodayMission data={missionData} />
+          <MyStamp data={stampData} />
         </Box>
       </Contents>
     </Page>
@@ -69,13 +67,14 @@ const Contents = styled.div`
   gap: 30px;
 `;
 const Text = styled.div`
+  color: #141414;
   font-family: Pretendard;
   font-size: 24px;
   font-style: normal;
-  font-weight: 400;
-  line-height: 30px;
+  font-weight: 600;
+  line-height: 30px; /* 125% */
+  letter-spacing: -1px;
   text-align: left;
-
   margin-top: 31px;
   margin-left: 24px;
 `;

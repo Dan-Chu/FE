@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export default function MenuCard({key,data}) {
+export default function MenuCard({data}) {
   return (
     <Card>
       <TextBox>

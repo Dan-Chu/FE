@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import Stamp from "../assets/icons/stamp.svg?react";
+import LastStamp from "../assets/icons/last_stamp.svg?react"
+import LastStampOn from "../assets/icons/last_stamp_on.svg?react"
 
 export default function StampCard({data}) {
   const TotalStamp = 10;
@@ -10,7 +12,8 @@ export default function StampCard({data}) {
       <StampName>{data.storeName}</StampName>
       <StampGroup>
         {Array.from({ length: TotalStamp }).map((_, i) => (
-          <StampBox key={i}>{i < stampCount ? <Stamp /> : null}</StampBox>
+          <>{i<9 ? (<StampBox key={i}>{i < stampCount ? <Stamp /> : null}</StampBox>):(
+          i<stampCount ? <LastStampOn/>:<LastStamp/>)}</>
         ))}
       </StampGroup>
     </Card>

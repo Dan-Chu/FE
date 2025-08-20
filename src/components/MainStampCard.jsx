@@ -46,7 +46,7 @@ export default function MainStampCard({ data, onClaim }) {
       <Grid aria-label={`적립 ${data.currentCount}`}>
         {Array.from({ length: 10 }).map((_, i) => {
           const isLast = i === 9;
-          const filled = i <= data.currentCount;
+          const filled = i < data.currentCount;
 
           const src = isLast
             ? (filled ? stampLastFilled : stampLastEmpty)
