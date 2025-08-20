@@ -1,15 +1,13 @@
 // 일일미션 카드
 import styled from "styled-components";
 import AIRecommendText from "../assets/images/ai_recommend_text.svg?react"; // "AI추천" 텍스트 이미지화
-import AIRecommendEmoji from "../assets/logos/ai_recommend.svg?react";      // AI추천 카드 내 이모지
-import MissionThumbIcon from "../assets/logos/missionlist.svg?react";       // 일반 카드 내 이모지
+import AIRecommendEmoji from "../assets/logos/ai_recommend.svg?react"; // AI추천 카드 내 이모지
+import MissionThumbIcon from "../assets/logos/missionlist.svg?react"; // 일반 카드 내 이모지
 
 export default function MainMissionCard({
   onClick,
-  store = "가게이름",
-  title = "미션내용내용내용",
-  reward = "탄산 음료 한 캔 쿠폰",
-  recommended = false, // true면 AI 추천 카드(UI 빨간 테두리 + 배지 + 이모지)
+  data,
+  recommended // true면 AI 추천 카드(UI 빨간 테두리 + 배지 + 이모지)
 }) {
   return (
     <Card $recommended={recommended} onClick={onClick}>
@@ -22,9 +20,9 @@ export default function MainMissionCard({
 
       <Row>
         <TextCol>
-          <StoreText>{store}</StoreText>
-          <TitleText>{title}</TitleText>
-          <RewardText>보상: {reward}</RewardText>
+          <StoreText>{data.storeName}</StoreText>
+          <TitleText>{data.title}</TitleText>
+          <RewardText>보상: {data.reward}</RewardText>
         </TextCol>
 
         {/* 오른쪽 썸네일: 추천이면 AI 이모지, 아니면 기본 썸네일 */}
@@ -41,7 +39,7 @@ export default function MainMissionCard({
 const Card = styled.button`
   all: unset;
   box-sizing: border-box;
-  width: 100%;               /* ✅ 부모폭 가득 */
+  width: 100%; /* ✅ 부모폭 가득 */
   border-radius: 12px;
   cursor: pointer;
 
@@ -50,8 +48,10 @@ const Card = styled.button`
   padding: 16px;
 
   /* 추천카드: 빨간 테두리 + 살짝 그림자 */
-  border: ${({ $recommended }) => ($recommended ? "2px solid #F25C3D" : "2px solid transparent")};
-  box-shadow: ${({ $recommended }) => ($recommended ? "0 6px 18px rgba(242,92,61,0.15)" : "none")};
+  border: ${({ $recommended }) =>
+    $recommended ? "2px solid #F25C3D" : "2px solid transparent"};
+  box-shadow: ${({ $recommended }) =>
+    $recommended ? "0 6px 18px rgba(242,92,61,0.15)" : "none"};
 
   display: flex;
   flex-direction: column;

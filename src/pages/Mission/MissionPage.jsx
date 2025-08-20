@@ -1,21 +1,55 @@
 // src/pages/Mission/MissionPage.jsx
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import Navar from "../../components/Navar";
 import TitleBar from "../../components/TitleBar";
 import MainMissionCard from "../../components/MainMissionCard";
-import { MissionModal, CodeInputModal, CouponSuccessModal } from "../../components/Modal";
+import {
+  MissionModal,
+  CodeInputModal,
+  CouponSuccessModal,
+} from "../../components/Modal";
+import { AiMissionGet } from "../../shared/api/openAI";
+import { MissionListGet, MissionDetailGet } from "../../shared/api/mission";
 
 export default function MissionPage() {
   const [isMissionOpen, setIsMissionOpen] = useState(false);
   const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [aiMissionData, setAiMissionData] = useState();
+  const [missionData, setMissionData] = useState();
+  const [missionDetailData, setMissionDetailData] = useState();
 
   // 바깥 스크롤 잠금
   useEffect(() => {
     document.body.classList.add("no-body-scroll");
     return () => document.body.classList.remove("no-body-scroll");
   }, []);
+
+  const getData = async () => {
+    try {
+      const result = await AiMissionGet();
+      setAiMissionData(result);
+    } catch (err) {
+      console.warn("AiMissionGet 실패:", err);
+    }
+
+    try {
+      const result = await MissionListGet();
+      setMissionData(result);
+    } catch (err) {
+      console.warn("MissionListGet 실패:", err);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const missionDetail = async (id) => {
+    const result = await MissionDetailGet(id);
+    setMissionDetailData(result);
+    setIsMissionOpen(true);
+  };
 
   return (
     <Page>
@@ -34,47 +68,53 @@ export default function MissionPage() {
         </Hero>
 
         {/* AI 추천 카드 */}
-        <MissionCard className="is-ai">
-          <AiPill>AI 추천</AiPill>
-          <CardReset>
-            <MainMissionCard
-              store="가게이름"
-              title="미션내용내용내용"
-              reward="탄산 음료 한 캔 쿠폰"
-              onClick={() => setIsMissionOpen(true)}
-            />
-          </CardReset>
-        </MissionCard>
+        {aiMissionData ? (
+          <MissionCard className="is-ai" key={aiMissionData.id}>
+            <AiPill>AI 추천</AiPill>
+            <CardReset>
+              <MainMissionCard
+                onClick={() => missionDetail(aiMissionData.id)}
+                data={aiMissionData}
+                recommended={true}
+              />
+            </CardReset>
+          </MissionCard>
+        ) : (
+          <p>해시태그가 없어 추천이 어렵습니다.</p>
+        )}
 
         <Divider />
 
         {/* 일반 카드들 */}
         <CardList>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <MissionCard key={i}>
-              <CardReset>
-                <MainMissionCard
-                  store="가게이름"
-                  title="미션내용내용내용"
-                  reward="탄산 음료 한 캔 쿠폰"
-                  onClick={() => setIsMissionOpen(true)}
-                />
-              </CardReset>
-            </MissionCard>
-          ))}
+          {missionData && missionData.length > 0 ? (
+            missionData.map((data) => (
+              <MissionCard>
+                <CardReset>
+                  <MainMissionCard
+                    key={data.id}
+                    onClick={() => missionDetail(data.id)}
+                    data={data}
+                    recommended={false}
+                  />
+                </CardReset>
+              </MissionCard>
+            ))
+          ) : (
+            <p>미션이 없습니다.</p>
+          )}
         </CardList>
       </ScrollArea>
-
-      <Navar />
 
       {/* 모달들 */}
       {isMissionOpen && (
         <MissionModal
           mission={{
-            image: "https://via.placeholder.com/126",
-            title: "15,000원 이상 결제하기",
-            store: "동방손칼국수",
-            reward: "찐만두",
+            image: missionDetailData?.rewardImageUrl,
+            title: missionDetailData?.title,
+            store: missionDetailData?.storeName,
+            reward: missionDetailData?.description,
+            storeId: missionDetailData?.storeId,
           }}
           onClose={() => setIsMissionOpen(false)}
           onSubmit={() => {
@@ -87,9 +127,11 @@ export default function MissionPage() {
         <CodeInputModal
           onClose={() => setIsCodeInputOpen(false)}
           onSubmit={() => {
+            getData();
             setIsCodeInputOpen(false);
             setIsSuccessOpen(true);
           }}
+          authCode={missionDetailData.storeAuthCode}
         />
       )}
       {isSuccessOpen && (
@@ -134,9 +176,10 @@ const ScrollArea = styled.div`
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
 
   /* 스크롤바 숨김 */
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* old Edge/IE */
-  &::-webkit-scrollbar {      /* Chrome/Safari */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge/IE */
+  &::-webkit-scrollbar {
+    /* Chrome/Safari */
     width: 0 !important;
     height: 0 !important;
     display: none !important;
@@ -151,13 +194,26 @@ const ScrollArea = styled.div`
 const Hero = styled.div`
   margin: 12px 0 16px;
   line-height: 30px;
+  text-align: left;
 
-  .nick  { color:#CE4927; font:600 24px/30px Pretendard, system-ui, sans-serif; }
-  .plain { color:#141414; font:600 24px/30px Pretendard, system-ui, sans-serif; }
-  .count { color:#CF4721; font:500 24px/30px Pretendard, system-ui, sans-serif; }
+  .nick {
+    color: #ce4927;
+    font: 600 24px/30px Pretendard, system-ui, sans-serif;
+  }
+  .plain {
+    color: #141414;
+    font: 600 24px/30px Pretendard, system-ui, sans-serif;
+  }
+  .count {
+    color: #cf4721;
+    font: 500 24px/30px Pretendard, system-ui, sans-serif;
+  }
 
   /* 두 번째 줄은 500으로 */
-  br + .plain, .count ~ .plain { font-weight: 500; }
+  br + .plain,
+  .count ~ .plain {
+    font-weight: 500;
+  }
 `;
 
 const Divider = styled.div`
@@ -212,4 +268,3 @@ const CardList = styled.div`
   flex-direction: column;
   gap: 12px;
 `;
-

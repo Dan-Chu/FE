@@ -36,11 +36,13 @@ export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
   return res.data.data;
 };
 
-export const FilterStoreGet = async (tags) => {
+export const FilterStoreGet = async (tags,lat,lng,page) => {
   const token = localStorage.getItem("accessToken");
   const params = new URLSearchParams();
   tags.forEach((tag) => params.append("tags", tag));
-  params.append("page", 0);
+  params.append("lat", lat);
+  params.append("lng", lng);
+  params.append("page", page);
   params.append("size", 3);
   const res = await api.get(`/stores/filter?${params.toString()}`, {
     headers: {

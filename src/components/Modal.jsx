@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Modal.css";
+import { useNavigate } from "react-router-dom";
 
 /* 공통 래퍼 */
 const ModalWrapper = ({ children, onClose }) => {
@@ -28,6 +29,11 @@ const ModalWrapper = ({ children, onClose }) => {
 
 // 1) 미션 상세 정보 모달
 export const MissionModal = ({ mission, onClose, onSubmit }) => {
+    const navigate = useNavigate();
+
+  const toStoreDetail = (id) => {
+    navigate(`/storeList/storeDetail/${id}`);
+  };
   return (
     <ModalWrapper onClose={onClose}>
       <div className="mission-modal">
@@ -40,7 +46,7 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
           <button
             type="button"
             className="mission-btn mission-btn-store"
-            onClick={() => alert("가게 더보기")}
+            onClick={() => toStoreDetail(mission.storeId)}
           >
             가게 더보기
           </button>
@@ -57,13 +63,17 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
   );
 };
 
+import { MissionComplete } from "../shared/api/mission";
 // 2) 인증코드 입력 모달(일일미션)
-export const CodeInputModal = ({ onClose, onSubmit, hint = "예시 코드는 1234 입니다" }) => {
+export const CodeInputModal = ({ onClose, onSubmit, hint = "예시 코드는 0000 입니다" , authCode}) => {
   const [code, setCode] = useState("");
 
-  const handleSubmit = () => {
-    if (code.length === 4) onSubmit(code);
-    else alert("4자리 숫자를 입력해주세요!");
+  const handleSubmit = async () => {
+    const result=await MissionComplete(code,authCode);
+    if (code.length === 4) {
+      if (result) onSubmit(); 
+      else alert("올바른 코드를 입력해주세요.")
+    } else alert("4자리 숫자를 입력해주세요!");
   };
 
   return (

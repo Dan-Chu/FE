@@ -59,7 +59,7 @@ export default function StoreList() {
         if (!location.lat || !location.lng) return;
         const result = await StoreListGet(page - 1, location.lat, location.lng);
         setData(result);
-      } else {
+      } else if(debouncedSearch){
         // 검색어 있으면 검색 API 호출
         if (!location.lat || !location.lng) return;
         const result = await SearchStoreGet(
@@ -69,6 +69,10 @@ export default function StoreList() {
           location.lng
         );
         setData(result);
+      } else{
+        if (!location.lat || !location.lng) return;
+        const result = await FilterStoreGet(selectFilter,location.lat, location.lng,page-1);
+      setData(result);
       }
       setMaxPage(data.totalPages);
     };
@@ -84,7 +88,7 @@ export default function StoreList() {
 
   const filterApply = async () => {
     if (selectFilter.length > 0) {
-      const result = await FilterStoreGet(selectFilter);
+      const result = await FilterStoreGet(selectFilter,location.lat, location.lng,page-1);
       setData(result);
     } else {
       const result = await StoreListGet(0, location.lat, location.lng);
