@@ -17,7 +17,12 @@ const ModalWrapper = ({ children, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
@@ -29,7 +34,7 @@ const ModalWrapper = ({ children, onClose }) => {
 
 // 1) 미션 상세 정보 모달
 export const MissionModal = ({ mission, onClose, onSubmit }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const toStoreDetail = (id) => {
     navigate(`/storeList/storeDetail/${id}`);
@@ -65,14 +70,19 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
 
 import { MissionComplete } from "../shared/api/mission";
 // 2) 인증코드 입력 모달(일일미션)
-export const CodeInputModal = ({ onClose, onSubmit, hint = "예시 코드는 0000 입니다" , authCode}) => {
+export const CodeInputModal = ({
+  onClose,
+  onSubmit,
+  hint = "예시 코드는 0000 입니다",
+  authCode,
+}) => {
   const [code, setCode] = useState("");
 
   const handleSubmit = async () => {
-    const result=await MissionComplete(code,authCode);
+    const result = await MissionComplete(code, authCode);
     if (code.length === 4) {
-      if (result) onSubmit(); 
-      else alert("올바른 코드를 입력해주세요.")
+      if (result) onSubmit();
+      else alert("올바른 코드를 입력해주세요.");
     } else alert("4자리 숫자를 입력해주세요!");
   };
 
@@ -95,46 +105,50 @@ export const CodeInputModal = ({ onClose, onSubmit, hint = "예시 코드는 000
         />
 
         <div className="modal-button-group">
-          <button className="btn-confirm" onClick={handleSubmit}>확인</button>
+          <button className="btn-confirm" onClick={handleSubmit}>
+            확인
+          </button>
         </div>
       </div>
     </ModalWrapper>
   );
 };
 
-
 // ✅ 3) 공용: 쿠폰함 성공 모달 (일일미션/스탬프 모두 재사용)
 export const CouponSuccessModal = ({ onClose }) => {
   return (
     <ModalWrapper onClose={onClose}>
       <div className="modal-success">
-        <h3 className="modal-success-title">쿠폰함에 성공적으로 추가되었습니다</h3>
+        <h3 className="modal-success-title">
+          쿠폰함에 성공적으로 추가되었습니다
+        </h3>
         <p className="modal-success-desc">
           *받은 쿠폰은 마이페이지&gt;쿠폰함에서 확인하실 수 있습니다
         </p>
-        <button className="btn-close" onClick={onClose}>닫기</button>
+        <button className="btn-close" onClick={onClose}>
+          닫기
+        </button>
       </div>
     </ModalWrapper>
   );
 };
 
-
 /* ---------------- 스탬프 전용 모달 3종 ---------------- */
 import StampHero from "../assets/images/stamp_modal.svg";
 import AlreadyHero from "../assets/images/already_stamp.svg";
+import { StampPlus, StampReward } from "../shared/api/stamp";
 
 // 1) 스탬프 찍기(가게별 인증번호 입력)
-export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
+export const StampCodeModal = ({ data, onClose, onSubmit }) => {
   const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (code.length !== 4) return alert("4자리 숫자를 입력해주세요!");
-    try {
-      setLoading(true);
-      await onSubmit(code); // 성공 시 부모 상태 갱신
-    } finally {
-      setLoading(false);
+    else {
+      const res = await StampPlus(data.authCode);//도장 적립 결과
+      if (res) {
+        onSubmit(data); // 성공 시 부모 상태 갱신,데이터 전달
+      } else return alert("옳은 코드를 입력해주세요");//적립실패시 다시입력(실패 이유:코드 틀림)
     }
   };
 
@@ -144,9 +158,9 @@ export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
         <img src={StampHero} alt="" className="stamp-hero" />
 
         {/* (가게이름), */}
-        {storeName ? (
+        {data.storeName ? (
           <div className="stamp-sub">
-            {storeName}
+            {data.storeName}
             <span className="comma">,</span>
           </div>
         ) : null}
@@ -169,8 +183,8 @@ export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
           aria-label="인증코드 4자리"
         />
 
-        <button className="btn-confirm" onClick={submit} disabled={loading}>
-          {loading ? "확인 중..." : "확인"}
+        <button className="btn-confirm" onClick={submit}>
+          "확인"
         </button>
       </div>
     </ModalWrapper>
@@ -250,7 +264,9 @@ export const AlreadyExistsModal = ({ storeName = "", onClose }) => {
           </p>
         ) : null}
 
-        <button className="btn-confirm" onClick={onClose}>확인</button>
+        <button className="btn-confirm" onClick={onClose}>
+          확인
+        </button>
       </div>
     </ModalWrapper>
   );

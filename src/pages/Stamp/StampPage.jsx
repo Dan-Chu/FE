@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import TitleBar from "../../components/TitleBar";
@@ -11,6 +11,7 @@ import {
   CouponSuccessModal,
 } from "../../components/Modal";
 import { StampCircleButton } from "../../components/Button";
+import { StampListGet } from "../../shared/api/stamp";
 
 // 임시: 인증코드 → 가게 인덱스 매핑 (API 오면 대체)
 const CODE_MAP = {
@@ -29,17 +30,22 @@ export default function StampPage() {
   // 'stamp' | 'claim' | 'exists' | 'success' | null
   const [modalType, setModalType] = useState(null);
   const [activeIdx, setActiveIdx] = useState(null);
-
   const openGlobalStamp = () => setModalType("stamp");
   const openClaim = (idx) => { setActiveIdx(idx); setModalType("claim"); };
+  const [stampData,setStampData]=useState();//도장 데이터
 
-  const handleSubmitStamp = async (code) => {
-    const idxByCode = CODE_MAP[code];
-    if (idxByCode === undefined) {
-      alert("유효하지 않은 인증코드예요.");
-      return;
+  useEffect(()=>{//도장 데이터 가져오기
+    const getStamp=async ()=>{
+      const result=await StampListGet();
+      setStampData(result);
     }
-    const target = stores[idxByCode];
+
+    getStamp();
+  },[])
+
+  const handleSubmitStamp = async (data) => {//스탬프 데이터 받기
+    const idxByCode = CODE_MAP[code];//여기서 부터 해줘 어떤걸 바꿔야할 지 잘 모르겠어
+    const target = stores[idxByCode];//스웨거 보고 data.뭐뭐뭐로 쓰면 될듯
 
     if (target.hasUnclaimedReward || target.stamps >= 10) {
       setModalType(null);
@@ -95,13 +101,15 @@ export default function StampPage() {
 
       <ScrollArea>
         <List>
-          {stores.map((store, idx) => (
+          {stampData && stampData.length>0 ? (
+            stampData.map((data) => (
             <MainStampCard
-              key={store.storeName + idx}
-              store={store}
-              onClaim={() => openClaim(idx)}
+              key={data.id}//도장 데이터 전달
+              data={data}
+              onClaim={() => openClaim(data.id)}
             />
-          ))}
+          ))
+          ):(<p>도장이 없습니다.</p>)}
         </List>
       </ScrollArea>
 
@@ -109,9 +117,9 @@ export default function StampPage() {
 
       {modalType === "stamp" && (
         <StampCodeModal
-          storeName=""
+          data={stampData}//도장 데이터 전달
           onClose={closeModal}
-          onSubmit={handleSubmitStamp}
+          onSubmit={handleSubmitStamp}//Modal에서 전해준 데이터가 같이 감
         />
       )}
 
