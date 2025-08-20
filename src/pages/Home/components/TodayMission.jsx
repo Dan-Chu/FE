@@ -3,7 +3,7 @@ import { Group, TextBox, Text, Button } from "../styles/Box";
 import MissionCard from "../../../components/MissionCard";
 import { useNavigate } from "react-router-dom";
 
-export default function TodayMission(data) {
+export default function TodayMission({data}) {
     const navigate=useNavigate();
   
     const toMission=()=>{

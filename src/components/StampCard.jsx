@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Stamp from "../assets/icons/stamp.svg?react";
 
-export default function StampCard(data) {
+export default function StampCard({data}) {
   const TotalStamp = 10;
   const stampCount = data.currentCount;
 

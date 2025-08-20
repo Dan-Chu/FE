@@ -69,11 +69,11 @@ export default function MissionPage() {
 
         {/* AI 추천 카드 */}
         {aiMissionData ? (
-          <MissionCard className="is-ai" key={aiMissionData.id}>
+          <MissionCard className="is-ai" key={aiMissionData.missionId}>
             <AiPill>AI 추천</AiPill>
             <CardReset>
               <MainMissionCard
-                onClick={() => missionDetail(aiMissionData.id)}
+                onClick={() => missionDetail(aiMissionData.missionId)}
                 data={aiMissionData}
                 recommended={true}
               />

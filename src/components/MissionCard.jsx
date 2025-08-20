@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
-export default function MissionCard(data) {
+export default function MissionCard({data}) {
   const navigate = useNavigate();
 
   const toMission = () => {
@@ -12,7 +12,7 @@ export default function MissionCard(data) {
       <Text>{data.storeName}</Text>
       <Mission>
         <MissionName>{data.title}</MissionName>
-        <Button onClick={()=>toMission()}>참여하기</Button>
+        <Button onClick={() => toMission()}>참여하기</Button>
       </Mission>
       <RewardText>보상: {data.reward}</RewardText>
     </Card>
@@ -59,6 +59,9 @@ const MissionName = styled.span`
   letter-spacing: -1px;
 `;
 const Button = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 74px;
   height: 35px;
   flex-shrink: 0;

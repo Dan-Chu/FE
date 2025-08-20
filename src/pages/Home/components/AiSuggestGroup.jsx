@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import RightButton from "../../../assets/icons/right_button.svg?react";
 
-export default function AiSuggestGroup(data) {
+export default function AiSuggestGroup({ data }) {
   const navigate = useNavigate();
 
   const toStoreDetail = (id) => {
@@ -12,7 +12,7 @@ export default function AiSuggestGroup(data) {
     <Group>
       {data && data.length > 0 ? (
         data.map((store) => (
-          <AiSuggestCard onClick={() => toStoreDetail(store.id)}>
+          <AiSuggestCard onClick={() => toStoreDetail(store.id)} key={store.id}>
             <ShopImg src={store.mainImageUrl} />
             <Explain>
               <ShopName>
@@ -21,9 +21,7 @@ export default function AiSuggestGroup(data) {
               </ShopName>
               <Hashtag>
                 {store.hashtags && store.hashtags.length > 0 ? (
-                  store.hashtags.map((tags) => {
-                    tags.name;
-                  })
+                  store.hashtags.map((tags) => <span key={tags.id}>{tags.name}</span>)
                 ) : (
                   <p>태그가 없습니다.</p>
                 )}
@@ -32,7 +30,11 @@ export default function AiSuggestGroup(data) {
           </AiSuggestCard>
         ))
       ) : (
-        <p>사용자 해시태그가 없어<br/>추천을 진행할 수 없습니다.</p>
+        <p>
+          사용자 해시태그가 없어
+          <br />
+          추천을 진행할 수 없습니다.
+        </p>
       )}
     </Group>
   );
@@ -50,8 +52,8 @@ const Group = styled.div`
   padding-left: 60px;
 `;
 const ShopImg = styled.img`
-  width: 271.789px;
-  height: 244px;
+  width: 242px;
+  height: 186px;
   flex-shrink: 0;
   border-radius: 12px 12px 0 0;
 `;
@@ -60,8 +62,8 @@ const AiSuggestCard = styled.div`
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.5);
-  width: 272px;
-  height: 368px;
+  width: 242px;
+  height: 313px;
   flex-shrink: 0;
   flex-direction: column;
 
@@ -71,7 +73,7 @@ const AiSuggestCard = styled.div`
 `;
 const Explain = styled.div`
   display: flex;
-  width: 272px;
+  width: 242px;
   height: 124px;
   flex-shrink: 0;
   flex-direction: column;
@@ -91,10 +93,12 @@ const ShopName = styled.p`
   letter-spacing: -0.24px;
   text-align: left;
   justify-content: space-between;
-  max-width: 235px;
+  max-width: 210px;
   margin: 0;
 `;
-const Hashtag = styled.p`
+const Hashtag = styled.div`
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
   color: #5d5d5d;
   font-family: Pretendard;
   font-size: 16px;

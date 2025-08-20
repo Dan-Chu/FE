@@ -7,34 +7,27 @@ import { useEffect, useState } from "react";
 import { AiStoreGet } from "../../shared/api/openAI";
 import { PopularMissionGet } from "../../shared/api/mission";
 import { ExpiringStampGet } from "../../shared/api/stamp";
+import TextLogo from "../../assets/logos/text_danchu.svg?react"
 
 export default function Home() {
-  const [storeData,setStoreData]=useState();
-  const [missionData,setMissionData]=useState();
-  const [stampData,setStampData]=useState();
+  const [storeData,setStoreData]=useState("");
+  const [missionData,setMissionData]=useState("");
+  const [stampData,setStampData]=useState("");
 
     useEffect(() => {
     const fetchData = async () => {
     try {
-      const storeResult = await AiStoreGet();
+      const [storeResult,missionResult,stampResult] = await Promise.all([
+        AiStoreGet(),
+        PopularMissionGet(),
+         ExpiringStampGet(),
+      ])
       setStoreData(storeResult);
-    } catch (err) {
-      console.warn("AiStoreGet 실패:", err);
-      setStoreData(null); // 실패해도 기본값 세팅 가능
-    }
-
-    try {
-      const missionResult = await PopularMissionGet();
       setMissionData(missionResult);
-    } catch (err) {
-      console.warn("PopularMissionGet 실패:", err);
-    }
-
-    try {
-      const stampResult = await ExpiringStampGet();
       setStampData(stampResult);
     } catch (err) {
-      console.warn("ExpiringStampGet 실패:", err);
+      console.warn("Get 실패:", err);
+      setStoreData(null); // 실패해도 기본값 세팅 가능
     }
   };
     fetchData();
@@ -42,7 +35,7 @@ export default function Home() {
 
   return (
     <Page>
-      <TitleBar pageName="AI 추천" />
+      <TitleBar pageName={<TextLogo width="51.859px" height="26.878px"/>} />
       <Contents>
         <Text>
           <span style={{ color: "#CE4927", fontWeight: "600" }}>김단추</span>
