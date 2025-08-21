@@ -101,9 +101,10 @@ export default function StoreList() {
   };
 
   const filterApply = async () => {
+    let result
     setLoading(true);
     if (selectFilter.length > 0) {
-      const result = await FilterStoreGet(
+      result = await FilterStoreGet(
         selectFilter,
         location.lat,
         location.lng,
@@ -111,11 +112,11 @@ export default function StoreList() {
       );
       setData(result);
     } else {
-      const result = await StoreListGet(0, location.lat, location.lng);
+      result = await StoreListGet(0, location.lat, location.lng);
       setData(result);
     }
     setLoading(false);
-    setMaxPage(data.totalPages);
+    setMaxPage(result.totalPages);
   };
 
   const filterPlus = (hashtag) => {
