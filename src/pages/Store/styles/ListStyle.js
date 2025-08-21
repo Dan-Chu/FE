@@ -4,6 +4,7 @@ export const Page = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
+  position: relative;
 `;
 export const SearchBar = styled.div`
   display: flex;
@@ -142,8 +143,8 @@ export const ListPage = styled.div`
   flex-direction: row;
   gap: 10px;
   align-items: center;
-  position: fixed;
-  bottom: 90px;
+  position: absolute;
+  bottom: -30px;
   left: 50%;
   transform: translateX(-50%);
   width: fit-content; /* 필요한 만큼만 차지 */

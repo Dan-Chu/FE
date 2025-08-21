@@ -194,7 +194,6 @@ export default function StampPage() {
       {/* 전역 스탬프 적립(코드 입력) */}
       {modalType === "stamp" && (
         <StampCodeModal
-          storeName=""            // 전역 코드라 매장명 미표기
           onClose={closeModal}
           onSubmit={handleSubmitStamp}
         />

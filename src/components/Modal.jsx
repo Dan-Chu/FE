@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Modal.css";
 import styled from "styled-components";
 import couponUse from "../assets/images/coupon_use.svg";
+import { useNavigate } from "react-router-dom";
 
 /* 공통 래퍼 */
 const ModalWrapper = ({ children, onClose }) => {
@@ -138,15 +139,15 @@ import AlreadyHero from "../assets/images/already_stamp.svg";
 import { StampPlus, StampReward } from "../shared/api/stamp";
 
 // 1) 스탬프 찍기(가게별 인증번호 입력)
-export const StampCodeModal = ({ data, onClose, onSubmit }) => {
+export const StampCodeModal = ({ onClose, onSubmit }) => {
   const [code, setCode] = useState("");
 
   const submit = async () => {
     if (code.length !== 4) return alert("4자리 숫자를 입력해주세요!");
     else {
-      const res = await StampPlus(data.authCode);//도장 적립 결과
+      const res = await StampPlus(code);//도장 적립 결과
       if (res) {
-        onSubmit(data); // 성공 시 부모 상태 갱신,데이터 전달
+        onSubmit(code); // 성공 시 부모 상태 갱신,데이터 전달
       } else return alert("옳은 코드를 입력해주세요");//적립실패시 다시입력(실패 이유:코드 틀림)
     }
   };
@@ -155,14 +156,6 @@ export const StampCodeModal = ({ data, onClose, onSubmit }) => {
     <ModalWrapper onClose={onClose}>
       <div className="stamp-modal">
         <img src={StampHero} alt="" className="stamp-hero" />
-
-        {/* (가게이름), */}
-        {data.storeName ? (
-          <div className="stamp-sub">
-            {data.storeName}
-            <span className="comma">,</span>
-          </div>
-        ) : null}
 
         {/* 단골 도장 꾹! */}
         <h3 className="stamp-title">단골 도장 꾹!</h3>
