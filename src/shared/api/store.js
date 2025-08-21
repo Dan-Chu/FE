@@ -9,7 +9,6 @@ export const StoreListGet = async (pageNumber,lat,lng) => {//위치 기반 리�
   });
 
   return res.data.data;
-  return res.data.data;
 };
 
 export const StoreDetailGet = async (storeId) => {
@@ -24,7 +23,6 @@ export const StoreDetailGet = async (storeId) => {
 };
 
 export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
-export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
   const token = localStorage.getItem("accessToken");
   const res = await api.get(
     `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`,
@@ -37,10 +35,9 @@ export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
   );
 
   return res.data.data;
-  return res.data.data;
 };
 
-export const FilterStoreGet = async (tags,lat,lng,page) => {
+
 export const FilterStoreGet = async (tags,lat,lng,page) => {
   const token = localStorage.getItem("accessToken");
   const params = new URLSearchParams();
@@ -58,6 +55,5 @@ export const FilterStoreGet = async (tags,lat,lng,page) => {
     },
   });
 
-  return res.data.data;
   return res.data.data;
 };

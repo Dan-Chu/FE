@@ -12,13 +12,15 @@ import needleIcon from "../assets/icons/needle.svg";
  * - onAction: () => void
  * - onClaim:  () => void
  */
-export default function MainStampCard({ data, onClaim }) {
+export default function MainStampCard({ store, disabled, onClaim }) {
+  const { storeName, stamps = 0, hasUnclaimedReward, cyclesCompleted = 0 } = store;
+  const completed = hasUnclaimedReward || stamps >= 10;
 
   // ✅ 카드 밖으로 나가지 않도록 최대 3개까지만 표시(필요 시 4개 이상도 쉽게 확장 가능)
-  const needlesToShow = data.cardNum;
+  const needlesToShow = Math.min(cyclesCompleted, 3);
 
   return (
-    <Card>
+    <Card $completed={completed} $disabled={disabled}>
       {/* ✅ 상단 우측 바늘 오버레이 */}
       {needlesToShow > 0 && (
         <NeedleWrap aria-hidden="true">
@@ -37,34 +39,34 @@ export default function MainStampCard({ data, onClaim }) {
       <Head>
         <div>
           <Store>가게이름</Store>
-          <Title>{data.storeName}</Title>
-          <Desc>{data.reward}</Desc>
+          <Title>{storeName}</Title>
+          <Desc>스탬프 10개 모으면 아메리카노 1잔 무료!</Desc>
         </div>
       </Head>
 
       {/* 스탬프 그리드 */}
-      <Grid aria-label={`적립 ${data.currentCount}`}>
+      <Grid aria-label={`적립 ${Math.min(stamps, 10)}/10`}>
         {Array.from({ length: 10 }).map((_, i) => {
           const isLast = i === 9;
-          const filled = i < data.currentCount;
+          const filled = completed ? true : i < stamps;
 
           const src = isLast
-            ? (filled ? stampLastFilled : stampLastEmpty)
-            : (filled ? stampFilled : stampEmpty);
+            ? filled ? stampLastFilled : stampLastEmpty
+            : filled ? stampFilled : stampEmpty;
 
           return <SIcon key={i} src={src} alt="stamp" />;
         })}
       </Grid>
 
       {/* 완료 → 카드 내부 CTA */}
-      {data.currentCount==10 && (
+      {hasUnclaimedReward && (
         <ClaimBar type="button" onClick={onClaim}>
           보상 수령하기
         </ClaimBar>
       )}
 
       {/* 누적 텍스트 */}
-      {data.cardNum > 0 && <Foot>누적 {data.cardNum}회</Foot>}
+      {cyclesCompleted > 0 && <Foot>누적 {cyclesCompleted}회</Foot>}
     </Card>
   );
 }
