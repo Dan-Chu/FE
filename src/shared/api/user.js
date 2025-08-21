@@ -19,3 +19,13 @@ export const logout = () =>
 // 회원 탈퇴
 export const deleteUser = () => api.delete("/users");
 
+export const CompleteMissionGet = async () => {
+  const token = localStorage.getItem("accessToken");
+  const res = await api.get(`/users/missions/count`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data.data;
+};

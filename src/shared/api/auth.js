@@ -7,7 +7,6 @@ export const TestLogin = async () => {
     
     if (token) {
       localStorage.setItem("accessToken", token);
-      console.log("로그인 성공, 토큰 저장됨:", token);
       return true;  // 여기서 true 반환
     } else {
       console.error("토큰 없음");

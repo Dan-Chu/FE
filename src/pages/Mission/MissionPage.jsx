@@ -11,7 +11,8 @@ import {
 } from "../../components/Modal";
 import { AiMissionGet } from "../../shared/api/openAI";
 import { MissionListGet, MissionDetailGet } from "../../shared/api/mission";
-import FlagLogo from "../../assets/logos/flag_logo.svg?react"
+import { CompleteMissionGet } from "../../shared/api/user";
+import FlagLogo from "../../assets/logos/flag_logo.svg?react";
 
 export default function MissionPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function MissionPage() {
   const [aiMissionData, setAiMissionData] = useState();
   const [missionData, setMissionData] = useState();
   const [missionDetailData, setMissionDetailData] = useState();
+  const [completeMission, setCompleteMission] = useState();
 
   // 바깥 스크롤 잠금
   useEffect(() => {
@@ -35,12 +37,17 @@ export default function MissionPage() {
     } catch (err) {
       console.warn("AiMissionGet 실패:", err);
     }
-
     try {
       const result = await MissionListGet();
       setMissionData(result);
     } catch (err) {
       console.warn("MissionListGet 실패:", err);
+    }
+    try {
+      const result = await CompleteMissionGet();
+      setCompleteMission(result);
+    } catch (err) {
+      console.warn("CompleteMissionGet 실패:", err);
     }
   };
 
@@ -69,7 +76,7 @@ export default function MissionPage() {
           <span className="plain">님의</span>
           <br />
           <span className="plain">완료한 미션&nbsp;</span>
-          <span className="count">NN</span>
+          <span className="count">{completeMission}</span>
           <span className="plain">&nbsp;개</span>
         </Hero>
 

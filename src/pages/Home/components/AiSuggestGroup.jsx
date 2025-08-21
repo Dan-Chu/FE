@@ -107,6 +107,7 @@ const ShopName = styled.p`
 const Hashtag = styled.div`
   display: grid;
   grid-template-rows: repeat(2, 1fr);
+   grid-auto-flow: column;
   color: #5d5d5d;
   font-family: Pretendard;
   font-size: 16px;
