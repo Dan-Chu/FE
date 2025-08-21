@@ -15,7 +15,7 @@ import {
   logout as apiLogout,
   deleteUser as apiDeleteUser,
 } from "../../shared/api/user";
-import { HashtagsGet } from "../../shared/api/hashtag"; 
+import { HashtagsGet } from "../../shared/api/hashtag";
 
 export default function EditProfile() {
   const nav = useNavigate();
@@ -29,10 +29,10 @@ export default function EditProfile() {
   const [avatarFile, setAvatarFile] = useState(null);
 
   // 해시태그
-  const allTags = HashtagsGet();                // [{id, name, ...}] 정렬된 배열
+  const allTags = HashtagsGet();                    // [{id, name, ...}]
   const [selected, setSelected] = useState(new Set()); // 선택된 태그 id 집합
 
-  // dataURL → File 변환 (PhotoPickButton이 dataURL을 넘겨줄 때 사용)
+  // dataURL → File
   const dataURLtoFile = (dataUrl, filename = "avatar.png") => {
     const arr = dataUrl.split(",");
     const mime = arr[0].match(/:(.*?);/)[1];
@@ -72,9 +72,22 @@ export default function EditProfile() {
   // 저장: multipart/form-data (userRequest JSON + imageFile)
   const saveAll = async () => {
     try {
+      // 1) 선택된 id -> 태그 이름으로 변환
+      const chosen = allTags.filter((t) =>
+        selected.has(t.id ?? t.hashtagId)
+      );
+      const hashtagsPayload = chosen
+        .map((t) => (t.name ?? t.title ?? t.hashtag ?? "").trim())
+        .filter(Boolean)
+        .map((name) => ({ name })); // [{ name: "단짠단짠" }]
+
+      // 2) 스웨거 스펙대로 userRequest 구성
       const userRequest = {
         nickname,
-        email, 
+        email,
+        hashtags: hashtagsPayload,
+        // 필요 시 서버가 id 목록을 받는 구현도 대비 가능
+        // hashtagIds: chosen.map((t) => t.id ?? t.hashtagId),
       };
 
       const fd = new FormData();
@@ -82,14 +95,17 @@ export default function EditProfile() {
         "userRequest",
         new Blob([JSON.stringify(userRequest)], { type: "application/json" })
       );
-      if (avatarFile) fd.append("imageFile", avatarFile); 
+      if (avatarFile) fd.append("imageFile", avatarFile);
 
       await updateUser(fd);
       alert("저장 완료!");
       nav(-1);
     } catch (e) {
       console.log("PUT /users error:", e?.response?.status, e?.response?.data);
-      alert(e?.response?.data?.message ?? `저장 실패 (${e?.response?.status ?? "네트워크"})`);
+      alert(
+        e?.response?.data?.message ??
+          `저장 실패 (${e?.response?.status ?? "네트워크"})`
+      );
     }
   };
 
@@ -139,11 +155,12 @@ export default function EditProfile() {
             <Camera
               size={32}
               onPick={(dataUrl) => {
-                setAvatarPreview(dataUrl); // 미리보기
+                setAvatarPreview(dataUrl);
                 try {
                   setAvatarFile(dataURLtoFile(dataUrl));
                 } catch (e) {
-                  if (import.meta.env.DEV) console.debug("dataURL->File 변환 실패", e);
+                  if (import.meta.env.DEV)
+                    console.debug("dataURL->File 변환 실패", e);
                 }
               }}
             />
@@ -174,7 +191,9 @@ export default function EditProfile() {
         <TagGrid>
           {allTags.map((t) => {
             const id = t.id ?? t.hashtagId;
-            const name = (t.name ?? t.title ?? t.hashtag ?? "").trim().replace(/^#+/, ""); 
+            const name = (t.name ?? t.title ?? t.hashtag ?? "")
+              .trim()
+              .replace(/^#+/, "");
             const active = selected.has(id);
             return (
               <TagBtn
@@ -193,11 +212,15 @@ export default function EditProfile() {
 
         <SaveButton onClick={saveAll}>변경 사항 한번에 저장하기</SaveButton>
 
-        {/* 하단 링크: 항상 보이게 sticky 처리 */}
+        {/* 하단 링크 */}
         <FooterLinks>
-          <a href="#logout" onClick={onLogout}>로그아웃</a>
+          <a href="#logout" onClick={onLogout}>
+            로그아웃
+          </a>
           <span>|</span>
-          <a href="#withdraw" onClick={onWithdraw}>회원탈퇴</a>
+          <a href="#withdraw" onClick={onWithdraw}>
+            회원탈퇴
+          </a>
         </FooterLinks>
       </Wrap>
     </Center>
@@ -221,7 +244,10 @@ const Wrap = styled.div`
   padding: 0 24px 0;
   overflow-y: auto;
 
-  &::-webkit-scrollbar { width: 0; height: 0; }
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
   scrollbar-width: none;
   -ms-overflow-style: none;
 
@@ -249,9 +275,19 @@ const BackFloat = styled.button`
   -webkit-tap-highlight-color: transparent;
   outline: none;
 
-  &:focus, &:focus-visible, &:active { outline: none; box-shadow: none; }
-  &::-moz-focus-inner { border: 0; }
-  svg { width: 20px; height: 20px; }
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const AvatarWrap = styled.div`
@@ -275,8 +311,15 @@ const Camera = styled(PhotoPickButton)`
   outline: none;
   -webkit-tap-highlight-color: transparent;
 
-  &:focus, &:focus-visible, &:active { outline: none; box-shadow: none; }
-  &::-moz-focus-inner { border: 0; }
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
 `;
 
 const Card = styled.div`
@@ -343,7 +386,6 @@ const TagGrid = styled.div`
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px 12px;
   margin-bottom: 18px;
-
 `;
 
 const TagBtn = styled.button`
@@ -359,14 +401,12 @@ const TagBtn = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 75;
   cursor: pointer;
 
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px #ff5a2f33;
   }
-   /* ↓ 포커스/탭 하이라이트 제거 전부 */
   outline: none;
   -webkit-tap-highlight-color: transparent;
 
@@ -376,10 +416,9 @@ const TagBtn = styled.button`
     outline: none;
     box-shadow: none;
   }
-
-  /* Firefox 내부 포커스 테두리 제거 */
-  &::-moz-focus-inner { border: 0; }
-
+  &::-moz-focus-inner {
+    border: 0;
+  }
 `;
 
 const Empty = styled.div`
@@ -403,8 +442,15 @@ const SaveButton = styled.button`
   outline: none;
   -webkit-tap-highlight-color: transparent;
 
-  &:focus, &:focus-visible, &:active { outline: none; box-shadow: none; }
-  &::-moz-focus-inner { border: 0; }
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
 `;
 
 const FooterLinks = styled.div`
@@ -417,5 +463,8 @@ const FooterLinks = styled.div`
   gap: 10px;
   justify-content: center;
   color: #9b9b9b;
-  & a { color: inherit; text-decoration: none; }
+  & a {
+    color: inherit;
+    text-decoration: none;
+  }
 `;
