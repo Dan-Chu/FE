@@ -59,17 +59,18 @@ export default function StoreList() {
 
   useEffect(() => {
     const fetchData = async () => {
+      let result;
       setLoading(true);
       if (!debouncedSearch) {
         // 검색어 없으면 그냥 기본 리스트
         
         if (!location.lat || !location.lng) return;
-        const result = await StoreListGet(page - 1, location.lat, location.lng);
+        result = await StoreListGet(page - 1, location.lat, location.lng);
         setData(result);
       } else if (debouncedSearch) {
         // 검색어 있으면 검색 API 호출
         if (!location.lat || !location.lng) return;
-        const result = await SearchStoreGet(
+        result = await SearchStoreGet(
           debouncedSearch,
           page - 1,
           location.lat,
@@ -78,7 +79,7 @@ export default function StoreList() {
         setData(result);
       } else {
         if (!location.lat || !location.lng) return;
-        const result = await FilterStoreGet(
+        result = await FilterStoreGet(
           selectFilter,
           location.lat,
           location.lng,
@@ -87,7 +88,7 @@ export default function StoreList() {
         setData(result);
       }
       setLoading(false);
-      setMaxPage(data.totalPages);
+      setMaxPage(result.totalPages);
     };
 
     fetchData();
