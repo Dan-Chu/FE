@@ -25,7 +25,7 @@ export default function Mypage() {
 
     (async () => {
       try {
-        const me = await getUser(); // { nickname, email, imageUrl, myHashtags?: [{id,name}] ... }
+        const me = await getUser(); 
 
         if (ignore) return;
 
@@ -34,19 +34,19 @@ export default function Mypage() {
         setAvatar(me?.imageUrl || null);
 
         // 해시태그: 서버가 주는 필드명 여러가지 대응
-        const rawTags = me?.myHashtags ?? me?.hashtags ?? [];
-        const names = Array.isArray(rawTags)
-          ? rawTags.map(
-              (t) =>
-                t?.name ??
-                t?.tagName ??
-                t?.keyword ??
-                t?.title ??
-                (typeof t === "string" ? t : "")
-            ).filter(Boolean)
-          : [];
+       const rawTags = me?.myHashtags ?? me?.hashtags ?? [];
+       const names = Array.isArray(rawTags)
+       ? rawTags
+      .map((t) =>
+        (t?.name ?? t?.tagName ?? t?.keyword ?? t?.title ?? (typeof t === "string" ? t : ""))
+          .toString()
+          .trim()
+          .replace(/^#+/, "")
+      )
+      .filter(Boolean)
+       : [];
+      setMyTags(names);
 
-        setMyTags(names);
       } catch (e) {
         // ❗ API 실패 시에만 예전 localStorage 폴백 사용 (더미 UI 방지)
         try {
