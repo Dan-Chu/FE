@@ -20,12 +20,20 @@ import StampPage from "./pages/Stamp/StampPage";
 export default function App() {
   function WithNavar() {
     return (
-      <>
-        <Contents>
+     <>
+        <Contents>       {/* 하단 Nav 높이만큼 패딩 */}
           <Outlet />
         </Contents>
         <Navar />
       </>
+    );
+  }
+
+  function WithoutNav() {
+    return (
+      <ContentsFull>    {/* Nav 없음: 풀 높이 */}
+        <Outlet />
+      </ContentsFull>
     );
   }
 
@@ -44,12 +52,15 @@ export default function App() {
             <Route path="/mission" element={<MissionPage />} />
             <Route path="/stamp" element={<StampPage />} />
             <Route path="/mypage" element={<Mypage />} />
-            <Route path="/mypage/edit" element={<EditProfile />} />
-            <Route path="/mypage/coupons" element={<CouponPage />} /> {/* ✅ 추가 */}
           </Route>
+
+          {/* ✅ Nav 숨길 페이지들 */}
+        <Route element={<WithoutNav />}>
+           <Route path="/mypage/edit" element={<EditProfile />} />
+           <Route path="/mypage/coupons" element={<CouponPage />} />
++        </Route>
+
           <Route path="/storeList/storeDetail/:id" element={<StoreDetail />} />
-          <Route path="/coupons" element={<CouponPage />} />
-          <Route path="/edit" element={<EditProfile />} />
         </Routes>
       </BrowserRouter>
     </Phone>
@@ -72,4 +83,9 @@ const Phone = styled.div`
 const Contents = styled.div`
   padding-top: 21px;
   height: 674px;
+`;
+
+/* ✅ Nav가 없을 때: 하단 패딩 제거 */
+const ContentsFull = styled(Contents)`
+  padding-bottom: 0;
 `;

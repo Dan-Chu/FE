@@ -30,7 +30,6 @@ export default function MainMissionCard({
         {/* 오른쪽 썸네일: 추천이면 AI 이모지, 아니면 기본 썸네일 */}
         <Thumb $recommended={recommended}>
           {recommended ? <AIRecommendEmoji /> : <MissionThumbIcon />}
-          {recommended && <Check>✓</Check>}
         </Thumb>
       </Row>
     </Card>
@@ -44,6 +43,17 @@ const Card = styled.button`
   width: 100%;               /* ✅ 부모폭 가득 */
   border-radius: 12px;
   cursor: pointer;
+
+   /* 포커스(클릭) 아웃라인 제거 */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+
 
   /* 공통 배경/여백 */
   background: ${({ $recommended }) => ($recommended ? "#fff" : "#FFEDD6")};
@@ -100,17 +110,18 @@ const RewardText = styled.div`
 
 const Thumb = styled.div`
   position: relative;
-  flex: 0 0 66px;
-  width: 66px;
-  height: 66px;
+  flex: 0 0 76px;
+  width: 76px;
+  height: 76px;
   border-radius: 14px;
   background: ${({ $recommended }) => ($recommended ? "#FFF4F0" : "#FBE7DA")};
   display: grid;
   place-items: center;
 
   svg {
-    width: 42px;
-    height: 42px;
+    width: 110px;
+    height: 110px;
+    transform: translate(-28px, -20px); /* ← 왼쪽(-x), 위(-y)로 살짝 이동 */
   }
 `;
 

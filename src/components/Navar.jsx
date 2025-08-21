@@ -15,6 +15,13 @@ export default function Navar() {
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
+    // 네비를 감출 페이지들
+  const HIDE_ON = [
+    "/mypage/edit",     // 내 정보 페이지
+    "/mypage/coupons", // 쿠폰함 페이지
+  ];
+
+
   const getPageIndex = () => {
     switch (currentPath) {
       case "/storeList":
