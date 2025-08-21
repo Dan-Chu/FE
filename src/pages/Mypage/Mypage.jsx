@@ -1,3 +1,4 @@
+// src/pages/Mypage/Mypage.jsx
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +7,10 @@ import TitleBar from "../../components/TitleBar";
 import Navar from "../../components/Navar";
 import basicProfile from "../../assets/images/basic_profile.svg";
 import { EditCircleButton } from "../../components/Button";
+import mycoupon from "../../assets/images/mycoupon.svg?url";
+
+// 유저 API
+import { getUser } from "../../shared/api/user";
 
 export default function Mypage() {
   const nav = useNavigate();
@@ -16,20 +21,59 @@ export default function Mypage() {
   const [myTags, setMyTags] = useState([]);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("profile") || "null");
-    if (saved) {
-      setNickname(saved.nickname ?? "김단추");
-      setEmail(saved.email ?? "XXXXXX@skuniv.ac.kr");
-      setAvatar(saved.avatar ?? null);
+    let ignore = false;
 
-      if (Array.isArray(saved.selectedIndices)) {
-        const count = saved.selectedIndices.length;
-        setMyTags(Array.from({ length: count }, () => "해시태그"));
-        return;
+    (async () => {
+      try {
+        const me = await getUser(); // { nickname, email, imageUrl, myHashtags?: [{id,name}] ... }
+
+        if (ignore) return;
+
+        setNickname(me?.nickname ?? "김단추");
+        setEmail(me?.email ?? "XXXXXX@skuniv.ac.kr");
+        setAvatar(me?.imageUrl || null);
+
+        // 해시태그: 서버가 주는 필드명 여러가지 대응
+        const rawTags = me?.myHashtags ?? me?.hashtags ?? [];
+        const names = Array.isArray(rawTags)
+          ? rawTags.map(
+              (t) =>
+                t?.name ??
+                t?.tagName ??
+                t?.keyword ??
+                t?.title ??
+                (typeof t === "string" ? t : "")
+            ).filter(Boolean)
+          : [];
+
+        setMyTags(names);
+      } catch (e) {
+        // ❗ API 실패 시에만 예전 localStorage 폴백 사용 (더미 UI 방지)
+        try {
+          const saved = JSON.parse(localStorage.getItem("profile") || "null");
+          if (saved) {
+            setNickname(saved.nickname ?? "김단추");
+            setEmail(saved.email ?? "XXXXXX@skuniv.ac.kr");
+            setAvatar(saved.avatar ?? null);
+
+            // 옛 로컬 포맷(인덱스만 저장) → 개수만큼 빈 태그명 생성 X
+            // 실제 표시용 태그는 별도 저장되어 있었다면 그것만 사용
+            const legacy = JSON.parse(localStorage.getItem("myTags") || "[]");
+            if (Array.isArray(legacy) && legacy.length) {
+              setMyTags(legacy.map(String));
+            } else {
+              setMyTags([]); // 더미(#해시태그)로 채우지 않음
+            }
+            return;
+          }
+        } catch (_) {}
+        // 폴백도 없으면 빈 상태 유지
       }
-    }
-    const legacy = JSON.parse(localStorage.getItem("myTags") || "[]");
-    if (Array.isArray(legacy) && legacy.length) setMyTags(legacy);
+    })();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   return (
@@ -49,7 +93,7 @@ export default function Mypage() {
             <Email>{email}</Email>
           </Info>
 
-          <EditBtn size={70} onClick={() => nav("/mypage/edit")} />
+          <EditBtn size={80} onClick={() => nav("/mypage/edit")} />
         </Profile>
 
         {!!myTags.length && (
@@ -60,12 +104,13 @@ export default function Mypage() {
           </TagGrid>
         )}
 
-        <CouponCard>
-          <CouponTitle>나의 쿠폰함</CouponTitle>
-          <CouponCTA type="button" onClick={() => nav("/mypage/coupons")}>
-            확인하기
-          </CouponCTA>
-        </CouponCard>
+<TicketButton
+  onClick={() => nav("/mypage/coupons")}
+  aria-label="나의 쿠폰함 확인하기"
+>
+  내 쿠폰함 확인하기
+</TicketButton>
+
 
         <Divider />
 
@@ -96,7 +141,7 @@ const Page = styled.div`
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  background: #FAF8F8;
+  background: #faf8f8;
   overflow: hidden;
 `;
 
@@ -104,7 +149,7 @@ const Header = styled.div`
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #FAF8F8;
+  background: #faf8f8;
   box-shadow: none;
 `;
 
@@ -123,7 +168,11 @@ const ScrollArea = styled.div`
   /* 스크롤바 숨김 */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  &::-webkit-scrollbar{ width:0!important; height:0!important; display:none!important; }
+  &::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
 
   /* 오버레이 스크롤바 마스킹 */
   --sbw: 14px;
@@ -137,30 +186,68 @@ const Profile = styled.div`
   align-items: center;
   column-gap: 12px;
   padding: 8px 0 14px;
+  justify-items: start;
 `;
 
 const Avatar = styled.div`
-  width: 70px; height: 70px; border-radius: 9999px;
-  background: #fff9f2; overflow: hidden;
-  img { width: 100%; height: 100%; object-fit: cover; }
+  width: 70px;
+  height: 70px;
+  border-radius: 9999px;
+  background: #fff9f2;
+  overflow: hidden;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  margin: 12px 0 30px;
 `;
 
 const Info = styled.div`
-  min-width: 0; display: flex; flex-direction: column; gap: 6px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px 0 30px;
+  text-align: left;
 `;
 
 const Name = styled.div`
-  color: #ce4927; font-size: 32px; font-weight: 700; line-height: 30px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #ce4927;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Email = styled.div`
-  color: #9a9a9a; font-size: 14px; font-weight: 500;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #9a9a9a;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const EditBtn = styled(EditCircleButton)`
-  margin-left: 12px; flex-shrink: 0;
+  margin-left: 12px;
+  flex-shrink: 0;
+  transform: translateX(+15px);
+
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
 `;
 
 /* 해시태그 – 4열 그리드 */
@@ -175,7 +262,7 @@ const TagChip = styled.div`
   height: 31px;
   padding: 0 12px;
   border-radius: 18px;
-  background: #EC6541;
+  background: #ec6541;
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -183,49 +270,6 @@ const TagChip = styled.div`
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-`;
-
-const CouponCard = styled.div`
-  display: flex;
-  align-items: stretch;
-  width: 100%;
-  height: 130px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #ffedd6;
-  margin: 16px 0 22px;
-`;
-
-const CouponTitle = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding-left: 18px;
-  color: #141414;
-  font-size: 24px;
-  font-weight: 600;
-`;
-
-const CouponCTA = styled.button`
-  width: 120px;
-  border: 0;
-  background: #cf4721;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  position: relative;
-
-  &:after {
-    content: "";
-    position: absolute;
-    left: -12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 12px; height: 24px;
-    background: #ffedd6;
-    border-radius: 0 12px 12px 0;
-  }
 `;
 
 const Divider = styled.div`
@@ -241,6 +285,7 @@ const SectionTitle = styled.div`
     "Noto Sans KR", sans-serif;
   font-weight: 500;
   margin-bottom: 12px;
+  text-align: left;
 `;
 
 const TwoCol = styled.div`
@@ -249,11 +294,13 @@ const TwoCol = styled.div`
   column-gap: 48px;
   row-gap: 12px;
   align-items: start;
+  text-align: left;
 `;
 
 const Col = styled.div`
   display: grid;
   gap: 12px;
+  text-align: left;
 `;
 
 const Item = styled.div`
@@ -263,6 +310,25 @@ const Item = styled.div`
     "Noto Sans KR", sans-serif;
   font-weight: 500;
   line-height: 20px;
+  text-align: left;
 `;
 
 const ItemSmall = styled(Item)``;
+
+const TicketButton = styled.button`
+  width: 100%;
+  height: 130px;
+  margin: 40px 0 40px;              
+  background: url(${mycoupon}) center / 100% 100% no-repeat;
+  border: 0;
+  cursor: pointer;
+
+  text-indent: -9999px;
+  overflow: hidden;
+
+  /* 포커스/탭 하이라이트 제거*/
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  &:focus { outline: none; }
+`;
+
