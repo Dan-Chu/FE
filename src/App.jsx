@@ -20,12 +20,20 @@ import StampPage from "./pages/Stamp/StampPage";
 export default function App() {
   function WithNavar() {
     return (
-      <>
-        <Contents>
+     <>
+        <Contents>       {/* 하단 Nav 높이만큼 패딩 */}
           <Outlet />
         </Contents>
         <Navar />
       </>
+    );
+  }
+
+  function WithoutNav() {
+    return (
+      <ContentsFull>    {/* Nav 없음: 풀 높이 */}
+        <Outlet />
+      </ContentsFull>
     );
   }
 
@@ -44,15 +52,15 @@ export default function App() {
             <Route path="/mission" element={<MissionPage />} />
             <Route path="/stamp" element={<StampPage />} />
             <Route path="/mypage" element={<Mypage />} />
-            <Route path="/mypage/edit" element={<EditProfile />} />
-            <Route path="/mypage/coupons" element={<CouponPage />} /> {/* ✅ 추가 */}
           </Route>
 
-          {/* 네비 없이 쓰는 단독 페이지들 */}
-          <Route path="/storeList/storeDetail" element={<StoreDetail />} />
-          {/* 불필요한 중복 라우트 정리 */}
-          {/* <Route path="/coupons" element={<CouponPage />} /> */}
-          {/* <Route path="/edit" element={<EditProfile />} /> */}
+          {/* ✅ Nav 숨길 페이지들 */}
+        <Route element={<WithoutNav />}>
+           <Route path="/mypage/edit" element={<EditProfile />} />
+           <Route path="/mypage/coupons" element={<CouponPage />} />
++        </Route>
+
+          <Route path="/storeList/storeDetail/:id" element={<StoreDetail />} />
         </Routes>
       </BrowserRouter>
     </Phone>
@@ -62,7 +70,7 @@ export default function App() {
 const Phone = styled.div`
   position: relative;
   width: 393px;
-  min-height: 100vh;
+  height: 765px;
   margin-left: auto;
   margin-right: auto;
   background-color: #faf8f8;
@@ -74,6 +82,10 @@ const Phone = styled.div`
 
 const Contents = styled.div`
   padding-top: 21px;
-  height: calc(100vh - 91px); /* 네비 높이만큼 빼기 */
-  overflow: auto;            /* 안쪽만 스크롤 */
+  height: 674px;
+`;
+
+/* ✅ Nav가 없을 때: 하단 패딩 제거 */
+const ContentsFull = styled(Contents)`
+  padding-bottom: 0;
 `;

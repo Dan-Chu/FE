@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Modal.css";
+import styled from "styled-components";
+import couponUse from "../assets/images/coupon_use.svg";
 
 /* 공통 래퍼 */
 const ModalWrapper = ({ children, onClose }) => {
@@ -16,7 +18,12 @@ const ModalWrapper = ({ children, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
@@ -28,6 +35,11 @@ const ModalWrapper = ({ children, onClose }) => {
 
 // 1) 미션 상세 정보 모달
 export const MissionModal = ({ mission, onClose, onSubmit }) => {
+  const navigate = useNavigate();
+
+  const toStoreDetail = (id) => {
+    navigate(`/storeList/storeDetail/${id}`);
+  };
   return (
     <ModalWrapper onClose={onClose}>
       <div className="mission-modal">
@@ -40,7 +52,7 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
           <button
             type="button"
             className="mission-btn mission-btn-store"
-            onClick={() => alert("가게 더보기")}
+            onClick={() => toStoreDetail(mission.storeId)}
           >
             가게 더보기
           </button>
@@ -57,13 +69,22 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
   );
 };
 
+import { MissionComplete } from "../shared/api/mission";
 // 2) 인증코드 입력 모달(일일미션)
-export const CodeInputModal = ({ onClose, onSubmit, hint = "예시 코드는 1234 입니다" }) => {
+export const CodeInputModal = ({
+  onClose,
+  onSubmit,
+  hint = "예시 코드는 0000 입니다",
+  authCode,
+}) => {
   const [code, setCode] = useState("");
 
-  const handleSubmit = () => {
-    if (code.length === 4) onSubmit(code);
-    else alert("4자리 숫자를 입력해주세요!");
+  const handleSubmit = async () => {
+    const result = await MissionComplete(code, authCode);
+    if (code.length === 4) {
+      if (result) onSubmit();
+      else alert("올바른 코드를 입력해주세요.");
+    } else alert("4자리 숫자를 입력해주세요!");
   };
 
   return (
@@ -85,46 +106,48 @@ export const CodeInputModal = ({ onClose, onSubmit, hint = "예시 코드는 123
         />
 
         <div className="modal-button-group">
-          <button className="btn-confirm" onClick={handleSubmit}>확인</button>
+          <button className="btn-confirm" onClick={handleSubmit}>
+            확인
+          </button>
         </div>
       </div>
     </ModalWrapper>
   );
 };
 
-
 // ✅ 3) 공용: 쿠폰함 성공 모달 (일일미션/스탬프 모두 재사용)
 export const CouponSuccessModal = ({ onClose }) => {
   return (
     <ModalWrapper onClose={onClose}>
       <div className="modal-success">
-        <h3 className="modal-success-title">쿠폰함에 성공적으로 추가되었습니다</h3>
+        <h3 className="modal-success-title">쿠폰함에 성공적으로<br />추가되었습니다</h3>
         <p className="modal-success-desc">
-          *받은 쿠폰은 마이페이지&gt;쿠폰함에서 확인하실 수 있습니다
+          *받은 쿠폰은 <span className="nowrap">마이페이지&gt;쿠폰함에서</span><br />확인하실 수 있습니다
         </p>
-        <button className="btn-close" onClick={onClose}>닫기</button>
+        <button className="btn-close" onClick={onClose}>
+          닫기
+        </button>
       </div>
     </ModalWrapper>
   );
 };
 
-
 /* ---------------- 스탬프 전용 모달 3종 ---------------- */
 import StampHero from "../assets/images/stamp_modal.svg";
 import AlreadyHero from "../assets/images/already_stamp.svg";
+import { StampPlus, StampReward } from "../shared/api/stamp";
 
 // 1) 스탬프 찍기(가게별 인증번호 입력)
-export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
+export const StampCodeModal = ({ data, onClose, onSubmit }) => {
   const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (code.length !== 4) return alert("4자리 숫자를 입력해주세요!");
-    try {
-      setLoading(true);
-      await onSubmit(code); // 성공 시 부모 상태 갱신
-    } finally {
-      setLoading(false);
+    else {
+      const res = await StampPlus(data.authCode);//도장 적립 결과
+      if (res) {
+        onSubmit(data); // 성공 시 부모 상태 갱신,데이터 전달
+      } else return alert("옳은 코드를 입력해주세요");//적립실패시 다시입력(실패 이유:코드 틀림)
     }
   };
 
@@ -134,9 +157,9 @@ export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
         <img src={StampHero} alt="" className="stamp-hero" />
 
         {/* (가게이름), */}
-        {storeName ? (
+        {data.storeName ? (
           <div className="stamp-sub">
-            {storeName}
+            {data.storeName}
             <span className="comma">,</span>
           </div>
         ) : null}
@@ -144,8 +167,8 @@ export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
         {/* 단골 도장 꾹! */}
         <h3 className="stamp-title">단골 도장 꾹!</h3>
 
-        {/* * 테스트용 인증코드 0000입니다. */}
-        <p className="stamp-hint">* 테스트용 인증코드 0000입니다.</p>
+        {/* * 테스트용 인증코드 입니다. */}
+        <p className="stamp-hint">* 테스트용 인증코드 ????입니다.</p>
 
         {/* AAAA 스타일의 대형 입력 */}
         <input
@@ -159,8 +182,8 @@ export const StampCodeModal = ({ storeName = "", onClose, onSubmit }) => {
           aria-label="인증코드 4자리"
         />
 
-        <button className="btn-confirm" onClick={submit} disabled={loading}>
-          {loading ? "확인 중..." : "확인"}
+        <button className="btn-confirm" onClick={submit}>
+          "확인"
         </button>
       </div>
     </ModalWrapper>
@@ -240,8 +263,53 @@ export const AlreadyExistsModal = ({ storeName = "", onClose }) => {
           </p>
         ) : null}
 
-        <button className="btn-confirm" onClick={onClose}>확인</button>
+        <button className="btn-confirm" onClick={onClose}>
+          확인
+        </button>
       </div>
     </ModalWrapper>
   );
 };
+
+/* ----- 쿠폰 사용 성공적 모달 ㄹㅇ내 인생 마지막 모달 ----- */
+export const CouponUseModal = ({ onClose }) => {
+  return (
+    <ModalWrapper onClose={onClose}>
+      <UseWrap role="dialog" aria-label="쿠폰 사용 완료">
+        <img src={couponUse} alt="" draggable="false" />
+        {/* 이미지 하단 '닫기' 영역만 클릭되도록 투명 버튼 오버레이 */}
+        <button type="button" className="btn-close" aria-label="닫기" onClick={onClose} />
+      </UseWrap>
+    </ModalWrapper>
+  );
+};
+
+// 이 모달만의 스타일 (다른 CSS 파일 필요 X)
+const UseWrap = styled.div`
+  position: relative;
+  width: min(320px, 90vw);   /* 모달 가로 폭 */
+  /* 그림자/라운드는 이미지 자체에 있으면 생략 가능 */
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 16px;     /* 이미지에 둥근 모서리 있으면 맞춰줘 */
+    user-select: none;
+    pointer-events: none;    /* 클릭은 아래 투명버튼이 받게 */
+  }
+
+  .btn-close {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    /* ⬇️ 이미지의 빨간 '닫기' 바 영역만큼 높이 설정 */
+    height: 56px;
+
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+`;

@@ -1,15 +1,13 @@
 // 일일미션 카드
 import styled from "styled-components";
 import AIRecommendText from "../assets/images/ai_recommend_text.svg?react"; // "AI추천" 텍스트 이미지화
-import AIRecommendEmoji from "../assets/logos/ai_recommend.svg?react";      // AI추천 카드 내 이모지
-import MissionThumbIcon from "../assets/logos/missionlist.svg?react";       // 일반 카드 내 이모지
+import AIRecommendEmoji from "../assets/logos/ai_recommend.svg?react"; // AI추천 카드 내 이모지
+import MissionThumbIcon from "../assets/logos/missionlist.svg?react"; // 일반 카드 내 이모지
 
 export default function MainMissionCard({
   onClick,
-  store = "가게이름",
-  title = "미션내용내용내용",
-  reward = "탄산 음료 한 캔 쿠폰",
-  recommended = false, // true면 AI 추천 카드(UI 빨간 테두리 + 배지 + 이모지)
+  data,
+  recommended // true면 AI 추천 카드(UI 빨간 테두리 + 배지 + 이모지)
 }) {
   return (
     <Card $recommended={recommended} onClick={onClick}>
@@ -22,15 +20,14 @@ export default function MainMissionCard({
 
       <Row>
         <TextCol>
-          <StoreText>{store}</StoreText>
-          <TitleText>{title}</TitleText>
-          <RewardText>보상: {reward}</RewardText>
+          <StoreText>{data.storeName}</StoreText>
+          <TitleText>{data.title}</TitleText>
+          <RewardText>보상: {data.rewardName}</RewardText>
         </TextCol>
 
         {/* 오른쪽 썸네일: 추천이면 AI 이모지, 아니면 기본 썸네일 */}
         <Thumb $recommended={recommended}>
           {recommended ? <AIRecommendEmoji /> : <MissionThumbIcon />}
-          {recommended && <Check>✓</Check>}
         </Thumb>
       </Row>
     </Card>
@@ -41,17 +38,30 @@ export default function MainMissionCard({
 const Card = styled.button`
   all: unset;
   box-sizing: border-box;
-  width: 100%;               /* ✅ 부모폭 가득 */
+  width: 100%; /* ✅ 부모폭 가득 */
   border-radius: 12px;
   cursor: pointer;
+
+   /* 포커스(클릭) 아웃라인 제거 */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+
 
   /* 공통 배경/여백 */
   background: ${({ $recommended }) => ($recommended ? "#fff" : "#FFEDD6")};
   padding: 16px;
 
   /* 추천카드: 빨간 테두리 + 살짝 그림자 */
-  border: ${({ $recommended }) => ($recommended ? "2px solid #F25C3D" : "2px solid transparent")};
-  box-shadow: ${({ $recommended }) => ($recommended ? "0 6px 18px rgba(242,92,61,0.15)" : "none")};
+  border: ${({ $recommended }) =>
+    $recommended ? "2px solid #F25C3D" : "2px solid transparent"};
+  box-shadow: ${({ $recommended }) =>
+    $recommended ? "0 6px 18px rgba(242,92,61,0.15)" : "none"};
 
   display: flex;
   flex-direction: column;
@@ -100,17 +110,18 @@ const RewardText = styled.div`
 
 const Thumb = styled.div`
   position: relative;
-  flex: 0 0 66px;
-  width: 66px;
-  height: 66px;
+  flex: 0 0 76px;
+  width: 76px;
+  height: 76px;
   border-radius: 14px;
   background: ${({ $recommended }) => ($recommended ? "#FFF4F0" : "#FBE7DA")};
   display: grid;
   place-items: center;
 
   svg {
-    width: 42px;
-    height: 42px;
+    width: 110px;
+    height: 110px;
+    transform: translate(-28px, -20px); /* ← 왼쪽(-x), 위(-y)로 살짝 이동 */
   }
 `;
 

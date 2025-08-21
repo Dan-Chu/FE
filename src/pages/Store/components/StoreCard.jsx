@@ -1,30 +1,33 @@
 import styled from "styled-components";
 import Logo from "../../../assets/logos/card_logo.svg?react";
-import ex_img from "../../../assets/images/example_shop_img.jpg";
 import { useNavigate } from "react-router-dom";
 
-export default function StoreCard({ data }) {
+export default function StoreCard({ id, data,distance }) {
   const navigate = useNavigate();
 
   const toStoreDetail = () => {
-    navigate(`/storeList/storeDetail`);
+    navigate(`/storeList/storeDetail/${id}`);
   };
 
   return (
     <Card onClick={() => toStoreDetail()}>
-      <StoreImg src={ex_img} />
+      <StoreImg src={data.mainImageUrl} />
       <TextBox>
         <StoreName>
           <Logo />
-          가게이름이름
+          {data.name}
         </StoreName>
         <HashtagBox>
-          <Hashtag>#해시태그</Hashtag>
-          <Hashtag>#해시태그</Hashtag>
-          <Hashtag>#해시태그</Hashtag>
+          {data.hashtags && data.hashtags.length > 0 ? (
+            data.hashtags.map((hashtag) => (
+              <Hashtag key={hashtag.id}>{hashtag.name}</Hashtag> 
+            ))
+          ) : (
+            <p>태그가 없습니다.</p>
+          )}
         </HashtagBox>
         <Distance>
-          지금 위치에서 &nbsp;<span style={{ color: "#CF4721" }}>NNm</span>
+          지금 위치에서 &nbsp;<span style={{ color: "#CF4721" }}>{distance}km</span>
           &nbsp; 거리에 있어요!
         </Distance>
       </TextBox>

@@ -1,15 +1,24 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function FilterType() {
-  const [type, setType] = useState(false);
+export default function FilterType({ hashtag, selected, onClick }) {
+  const [onType, setOnType] = useState(selected);
 
-  const typeOn = () => {
-    setType(!type);
+  // 부모에서 props로 내려주는 selected 값이 변하면 동기화
+  useEffect(() => {
+    setOnType(selected);
+  }, [selected]);
+
+  const handleClick = () => {
+    // 내부 상태 토글
+    setOnType((prev) => !prev);
+    // 부모에게 알림
+    onClick(hashtag);
   };
+
   return (
-    <Filter onClick={() => typeOn()} on={type}>
-      해시태그
+    <Filter onClick={handleClick} $on={onType}>
+      {hashtag}
     </Filter>
   );
 }
@@ -23,9 +32,9 @@ const Filter = styled.div`
   flex-shrink: 0;
   border-radius: 18px;
   border: 1px solid #e8512a;
-  background: ${({ on }) => (on ? "#E8512A" : "#FFF")};
+  background: ${({ $on }) => ($on ? "#E8512A" : "#FFF")};
 
-  color: ${({ on }) => (on ? "#FFF" : "#E8512A")};
+  color: ${({ $on }) => ($on ? "#FFF" : "#E8512A")};
   text-align: center;
   font-family: Pretendard;
   font-size: 11px;

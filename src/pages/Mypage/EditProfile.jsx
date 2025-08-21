@@ -2,60 +2,167 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import TitleBar from "../../components/TitleBar";
+import { useNavigate } from "react-router-dom";
+import BackIcon from "../../assets/icons/back_mypage.svg?react";
 
 import basicProfile from "../../assets/images/basic_profile.svg";
 import { PhotoPickButton } from "../../components/Button";
 
+// API
+import {
+  getUser,
+  updateUser,
+  logout as apiLogout,
+  deleteUser as apiDeleteUser,
+} from "../../shared/api/user";
+import { HashtagsGet } from "../../shared/api/hashtag";
+
 export default function EditProfile() {
-  const [nickname, setNickname] = useState("김단추");
-  const [email] = useState("XXXXXX@skuniv.ac.kr");
-  const [avatar, setAvatar] = useState(null);
+  const nav = useNavigate();
 
-  // 4x7 = 28개
-  const TAG_COUNT = 28;
-  const [selected, setSelected] = useState(
-    Array.from({ length: TAG_COUNT }, () => false)
-  );
+  // 프로필 기본 정보
+  const [nickname, setNickname] = useState("");
+  const [email, setEmail] = useState("");
 
-  // 저장된 프로필 불러오기
+  // 아바타(미리보기 / 파일)
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
+
+  // 해시태그
+  const allTags = HashtagsGet();                    // [{id, name, ...}]
+  const [selected, setSelected] = useState(new Set()); // 선택된 태그 id 집합
+
+  // dataURL → File
+  const dataURLtoFile = (dataUrl, filename = "avatar.png") => {
+    const arr = dataUrl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8 = new Uint8Array(n);
+    while (n--) u8[n] = bstr.charCodeAt(n);
+    return new File([u8], filename, { type: mime });
+  };
+
+  // 최초 로드: 내 정보 가져오기
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("profile") || "null");
-    if (!saved) return;
-    setNickname(saved.nickname ?? "김단추");
-    setAvatar(saved.avatar ?? null);
-    if (Array.isArray(saved.selectedIndices)) {
-      setSelected((prev) =>
-        prev.map((_, i) => saved.selectedIndices.includes(i))
-      );
-    }
+    (async () => {
+      try {
+        const me = await getUser(); // { nickname, email, imageUrl, myHashtags?: [{id,name}] ... }
+        setNickname(me?.nickname ?? "");
+        setEmail(me?.email ?? "");
+        setAvatarPreview(me?.imageUrl ?? "");
+
+        const mine = me?.myHashtags ?? me?.hashtags ?? [];
+        setSelected(new Set(mine.map((t) => t.id)));
+      } catch (e) {
+        alert("내 정보를 불러오지 못했어요.");
+        console.error(e);
+      }
+    })();
   }, []);
 
-  const toggle = (i) =>
-    setSelected((prev) => prev.map((v, idx) => (idx === i ? !v : v)));
+  const toggleTag = (id) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
 
-  const saveAll = () => {
-    const selectedIndices = selected
-      .map((v, i) => (v ? i : -1))
-      .filter((i) => i >= 0);
-    localStorage.setItem(
-      "profile",
-      JSON.stringify({ nickname, email, avatar, selectedIndices })
-    );
-    alert("저장 완료!");
+  // 저장: multipart/form-data (userRequest JSON + imageFile)
+  const saveAll = async () => {
+    try {
+      // 1) 선택된 id -> 태그 이름으로 변환
+      const chosen = allTags.filter((t) =>
+        selected.has(t.id ?? t.hashtagId)
+      );
+      const hashtagsPayload = chosen
+        .map((t) => (t.name ?? t.title ?? t.hashtag ?? "").trim())
+        .filter(Boolean)
+        .map((name) => ({ name })); // [{ name: "단짠단짠" }]
+
+      // 2) 스웨거 스펙대로 userRequest 구성
+      const userRequest = {
+        nickname,
+        email,
+        hashtags: hashtagsPayload,
+        // 필요 시 서버가 id 목록을 받는 구현도 대비 가능
+        // hashtagIds: chosen.map((t) => t.id ?? t.hashtagId),
+      };
+
+      const fd = new FormData();
+      fd.append(
+        "userRequest",
+        new Blob([JSON.stringify(userRequest)], { type: "application/json" })
+      );
+      if (avatarFile) fd.append("imageFile", avatarFile);
+
+      await updateUser(fd);
+      alert("저장 완료!");
+      nav(-1);
+    } catch (e) {
+      console.log("PUT /users error:", e?.response?.status, e?.response?.data);
+      alert(
+        e?.response?.data?.message ??
+          `저장 실패 (${e?.response?.status ?? "네트워크"})`
+      );
+    }
+  };
+
+  // 로그아웃/탈퇴
+  const onLogout = async (ev) => {
+    ev.preventDefault();
+    try {
+      await apiLogout();
+      localStorage.removeItem("accessToken");
+      alert("로그아웃 되었습니다.");
+      location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("로그아웃 실패");
+    }
+  };
+
+  const onWithdraw = async (ev) => {
+    ev.preventDefault();
+    if (!confirm("정말 탈퇴하시겠어요?")) return;
+    try {
+      await apiDeleteUser();
+      localStorage.removeItem("accessToken");
+      alert("회원탈퇴가 완료되었습니다.");
+      location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("회원탈퇴에 실패했습니다.");
+    }
   };
 
   return (
     <Center>
       <Wrap>
-        <TitleBar pageName="내 정보" />
+        <BackFloat onClick={() => nav(-1)} aria-label="뒤로가기">
+          <BackIcon />
+        </BackFloat>
+        <TitleBar pageName="내 정보" centered hideLogo />
 
-        {/* 카메라 버튼 */}
         <Head>
           <AvatarWrap>
-            <Avatar src={avatar || basicProfile} alt="프로필" />
+            <Avatar
+              src={avatarPreview || basicProfile}
+              alt="프로필"
+              onError={(e) => (e.currentTarget.src = basicProfile)}
+            />
             <Camera
               size={32}
-              onPick={(dataUrl) => setAvatar(dataUrl)}
+              onPick={(dataUrl) => {
+                setAvatarPreview(dataUrl);
+                try {
+                  setAvatarFile(dataURLtoFile(dataUrl));
+                } catch (e) {
+                  if (import.meta.env.DEV)
+                    console.debug("dataURL->File 변환 실패", e);
+                }
+              }}
             />
           </AvatarWrap>
         </Head>
@@ -79,30 +186,41 @@ export default function EditProfile() {
 
         <DottedHr />
 
-        {/* 해시태그 4x7 (28개) */}
+        {/* 해시태그 */}
         <SectionTitle>마이 해시태그</SectionTitle>
         <TagGrid>
-          {Array.from({ length: TAG_COUNT }).map((_, i) => (
-            <TagBtn
-              key={i}
-              type="button"
-              $on={selected[i]}
-              aria-pressed={selected[i]}
-              onClick={() => toggle(i)}
-            >
-              해시태그
-            </TagBtn>
-          ))}
+          {allTags.map((t) => {
+            const id = t.id ?? t.hashtagId;
+            const name = (t.name ?? t.title ?? t.hashtag ?? "")
+              .trim()
+              .replace(/^#+/, "");
+            const active = selected.has(id);
+            return (
+              <TagBtn
+                key={id}
+                type="button"
+                $on={active}
+                aria-pressed={active}
+                onClick={() => toggleTag(id)}
+              >
+                #{name}
+              </TagBtn>
+            );
+          })}
+          {allTags.length === 0 && <Empty>해시태그가 없습니다.</Empty>}
         </TagGrid>
-
-        {/* (옵션) 푸시 스위치 자리는 남겨두고 생략 */}
 
         <SaveButton onClick={saveAll}>변경 사항 한번에 저장하기</SaveButton>
 
+        {/* 하단 링크 */}
         <FooterLinks>
-          <a href="#logout">로그아웃</a>
+          <a href="#logout" onClick={onLogout}>
+            로그아웃
+          </a>
           <span>|</span>
-          <a href="#withdraw">회원탈퇴</a>
+          <a href="#withdraw" onClick={onWithdraw}>
+            회원탈퇴
+          </a>
         </FooterLinks>
       </Wrap>
     </Center>
@@ -110,7 +228,6 @@ export default function EditProfile() {
 }
 
 /* ================= styled ================= */
-
 const Center = styled.div`
   width: 100%;
   max-width: 390px;
@@ -124,20 +241,53 @@ const Center = styled.div`
 const Wrap = styled.div`
   flex: 1 1 auto;
   min-height: 0;
-  padding: 0 24px 24px;
+  padding: 0 24px 0;
   overflow-y: auto;
 
-  &::-webkit-scrollbar { width: 0; height: 0; }
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
   scrollbar-width: none;
   -ms-overflow-style: none;
 
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 `;
 
 const Head = styled.div`
   display: flex;
   justify-content: center;
   margin: 24px 0 12px;
+`;
+
+const BackFloat = styled.button`
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 100px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const AvatarWrap = styled.div`
@@ -154,11 +304,22 @@ const Avatar = styled.img`
   background: #fff9f2;
 `;
 
-/* 오버레이 카메라 버튼 위치 고정 */
 const Camera = styled(PhotoPickButton)`
   position: absolute;
   right: -2px;
   bottom: -2px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
 `;
 
 const Card = styled.div`
@@ -220,7 +381,6 @@ const SectionTitle = styled.h3`
   font-weight: 600;
 `;
 
-/* 해시태그 4열 그리드 */
 const TagGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -228,7 +388,6 @@ const TagGrid = styled.div`
   margin-bottom: 18px;
 `;
 
-/* 토글 가능한 칩 형태 */
 const TagBtn = styled.button`
   height: 31px;
   padding: 0 12px;
@@ -236,7 +395,7 @@ const TagBtn = styled.button`
   border: 1px solid #e8512a;
   background: ${({ $on }) => ($on ? "#EC6541" : "#fff")};
   color: ${({ $on }) => ($on ? "#fff" : "#e8512a")};
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   display: inline-flex;
@@ -248,12 +407,31 @@ const TagBtn = styled.button`
     outline: none;
     box-shadow: 0 0 0 3px #ff5a2f33;
   }
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
+`;
+
+const Empty = styled.div`
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: #888;
 `;
 
 const SaveButton = styled.button`
   width: 100%;
-  height: 52px;
-  margin-top: 16px;
+  height: 65px;
+  margin-top: 5px;
+  margin-bottom: 16px;
   border: 0;
   border-radius: 12px;
   background: #cf4721;
@@ -261,13 +439,32 @@ const SaveButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
 `;
 
 const FooterLinks = styled.div`
-  margin-top: 14px;
+  position: sticky;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  background: #faf8f8;
+  padding: 8px 0 10px;
+  z-index: 10;
   display: flex;
   gap: 10px;
   justify-content: center;
   color: #9b9b9b;
-  & a { color: inherit; text-decoration: none; }
+  & a {
+    color: inherit;
+    text-decoration: none;
+  }
 `;

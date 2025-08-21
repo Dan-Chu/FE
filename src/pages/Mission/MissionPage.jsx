@@ -1,21 +1,61 @@
 // src/pages/Mission/MissionPage.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import Navar from "../../components/Navar";
 import TitleBar from "../../components/TitleBar";
 import MainMissionCard from "../../components/MainMissionCard";
-import { MissionModal, CodeInputModal, CouponSuccessModal } from "../../components/Modal";
+import {
+  MissionModal,
+  CodeInputModal,
+  CouponSuccessModal,
+} from "../../components/Modal";
+import { AiMissionGet } from "../../shared/api/openAI";
+import { MissionListGet, MissionDetailGet } from "../../shared/api/mission";
+import FlagLogo from "../../assets/logos/flag_logo.svg?react"
 
 export default function MissionPage() {
+  const navigate = useNavigate();
   const [isMissionOpen, setIsMissionOpen] = useState(false);
   const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [aiMissionData, setAiMissionData] = useState();
+  const [missionData, setMissionData] = useState();
+  const [missionDetailData, setMissionDetailData] = useState();
 
   // 바깥 스크롤 잠금
   useEffect(() => {
     document.body.classList.add("no-body-scroll");
     return () => document.body.classList.remove("no-body-scroll");
   }, []);
+
+  const getData = async () => {
+    try {
+      const result = await AiMissionGet();
+      setAiMissionData(result);
+    } catch (err) {
+      console.warn("AiMissionGet 실패:", err);
+    }
+
+    try {
+      const result = await MissionListGet();
+      setMissionData(result);
+    } catch (err) {
+      console.warn("MissionListGet 실패:", err);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const missionDetail = async (id) => {
+    const result = await MissionDetailGet(id);
+    setMissionDetailData(result);
+    setIsMissionOpen(true);
+  };
+  const toMypage = () => {
+    navigate(`/mypage`);
+  };
 
   return (
     <Page>
@@ -34,47 +74,62 @@ export default function MissionPage() {
         </Hero>
 
         {/* AI 추천 카드 */}
-        <MissionCard className="is-ai">
-          <AiPill>AI 추천</AiPill>
-          <CardReset>
-            <MainMissionCard
-              store="가게이름"
-              title="미션내용내용내용"
-              reward="탄산 음료 한 캔 쿠폰"
-              onClick={() => setIsMissionOpen(true)}
-            />
-          </CardReset>
-        </MissionCard>
+        {aiMissionData ? (
+          <MissionCard className="is-ai" key={aiMissionData.missionId}>
+            <AiPill>AI 추천</AiPill>
+            <CardReset>
+              <MainMissionCard
+                onClick={() => missionDetail(aiMissionData.missionId)}
+                data={aiMissionData}
+                recommended={true}
+              />
+            </CardReset>
+          </MissionCard>
+        ) : (
+          <FailBox>
+            <FlagLogo width="117px" height="106px" />
+            <FailText>
+              김단골님의 <span style={{ color: "#CE4927" }}>취향</span>을<br />
+              알려주세요!
+            </FailText>
+            <FailButton onClick={() => toMypage()}>
+              해시태그 설정하러가기
+            </FailButton>
+          </FailBox>
+        )}
 
         <Divider />
 
         {/* 일반 카드들 */}
         <CardList>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <MissionCard key={i}>
-              <CardReset>
-                <MainMissionCard
-                  store="가게이름"
-                  title="미션내용내용내용"
-                  reward="탄산 음료 한 캔 쿠폰"
-                  onClick={() => setIsMissionOpen(true)}
-                />
-              </CardReset>
-            </MissionCard>
-          ))}
+          {missionData && missionData.length > 0 ? (
+            missionData.map((data) => (
+              <MissionCard>
+                <CardReset>
+                  <MainMissionCard
+                    key={data.id}
+                    onClick={() => missionDetail(data.id)}
+                    data={data}
+                    recommended={false}
+                  />
+                </CardReset>
+              </MissionCard>
+            ))
+          ) : (
+            <p>미션이 없습니다.</p>
+          )}
         </CardList>
       </ScrollArea>
-
-      <Navar />
 
       {/* 모달들 */}
       {isMissionOpen && (
         <MissionModal
           mission={{
-            image: "https://via.placeholder.com/126",
-            title: "15,000원 이상 결제하기",
-            store: "동방손칼국수",
-            reward: "찐만두",
+            image: missionDetailData?.rewardImageUrl,
+            title: missionDetailData?.title,
+            store: missionDetailData?.storeName,
+            reward: missionDetailData?.description,
+            storeId: missionDetailData?.storeId,
           }}
           onClose={() => setIsMissionOpen(false)}
           onSubmit={() => {
@@ -87,9 +142,11 @@ export default function MissionPage() {
         <CodeInputModal
           onClose={() => setIsCodeInputOpen(false)}
           onSubmit={() => {
+            getData();
             setIsCodeInputOpen(false);
             setIsSuccessOpen(true);
           }}
+          authCode={missionDetailData.storeAuthCode}
         />
       )}
       {isSuccessOpen && (
@@ -117,6 +174,7 @@ const Header = styled.div`
   z-index: 20;
   background: #faf8f8;
   box-shadow: none;
+  margin: 0px 0 17px;
 `;
 
 const ScrollArea = styled.div`
@@ -134,9 +192,9 @@ const ScrollArea = styled.div`
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
 
   /* 스크롤바 숨김 */
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* old Edge/IE */
-  &::-webkit-scrollbar {      /* Chrome/Safari */
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    /* Chrome/Safari */
     width: 0 !important;
     height: 0 !important;
     display: none !important;
@@ -149,41 +207,97 @@ const ScrollArea = styled.div`
 `;
 
 const Hero = styled.div`
-  margin: 12px 0 16px;
+  margin: 12px 0 37px;
   line-height: 30px;
+  text-align: left;
 
-  .nick  { color:#CE4927; font:600 24px/30px Pretendard, system-ui, sans-serif; }
-  .plain { color:#141414; font:600 24px/30px Pretendard, system-ui, sans-serif; }
-  .count { color:#CF4721; font:500 24px/30px Pretendard, system-ui, sans-serif; }
+  .nick {
+    color: #ce4927;
+    font: 600 24px/30px Pretendard, system-ui, sans-serif;
+  }
+  .plain {
+    color: #141414;
+    font: 600 24px/30px Pretendard, system-ui, sans-serif;
+  }
+  .count {
+    color: #cf4721;
+    font: 500 24px/30px Pretendard, system-ui, sans-serif;
+  }
 
   /* 두 번째 줄은 500으로 */
-  br + .plain, .count ~ .plain { font-weight: 500; }
+  br + .plain,
+  .count ~ .plain {
+    font-weight: 500;
+  }
 `;
 
 const Divider = styled.div`
   width: 100%;
   height: 1px;
   background: #d9d9d9;
-  margin: 14px 0 12px;
+  margin: 30px 0 30px;
 `;
 
 const MissionCard = styled.div`
   background: #ffedd6;
   border-radius: 12px;
-  padding: 16px 14px;
+  padding: 16px 5px;
   position: relative;
+
+  &.is-ai > div > button > div:first-child {
+    /* MainMissionCard의 내부 배지(BadgeWrap)가 첫 번째 div라서 */
+    display: none !important; /* ← 내부 "AI추천" 배지 숨김 */
+  }
 
   &.is-ai {
     background: #ffcec0;
     border: 1.5px solid #eb1f00;
   }
+
+  /* Row가 카드 전체 폭을 차지하도록 */
+  & > div > button > div:last-child {
+    width: 100%;
+    display: flex;
+  }
+
+  /* TextCol: 세 줄 왼쪽 정렬 + 간격 */
+  & > div > button > div:last-child > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 가게이름 · 미션내용 · 보상 사이 간격 */
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: flex-start; /* 아이템 왼쪽 정렬 */
+    text-align: left !important;
+    width: 100%;
+  }
+
+  /* 각 줄이 컨테이너 폭을 꽉 채우게 */
+  & > div > button > div:last-child > div:first-child > * {
+    align-self: stretch;
+    margin: 0;
+  }
+
+  /* 카드 높이 유지: 늘어난 간격만큼 내부 패딩 조절 */
+  & > div > button {
+    padding-top: 7px !important;
+    padding-bottom: 2px !important;
+  }
+
+  /* 보상 텍스트(세 번째 줄) 자간/단어 간격 살짝 줄이기 */
+  & > div > button > div:last-child > div:first-child > div:nth-child(3) {
+    letter-spacing: -0.3px; /* 숫자만 조절: -0.2 ~ -0.6px 추천 */
+    word-spacing: -1px; /* 선택: 단어 사이도 조금만 좁힘 */
+    font-kerning: normal; /* 커닝 활성화 */
+    text-rendering: optimizeLegibility;
+  }
 `;
 
 const AiPill = styled.div`
   position: absolute;
-  top: -12px;
+  top: -30px;
   left: 12px;
-  height: 26px;
+  height: 28px;
   padding: 0 10px;
   display: inline-flex;
   align-items: center;
@@ -212,4 +326,50 @@ const CardList = styled.div`
   flex-direction: column;
   gap: 12px;
 `;
+const FailBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  width: 345px;
+  height: 313px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.1);
+`;
+const FailText = styled.div`
+  color: #141414;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 30px; /* 125% */
+  letter-spacing: -1px;
+  text-align: center;
+`;
+const FailButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 244px;
+  height: 45px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #e8512a;
 
+  color: #fff;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 30px; /* 214.286% */
+  letter-spacing: -1px;
+
+  &:hover {
+    cursor: pointer;
+  }
+`;
