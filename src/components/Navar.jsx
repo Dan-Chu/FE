@@ -107,6 +107,9 @@ const Button = styled.div`
     border-radius: 15px;
     background-color: ${({ $line }) => ($line ? "#D9D9D9" : "transparent")};
   }
+  &:hover{
+    cursor: pointer;
+  }
 `;
 const NowMain = styled(NormalMain)`
   width: 70px;

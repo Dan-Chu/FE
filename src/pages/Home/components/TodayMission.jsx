@@ -19,7 +19,7 @@ export default function TodayMission({data}) {
           더보기 <SmallRightButton />
         </Button>
       </TextBox>
-      <MissionCard data={data}/>
+      {data?<MissionCard data={data}/>:""}
     </Group>
   );
 }

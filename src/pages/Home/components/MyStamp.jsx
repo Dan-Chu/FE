@@ -19,7 +19,7 @@ export default function MyStamp({data}) {
           더보기 <SmallRightButton />
         </Button>
       </TextBox>
-      <StampCard data={data}/>
+      {data? <StampCard data={data}/>:""}
     </Group>
   );
 }

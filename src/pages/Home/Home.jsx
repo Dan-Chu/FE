@@ -8,27 +8,39 @@ import { AiStoreGet } from "../../shared/api/openAI";
 import { PopularMissionGet } from "../../shared/api/mission";
 import { ExpiringStampGet } from "../../shared/api/stamp";
 import TextLogo from "../../assets/logos/text_danchu.svg?react";
+import Loading from "../../components/Loading";
 
 export default function Home() {
   const [storeData, setStoreData] = useState("");
   const [missionData, setMissionData] = useState("");
   const [stampData, setStampData] = useState("");
+  const [loading,setLoading]=useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [storeResult, missionResult, stampResult] = await Promise.all([
-          AiStoreGet(),
-          PopularMissionGet(),
-          ExpiringStampGet(),
-        ]);
-        setStoreData(storeResult);
-        setMissionData(missionResult);
-        setStampData(stampResult);
-      } catch (err) {
-        console.warn("Get 실패:", err);
+      setLoading(true);
+      try{
+        const result=await AiStoreGet();
+        setStoreData(result);
+      } catch(err){
+        console.warn("AiStoreGet 실패:", err);
         setStoreData(null); // 실패해도 기본값 세팅 가능
       }
+      try{
+        const result=await PopularMissionGet();
+        setMissionData(result);
+      } catch(err){
+        console.warn("PopularMissionGet 실패:", err);
+        setMissionData(null); // 실패해도 기본값 세팅 가능
+      }
+      try{
+        const result=await ExpiringStampGet();
+        setStampData(result);
+      } catch(err){
+        console.warn("ExpiringStampGet 실패:", err);
+        setStampData(null); // 실패해도 기본값 세팅 가능
+      }
+      setLoading(false);
     };
     fetchData();
   }, []);
@@ -36,9 +48,10 @@ export default function Home() {
   return (
     <Page>
       <TitleBar pageName={<TextLogo width="51.859px" height="26.878px" />} />
-      <Contents>
+      {!loading ? (
+        <Contents>
         <Text>
-          김단골님을 위한 단추 &nbsp;
+          김단골<span style={{fontWeight:400}}>님을 위한</span> <br/>단추 &nbsp;
           <span style={{ color: "#CE4927"}}>PICK</span>
         </Text>
         <AiSuggestGroup data={storeData} />
@@ -47,6 +60,7 @@ export default function Home() {
           <MyStamp data={stampData} />
         </Box>
       </Contents>
+      ):<Loading/>}
     </Page>
   );
 }
@@ -63,8 +77,7 @@ const Contents = styled.div`
   overflow-y: auto;
   white-space: nowrap;
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;
-  gap: 30px;
+  gap: 25px;
 `;
 const Text = styled.div`
   color: #141414;
@@ -83,5 +96,5 @@ const Box = styled.div`
   flex-direction: column;
   gap: 30px;
   margin-left: 24px;
-  padding-bottom: 10px;
+  padding-bottom: 59px;
 `;
