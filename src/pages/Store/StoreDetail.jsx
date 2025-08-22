@@ -6,16 +6,20 @@ import Close from "../../assets/icons/close.svg?react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { StoreDetailGet } from "../../shared/api/store";
+import Loading from "../../components/Loading";
 
 export default function StoreDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const storeData = await StoreDetailGet(id);
       setData(storeData);
+      setLoading(false);
     };
     fetchData();
   }, [id]);
@@ -30,39 +34,47 @@ export default function StoreDetail() {
         <LeftButton onClick={() => toStoreList()} />
         가게정보
       </Header>
-      <Contents>
-        <StoreImg src={data.mainImageUrl} />
-        <TextBox>
-          <StoreName>
-            {data.name} {data.open ? <Open /> : <Close />}
-          </StoreName>
-          <StoreInfo>{data.description}</StoreInfo>
-          <HashtagBox>
-            {data.hashtags && data.hashtags.length > 0 ? (
-              data.hashtags.map((hashtag) => (
-                <Hashtag key={hashtag.id}>{hashtag.name}</Hashtag>
-              ))
-            ) : (
-              <p>태그가 없습니다.</p>
-            )}
-          </HashtagBox>
-        </TextBox>
-        <InfoBox>
-          • 가게 주소 - {data.address} <br />• 영업시간 - {data.openTime} ~{" "}
-          {data.closeTime} <br />• 전화번호 - {data.phoneNumber} <br />
-        </InfoBox>
-        <Bar />
-        <Menu>
-          메뉴
-          <MenuBox>
-            {data.menu && data.menu.length > 0 ? (
-              data.menu.map((menu) => <MenuCard key={menu.id} data={menu} />)
-            ) : (
-              <p>메뉴가 없습니다.</p>
-            )}
-          </MenuBox>
-        </Menu>
-      </Contents>
+      {loading ? (
+        <Loading />
+      ) : (
+        <Contents>
+          <StoreImg src={data.mainImageUrl} />
+          <TextBox>
+            <StoreName>
+              {data.name} {data.open ? <Open /> : <Close />}
+            </StoreName>
+            <StoreInfo>{data.description}</StoreInfo>
+            <HashtagBox>
+              {data.hashtags && data.hashtags.length > 0 ? (
+                data.hashtags.map((hashtag) => (
+                  <Hashtag key={hashtag.id}>{hashtag.name}</Hashtag>
+                ))
+              ) : (
+                <p style={{ fontFamily: "Pretendard", fontSize: "12px" }}>
+                  태그가 없습니다.
+                </p>
+              )}
+            </HashtagBox>
+          </TextBox>
+          <InfoBox>
+            • 가게 주소 - {data.address} <br />• 영업시간 - {data.openTime} ~{" "}
+            {data.closeTime} <br />• 전화번호 - {data.phoneNumber} <br />
+          </InfoBox>
+          <Bar />
+          <Menu>
+            메뉴
+            <MenuBox>
+              {data.menus && data.menus.length > 0 ? (
+                data.menus.map((menu) => <MenuCard key={menu.id} data={menu} />)
+              ) : (
+                <p style={{ fontFamily: "Pretendard", fontSize: "14px" }}>
+                  메뉴가 없습니다.
+                </p>
+              )}
+            </MenuBox>
+          </Menu>
+        </Contents>
+      )}
     </Page>
   );
 }

@@ -29,6 +29,7 @@ import {
   StoreListGet,
   SearchStoreGet,
   FilterStoreGet,
+  NoneDistanceListGet,
 } from "../../shared/api/store";
 import { HashtagsGet } from "../../shared/api/hashtag";
 import MyLocation from "./location";
@@ -49,7 +50,8 @@ export default function StoreList() {
   const [dataSize, setDataSize] = useState(0);
   const [listEl, setListEl] = useState(null); // DOM 노드 보관
 
-  const listRef = useCallback((node) => {//콜백 ref: DOM에 붙는 순간 node가 들어옴
+  const listRef = useCallback((node) => {
+    //콜백 ref: DOM에 붙는 순간 node가 들어옴
     setListEl(node); // mount 시 node, unmount 시 null
   }, []);
 
@@ -85,40 +87,43 @@ export default function StoreList() {
     };
   }, [searchName]);
 
-  useEffect(() => {
-    //페이지, 검색어 변환에 따라 데이터 적용
+  useEffect(() => {//페이지, 검색어 변환에 따라 데이터 적용
     const fetchData = async () => {
       if (!dataSize) return;
       let result;
       setLoading(true);
-      if (!debouncedSearch) {
-        // 검색어 없으면 그냥 기본 리스트
-
-        if (!location.lat || !location.lng) return;
-        result = await StoreListGet(
-          page - 1,
-          location.lat,
-          location.lng,
-          dataSize
-        );
-        setData(result);
-      } else if (debouncedSearch) {
-        // 검색어 있으면 검색 API 호출
-        if (!location.lat || !location.lng) return;
-        result = await SearchStoreGet(
-          debouncedSearch,
-          page - 1,
-          location.lat,
-          location.lng,
-          dataSize
-        );
-        setData(result);
+      if (location.lat && location.lng) {
+        if (!debouncedSearch) {
+          // 검색어 없으면 그냥 기본 리스트
+          result = await StoreListGet(
+            page - 1,
+            location.lat,
+            location.lng,
+            dataSize
+          );
+          setData(result);
+        } else if (debouncedSearch) {
+          // 검색어 있으면 검색 API 호출
+          result = await SearchStoreGet(
+            debouncedSearch,
+            page - 1,
+            location.lat,
+            location.lng,
+            dataSize
+          );
+          setData(result);
+        } else {
+          result = await FilterStoreGet(
+            selectFilter,
+            location.lat,
+            location.lng,
+            page - 1,
+            dataSize
+          );
+          setData(result);
+        }
       } else {
-        if (!location.lat || !location.lng) return;
-        result = await FilterStoreGet(
-          selectFilter,
-          location.lat,
-          location.lng,
+        result = await NoneDistanceListGet(
           page - 1,
           dataSize
         );

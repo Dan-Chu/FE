@@ -2,7 +2,7 @@ import styled from "styled-components";
 import Logo from "../../../assets/logos/card_logo.svg?react";
 import { useNavigate } from "react-router-dom";
 
-export default function StoreCard({ id, data,distance }) {
+export default function StoreCard({ id, data, distance }) {
   const navigate = useNavigate();
 
   const toStoreDetail = () => {
@@ -20,16 +20,23 @@ export default function StoreCard({ id, data,distance }) {
         <HashtagBox>
           {data.hashtags && data.hashtags.length > 0 ? (
             data.hashtags.map((hashtag) => (
-              <Hashtag key={hashtag.id}>{hashtag.name}</Hashtag> 
+              <Hashtag key={hashtag.id}>{hashtag.name}</Hashtag>
             ))
           ) : (
-            <p>태그가 없습니다.</p>
+            <p style={{ fontFamily: "Pretendard", fontSize: "14px" }}>
+              태그가 없습니다.
+            </p>
           )}
         </HashtagBox>
-        <Distance>
-          지금 위치에서 &nbsp;<span style={{ color: "#CF4721" }}>{distance}km</span>
-          &nbsp; 거리에 있어요!
-        </Distance>
+        {distance ? (
+          <Distance>
+            지금 위치에서 &nbsp;
+            <span style={{ color: "#CF4721" }}>{distance}km</span>
+            &nbsp; 거리에 있어요!
+          </Distance>
+        ) : (
+          <Distance>거리를 보려면 위치정보를 허용해주세요.</Distance>
+        )}
       </TextBox>
     </Card>
   );
@@ -82,6 +89,7 @@ const StoreName = styled.div`
 const HashtagBox = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  width: 150px;
 `;
 const Hashtag = styled.div`
   display: flex;
