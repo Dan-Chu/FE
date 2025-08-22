@@ -122,12 +122,6 @@ export default function StoreList() {
           );
           setData(result);
         }
-      } else {
-        result = await NoneDistanceListGet(
-          page - 1,
-          dataSize
-        );
-        setData(result);
       }
       setLoading(false);
       setMaxPage(result.totalPages);

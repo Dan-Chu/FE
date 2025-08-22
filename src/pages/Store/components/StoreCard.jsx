@@ -89,7 +89,6 @@ const StoreName = styled.div`
 const HashtagBox = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  width: 150px;
 `;
 const Hashtag = styled.div`
   display: flex;
