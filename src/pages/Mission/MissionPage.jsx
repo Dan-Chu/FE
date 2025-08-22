@@ -13,6 +13,7 @@ import { AiMissionGet } from "../../shared/api/openAI";
 import { MissionListGet, MissionDetailGet } from "../../shared/api/mission";
 import { CompleteMissionGet } from "../../shared/api/user";
 import FlagLogo from "../../assets/logos/flag_logo.svg?react";
+import Loading from "../../components/Loading";
 
 export default function MissionPage() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function MissionPage() {
   const [missionData, setMissionData] = useState();
   const [missionDetailData, setMissionDetailData] = useState();
   const [completeMission, setCompleteMission] = useState();
+  const [loading, setLoading] = useState(true);
 
   // 바깥 스크롤 잠금
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function MissionPage() {
   }, []);
 
   const getData = async () => {
+    setLoading(true);
     try {
       const result = await AiMissionGet();
       setAiMissionData(result);
@@ -49,6 +52,7 @@ export default function MissionPage() {
     } catch (err) {
       console.warn("CompleteMissionGet 실패:", err);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -70,63 +74,67 @@ export default function MissionPage() {
         <TitleBar pageName="일일미션" />
       </Header>
 
-      <ScrollArea>
-        <Hero>
-          <span className="nick">김단추</span>
-          <span className="plain">님의</span>
-          <br />
-          <span className="plain">완료한 미션&nbsp;</span>
-          <span className="count">{completeMission}</span>
-          <span className="plain">&nbsp;개</span>
-        </Hero>
+      {!loading ? (
+        <ScrollArea>
+          <Hero>
+            <span className="nick">김단추</span>
+            <span className="plain">님의</span>
+            <br />
+            <span className="plain">완료한 미션&nbsp;</span>
+            <span className="count">{completeMission}</span>
+            <span className="plain">&nbsp;개</span>
+          </Hero>
 
-        {/* AI 추천 카드 */}
-        {aiMissionData ? (
-          <MissionCard className="is-ai" key={aiMissionData.missionId}>
-            <AiPill>AI 추천</AiPill>
-            <CardReset>
-              <MainMissionCard
-                onClick={() => missionDetail(aiMissionData.missionId)}
-                data={aiMissionData}
-                recommended={true}
-              />
-            </CardReset>
-          </MissionCard>
-        ) : (
-          <FailBox>
-            <FlagLogo width="117px" height="106px" />
-            <FailText>
-              김단골님의 <span style={{ color: "#CE4927" }}>취향</span>을<br />
-              알려주세요!
-            </FailText>
-            <FailButton onClick={() => toMypage()}>
-              해시태그 설정하러가기
-            </FailButton>
-          </FailBox>
-        )}
-
-        <Divider />
-
-        {/* 일반 카드들 */}
-        <CardList>
-          {missionData && missionData.length > 0 ? (
-            missionData.map((data) => (
-              <MissionCard>
-                <CardReset>
-                  <MainMissionCard
-                    key={data.id}
-                    onClick={() => missionDetail(data.id)}
-                    data={data}
-                    recommended={false}
-                  />
-                </CardReset>
-              </MissionCard>
-            ))
+          {/* AI 추천 카드 */}
+          {aiMissionData ? (
+            <MissionCard className="is-ai" key={aiMissionData.missionId}>
+              <AiPill>AI 추천</AiPill>
+              <CardReset>
+                <MainMissionCard
+                  onClick={() => missionDetail(aiMissionData.missionId)}
+                  data={aiMissionData}
+                  recommended={true}
+                />
+              </CardReset>
+            </MissionCard>
           ) : (
-            <p>미션이 없습니다.</p>
+            <FailBox>
+              <FlagLogo width="117px" height="106px" />
+              <FailText>
+                김단골님의 <span style={{ color: "#CE4927" }}>취향</span>을
+                <br />
+                알려주세요!
+              </FailText>
+              <FailButton onClick={() => toMypage()}>
+                해시태그 설정하러가기
+              </FailButton>
+            </FailBox>
           )}
-        </CardList>
-      </ScrollArea>
+          <Divider />
+
+          {/* 일반 카드들 */}
+          <CardList>
+            {missionData && missionData.length > 0 ? (
+              missionData.map((data) => (
+                <MissionCard>
+                  <CardReset>
+                    <MainMissionCard
+                      key={data.id}
+                      onClick={() => missionDetail(data.id)}
+                      data={data}
+                      recommended={false}
+                    />
+                  </CardReset>
+                </MissionCard>
+              ))
+            ) : (
+              <p>미션이 없습니다.</p>
+            )}
+          </CardList>
+        </ScrollArea>
+      ) : (
+        <Loading />
+      )}
 
       {/* 모달들 */}
       {isMissionOpen && (
