@@ -125,7 +125,7 @@ export default function StampPage() {
   };
 
   /** 보상 수령 제출 (현재 API는 코드 불필요) */
-  const handleSubmitClaim = async (_codeFromModal) => {
+  const handleSubmitClaim = async () => {
     if (activeIdx == null) return;
     const target = stores[activeIdx];
     if (!target?.id) {
@@ -194,7 +194,6 @@ export default function StampPage() {
       {/* 전역 스탬프 적립(코드 입력) */}
       {modalType === "stamp" && (
         <StampCodeModal
-          storeName=""            // 전역 코드라 매장명 미표기
           onClose={closeModal}
           onSubmit={handleSubmitStamp}
         />
