@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const StoreListGet = async (pageNumber,lat,lng) => {//위치 기반 리스트
+export const StoreListGet = async (pageNumber,lat,lng,size) => {//위치 기반 리스트
   const token = localStorage.getItem("accessToken");
-  const res = await api.get(`/stores/nearby?lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`, {
+  const res = await api.get(`/stores/nearby?lat=${lat}&lng=${lng}&page=${pageNumber}&size=${size}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -22,11 +22,10 @@ export const StoreDetailGet = async (storeId) => {
   return res.data.data;
 };
 
-export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
+export const SearchStoreGet = async (storeName, pageNumber,lat,lng,size) => {
   const token = localStorage.getItem("accessToken");
   const res = await api.get(
-    `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`,
-    `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`,
+    `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=${size}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -38,17 +37,14 @@ export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
 };
 
 
-export const FilterStoreGet = async (tags,lat,lng,page) => {
+export const FilterStoreGet = async (tags,lat,lng,page,size) => {
   const token = localStorage.getItem("accessToken");
   const params = new URLSearchParams();
   tags.forEach((tag) => params.append("tags", tag));
   params.append("lat", lat);
   params.append("lng", lng);
   params.append("page", page);
-  params.append("lat", lat);
-  params.append("lng", lng);
-  params.append("page", page);
-  params.append("size", 3);
+  params.append("size", size);
   const res = await api.get(`/stores/filter?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,

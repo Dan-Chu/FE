@@ -34,6 +34,7 @@ const Page = styled.div`
   display: flex;
   flex-direction: column;
   padding-top: 143px;
+  height: 100%;
 `;
 const TextBox = styled.div`
   display: flex;

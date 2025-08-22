@@ -71,7 +71,7 @@ const Page = styled.div`
   display: flex;
   flex-direction: column;
   padding-top: 25px;
-  height: 740px;
+  height: 100vh;
 `;
 const Header = styled.div`
   display: flex;

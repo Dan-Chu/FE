@@ -83,6 +83,7 @@ export default function Login1() {
 
 const Page = styled.div`
   display: flex;
+  height: 100%;
   flex-direction: column;
   justify-content: center;
   gap: 20px;
