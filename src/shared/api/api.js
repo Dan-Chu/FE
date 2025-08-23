@@ -10,6 +10,7 @@ function isTokenExpired(token) {
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // 환경변수 사용
+  withCredentials: true,//쿠키 주고받기
 });
 
 api.interceptors.request.use(async (config) => {
