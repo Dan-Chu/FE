@@ -22,7 +22,7 @@ export default function MainMissionCard({
         <TextCol>
           <StoreText>{data.storeName}</StoreText>
           <TitleText>{data.title}</TitleText>
-          <RewardText>보상: {data.rewardName}</RewardText>
+          <RewardText>보상: {data.reward}</RewardText>
         </TextCol>
 
         {/* 오른쪽 썸네일: 추천이면 AI 이모지, 아니면 기본 썸네일 */}

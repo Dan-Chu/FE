@@ -20,6 +20,7 @@ import {
   // ExpiringStampGet, // 필요하면 사용
 } from "../../shared/api/stamp";
 import axios from "axios";
+import Loading from "../../components/Loading";
 
 /** 서버 응답 → 카드에 필요한 형태로 매핑 (필드명이 달라도 최대한 흡수) */
 const toVM = (x) => {
@@ -56,6 +57,7 @@ export default function StampPage() {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
+  
 
   // 'stamp' | 'claim' | 'exists' | 'success' | null
   const [modalType, setModalType] = useState(null);
@@ -168,7 +170,7 @@ export default function StampPage() {
       </Header>
 
       <ScrollArea>
-        {loading && <div style={{ padding: "24px" }}>불러오는 중…</div>}
+        {loading && <Loading/>}
         {!loading && error && (
           <div style={{ padding: "24px", color: "#cf4721" }}>{error}</div>
         )}

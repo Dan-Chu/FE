@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { AiStoreGet } from "../../shared/api/openAI";
 import { PopularMissionGet } from "../../shared/api/mission";
 import { ExpiringStampGet } from "../../shared/api/stamp";
+import { getUser } from "../../shared/api/user";
 import TextLogo from "../../assets/logos/text_danchu.svg?react";
 import Loading from "../../components/Loading";
 
@@ -15,10 +16,18 @@ export default function Home() {
   const [missionData, setMissionData] = useState("");
   const [stampData, setStampData] = useState("");
   const [loading,setLoading]=useState(null);
+  const [nickname,setNickname]=useState("김")
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      try{
+        const result=await getUser();
+        setNickname(result.nickname);
+      } catch(err){
+        console.warn("AiStoreGet 실패:", err);
+        setNickname("김"); // 실패해도 기본값 세팅 가능
+      }
       try{
         const result=await AiStoreGet();
         setStoreData(result);
@@ -51,7 +60,7 @@ export default function Home() {
       {!loading ? (
         <Contents>
         <Text>
-          김단골<span style={{fontWeight:400}}>님을 위한</span> <br/>단추 &nbsp;
+          {nickname}<span style={{fontWeight:400}}>님을 위한</span> <br/>단추 &nbsp;
           <span style={{ color: "#CE4927"}}>PICK</span>
         </Text>
         <AiSuggestGroup data={storeData} />
