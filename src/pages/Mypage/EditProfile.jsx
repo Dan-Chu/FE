@@ -125,7 +125,7 @@ export default function EditProfile() {
       await apiLogout();
       localStorage.removeItem("accessToken");
       alert("로그아웃 되었습니다.");
-      location.reload();
+      nav("/login1");
     } catch (e) {
       console.error(e);
       alert("로그아웃 실패");
@@ -139,7 +139,7 @@ export default function EditProfile() {
       await apiDeleteUser();
       localStorage.removeItem("accessToken");
       alert("회원탈퇴가 완료되었습니다.");
-      location.reload();
+      nav("/login1");
     } catch (e) {
       console.error(e);
       alert("회원탈퇴에 실패했습니다.");
