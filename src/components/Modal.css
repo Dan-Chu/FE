@@ -1,160 +1,140 @@
 /* 공통: 화면 중앙 팝업 + 딤 */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 3000;                 /* 네비보다 위로 */
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;                 /* 좁은 화면 좌우 여백 */
+
+/* ===== 공통 오버레이 ===== */
+.dc-modal-backdrop{
+  position: fixed; inset: 0;
+  background: rgba(20,20,20,.45);
+  z-index: 10000;
 }
 
-
-.modal-content { position: relative; }
+.dc-modal-shell{
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  width: auto; height: auto; max-width: 92vw;
+}
 
 /* ===== 미션 상세 모달 카드 ===== */
-.mission-modal {
-  width: min(360px, 100%);
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.20);
-  position: relative;
-  box-sizing: border-box;
-
-  /* 썸네일(126) + 좌패딩(16) + 간격(10) ≈ 152 확보 */
-  padding: 16px 16px 62px 160px; /* T R B L */
-  overflow: hidden;
+.mission-skin{ position:relative; width:min(340px,92vw); }
+.mission-skin 
+.mission-bg{
+  display:block; 
+  grid-template-columns:150px 1fr; /* 이미지 크게 */
+  width:100%; 
+  height:auto;
+  user-select:none; pointer-events:none; /* 클릭은 위 오버레이가 받게 */
+  border-radius:16px;
 }
 
-/* 썸네일 왼쪽 고정 */
-.mission-image {
-  width: 126px;
-  height: 126px;
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: #f3f3f3;
+/* 내용 영역(상단~버튼바 위까지) */
+.mission-skin .mission-body{
+  position:absolute;
+  top:22px; left:20px; right:20px; bottom:68px; /* 하단 버튼바 높이 보존 */
+  display:grid; grid-template-columns:104px 1fr; column-gap:14px;
+  align-items:flex-start;
 }
 
-/* 텍스트 (피그마 값) */
-.mission-title {
-  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: #CE4927;
-  line-height: 30px;
-  margin: 2px 0 4px;
-  word-break: keep-all;
-}
-.mission-store {
-  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #5D5D5D;
-  margin: 0 0 8px;
-}
-.mission-desc {
-  font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #141414;
-  line-height: 24px;
-  white-space: pre-line;  /* 줄바꿈 유지 */
+/* 좌측 이미지 */
+.mission-image{
+  width:140px; height:140px;
+  border-radius:15px; 
+  object-fit:cover; 
+  background:#eee;
+  margin-top: 8px; 
 }
 
-/* 하단 버튼 2개 고정 */
-.mission-btn-group {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  display: flex;
+/* 우측 텍스트 */
+.mission-right{
+  display:flex; flex-direction:column;
+  justify-content:center;             /* 수직 가운데(=조금 내려온 느낌) */
+  padding-top:6px;                    /* 추가 하강 */
 }
 
-.mission-btn {
-  flex: 1;
-  height: 48px;
-  font-size: 15px;
-  font-weight: 800;
-  border: none;
-  outline: none;                  /* 포커스 테두리 제거 */
-  -webkit-appearance: none;
-  appearance: none;
-  cursor: pointer;
-  text-align: center;
-
-  display: flex;                  /* 텍스트 가운데 정렬 */
-  align-items: center;
-  justify-content: center;
+.mission-title{
+  padding-top:30px; 
+  padding-left: 40px;
+  height: 20px;
+  color:#CE4927;
+  font: 700 18px/22px Pretendard, system-ui, sans-serif;
+  letter-spacing:-0.5px; 
+  margin:0 0 4px;
+  display:-webkit-box; 
+  -webkit-box-orient:vertical; overflow:hidden;
+}
+.mission-store{
+  color:#8B8B8B;
+  padding-left: 40px;
+  font: 600 12px/16px Pretendard, system-ui, sans-serif;
+  margin:0 0 30px;
+}
+.mission-desc{
+  padding-left: 40px;
+  color:#141414;
+  font: 500 13px/18px Pretendard, system-ui, sans-serif;
+  letter-spacing:-0.3px;
+  display:-webkit-box; 
+  -webkit-box-orient:vertical; 
+  overflow:hidden;
 }
 
-.mission-btn-store {
-  background: #CE4927;
-  color: #fff;
-  border-bottom-left-radius: 16px;
+/* 하단 버튼 두 칸(배경은 svg, 텍스트/클릭만 오버레이) */
+.mission-cta{
+  position:absolute; left:0; right:0; bottom:0; height:56px;
+  display:grid; grid-template-columns:1fr 1fr;
 }
-.mission-btn-code {
-  background: #EAEAEA;
-  color: #5D5D5D;
-  border-bottom-right-radius: 16px;
+.mission-cta .cta{
+  height:56px; 
+  line-height:56px;      /* 클릭 영역 유지 */
+  background:transparent; 
+  border:0; 
+  cursor:pointer;
+  font-size:0;                        /* 글씨 완전 숨김 (겹침 해결) */
+  font:700 15px/56px Pretendard, system-ui, sans-serif;
+  letter-spacing:-0.3px;
 }
+.mission-cta .cta-left{ color:#FFFFFF; }   /* 왼쪽(주황 배경) */
+.mission-cta .cta-right{ color:#6A6A6A; }  /* 오른쪽(회색 배경) */
 
-/* 아주 좁은 화면에서 왼쪽 여백만 살짝 줄이기 */
-@media (max-width: 360px) {
-  .mission-modal { padding-left: 150px; }
-}
 
 
 
 /* 인증코드 모달 */
-.modal-code {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px 20px;
-  width: 90%;
-  max-width: 320px;
-  box-sizing: border-box;
-  text-align: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+.modal-card{
+  width:min(340px,92vw);
+  background:#FFF; border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  padding:22px 20px 18px;
+  text-align:left;
 }
+.modal-title{
+  color:#E8512A; font:700 18px/22px Pretendard, system-ui, sans-serif;
+  letter-spacing:-0.3px; margin:0 0 6px;
+}
+.modal-hint{
+  color:#8B8B8B; font:500 12px/16px Pretendard, system-ui, sans-serif;
+  margin:0 0 14px;
+}
+.modal-code-input{
+  width:100%; height:54px; border-radius:12px;
+  border:1px solid #E7E7E7; outline:none;
+  text-align:center; font:700 20px/54px Pretendard, system-ui, sans-serif;
+  letter-spacing:10px; /* 숫자 간격 */
+}
+.modal-code-input::placeholder{ color:#C9C9C9; letter-spacing:0; }
 
-.modal-code-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #ce4927;
-  margin-bottom: 16px;
+.modal-button-group{ margin-top:14px; display:flex; gap:10px; }
+.btn-confirm{
+  flex:1 1 auto; height:48px; border-radius:12px; border:0; cursor:pointer;
+  background:#E8512A; color:#FFF; font:700 15px/48px Pretendard, system-ui, sans-serif;
 }
-
-/* 기존 한 줄 input */
-.modal-code-input {
-  width: 100%;
-  height: 48px;
-  font-size: 20px;
-  padding: 8px 12px;
-  text-align: center;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-family: Pretendard;
-  margin-bottom: 20px;
-}
+.nowrap{ white-space:nowrap; }
 
 /* 인증코드 확인 버튼 */
 /* ===== 백드롭: 화면 중앙 정렬 ===== */
 .modal-backdrop,
 .modal-wrapper,
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,.5);
-}
 
 /* ===== 모달 본체 ===== */
 .modal-code {
@@ -237,10 +217,10 @@
 
 .btn-confirm:hover { background: #b73f22; }
 
-/* 폼 기본 마진 때문에 밀리는 현상 방지 (폼을 쓰는 경우) */
+/* 폼 기본 마진 때문에 밀리는 현상 방지 */
 .modal-code form { margin: 0; }
 
-/* 작은 안내문(힌트) */
+/* 힌트 */
 .modal-hint {
   margin: -6px 0 8px;
   font-size: 12px;
@@ -249,6 +229,9 @@
 }
 
 
+.dc-modal-shell:has(.modal-code) {
+  left: calc(50% + 14px) !important;  /* ← 숫자만 조절 */
+} 
 
 
 /* 쿠폰 성공 모달 */
@@ -258,7 +241,7 @@
   outline: 1px solid #dcdcdc;
   padding: 24px;
   width: 90%;
-  max-width: 350px;             /* 필요하면 340~360 사이로 조정 */
+  max-width: 350px;            
   box-sizing: border-box;
   text-align: center;
   word-break: keep-all;
@@ -271,7 +254,7 @@
   margin-bottom: 12px;
 }
 
-/* 설명문 – 두 줄 고정용(‘마이페이지>쿠폰함에서’를 한 덩어리로) */
+/* 두 줄 고정용(‘마이페이지>쿠폰함에서’를 한 덩어리로) */
 .modal-success-desc {
   font-size: 13px;
   color: #666;
@@ -347,9 +330,9 @@
 
 /* 공통 컨테이너 */
 .stamp-modal {
-  width: min(340px, 92vw);                 /* 360 → 340로 살짝 축소 */
+  width: min(340px, 92vw);                 
   max-height: calc(100dvh - 32px);         /* 화면 높이 초과 방지 */
-  overflow-y: auto;                         /* 내용 많을 때만 세로 스크롤 */
+  overflow-y: auto;                         
   overflow-x: hidden;                       /* 가로 스크롤 강제 제거 */
   background: #fff;
   border-radius: 15px;
@@ -370,13 +353,13 @@
   margin: 4px auto 12px;
 }
 
-/* (가게이름), */
+/* (가게이름) */
 .stamp-sub {
   color: #CE4927;
   font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  font-size: 22px;                          /* 24 → 22 */
+  font-size: 22px;                          
   font-weight: 500;
-  line-height: 28px;                        /* 30 → 28 */
+  line-height: 28px;                    
   margin-bottom: 4px;
 }
 .stamp-sub .comma { margin-left: 2px; }
@@ -385,9 +368,9 @@
 .stamp-title {
   color: #CE4927;
   font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  font-size: 28px;                          /* 32 → 28 */
+  font-size: 28px;                          
   font-weight: 700;
-  line-height: 1.3;                         /* 30px 고정보다 비율이 안정적 */
+  line-height: 1.3;                        
   margin: 0 0 10px;
 }
 
@@ -403,7 +386,7 @@
 /* AAAA 스타일 입력(숫자 4자리) */
 .stamp-code {
   width: 100%;
-  height: 50px;                             /* 40 → 50 (터치 편의) */
+  height: 50px;                          
   border: 1px solid #E3E3E3;
   border-radius: 12px;
   background: #fff;
@@ -411,21 +394,20 @@
 
   color: #141414;
   font-family: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  font-size: 34px;                          /* 30 → 34 */
+  font-size: 34px;                          
   font-weight: 600;
   line-height: 1;
-  letter-spacing: 8px;                      /* 칸 느낌 */
+  letter-spacing: 8px;                      
   padding: 0 8px;
   font-variant-numeric: tabular-nums;       /* 숫자 폭 균일 */
 
   outline: none;
   box-sizing: border-box;
-  margin: 0 0 14px;                         /* ✅ 오타 수정 (px 지정) */
+  margin: 0 0 14px;                         /* 오타 수정 (px 지정) */
 }
 .stamp-code::placeholder { color: #D0D0D0; letter-spacing: 8px; }
 .stamp-code::-webkit-outer-spin-button,
 .stamp-code::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.stamp-code[type="number"] { -moz-appearance: textfield; }
 
 /* 알림 모달 전용 */
 .stamp-modal--alert { padding-top: 24px; }
@@ -486,7 +468,7 @@
 .btn-confirm:active  { transform: translateY(1px); }
 .btn-confirm:disabled{ opacity: .6; cursor: not-allowed; }
 
-/* 📱 작은 화면 최적화 */
+/* 작은 화면 최적화 */
 @media (max-width: 390px) {
   .stamp-title { font-size: 26px; }
   .stamp-sub   { font-size: 20px; }

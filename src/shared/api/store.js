@@ -26,6 +26,7 @@ export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
   const token = localStorage.getItem("accessToken");
   const res = await api.get(
     `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`,
+    `/stores/search?keyword=${storeName}&lat=${lat}&lng=${lng}&page=${pageNumber}&size=3`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -36,10 +37,14 @@ export const SearchStoreGet = async (storeName, pageNumber,lat,lng) => {
   return res.data.data;
 };
 
+
 export const FilterStoreGet = async (tags,lat,lng,page) => {
   const token = localStorage.getItem("accessToken");
   const params = new URLSearchParams();
   tags.forEach((tag) => params.append("tags", tag));
+  params.append("lat", lat);
+  params.append("lng", lng);
+  params.append("page", page);
   params.append("lat", lat);
   params.append("lng", lng);
   params.append("page", page);

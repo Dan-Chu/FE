@@ -70,7 +70,7 @@ export default function App() {
 const Phone = styled.div`
   position: relative;
   width: 393px;
-  height: 765px;
+  height: 100vh;
   margin-left: auto;
   margin-right: auto;
   background-color: #faf8f8;

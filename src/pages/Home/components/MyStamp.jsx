@@ -3,7 +3,7 @@ import { Group, TextBox, Text, Button } from "../styles/Box";
 import StampCard from "../../../components/StampCard";
 import { useNavigate } from "react-router-dom";
 
-export default function MyStamp(data) {
+export default function MyStamp({data}) {
     const navigate=useNavigate();
   
     const toStamp=()=>{
@@ -19,7 +19,7 @@ export default function MyStamp(data) {
           더보기 <SmallRightButton />
         </Button>
       </TextBox>
-      <StampCard data={data}/>
+      {data? <StampCard data={data}/>:""}
     </Group>
   );
 }

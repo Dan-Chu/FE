@@ -20,7 +20,7 @@ export default function CouponPage() {
   const [askCode, setAskCode] = useState(false);  // 코드 입력 모달
   const [showUsed, setShowUsed] = useState(false);// 사용 완료 모달
 
-  // ✅ 날짜 포맷터
+  // 날짜 포맷터
   const fmtDate = (iso) => {
     if (!iso) return "";
     const d = new Date(iso);
@@ -30,7 +30,7 @@ export default function CouponPage() {
     return `${d.getFullYear()}.${mm}.${dd}`;
   };
 
-  // ✅ API 응답을 화면용 모델로 매핑 (필드명이 달라도 최대한 흡수)
+  // API 응답을 화면용 모델로 매핑 (필드명이 달라도 최대한 흡수)
   const toVM = (x) => ({
     id: x.id ?? x.couponId ?? x.uuid,
     store: x.storeName ?? x.store?.name ?? "가게",
@@ -40,7 +40,7 @@ export default function CouponPage() {
     needCode: Boolean(x.needCode ?? x.requiresCode ?? x.requireCode),
   });
 
-  // ✅ 최초 로드: 쿠폰 목록 가져오기
+  // 최초 로드: 쿠폰 목록 가져오기
   useEffect(() => {
     let ignore = false;
     (async () => {
@@ -198,17 +198,28 @@ const Page = styled.div`
   overflow: hidden;
 `;
 
-// 스타일
 const PageHeader = styled.header`
-  position: sticky; top: 0; z-index: 30; background: #faf8f8;
-  height: 48px; padding: 0 16px;
+  position: sticky; 
+  top: 0; z-index: 30; 
+  background: #faf8f8;
+  height: 48px; 
+  padding: 0 16px;
   display: grid;
   grid-template-columns: 48px 1fr 48px; /* 좌/중앙/우 */
   align-items: center;
 `;
-const HeaderLeft = styled.div`grid-column:1/2; display:flex; align-items:center;`;
-const HeaderCenter = styled.div`grid-column:2/3; display:flex; justify-content:center;`;
-const HeaderRight = styled.div`grid-column:3/4; display:flex; justify-content:flex-end;`;
+const HeaderLeft = styled.div`
+grid-column:1/2; 
+display:flex; 
+align-items:center;`;
+
+const HeaderCenter = styled.div`
+grid-column:2/3; display:flex; 
+justify-content:center;`;
+
+const HeaderRight = styled.div`
+grid-column:3/4; 
+display:flex; justify-content:flex-end;`;
 
 const BackFloat = styled.button`
   position: absolute;
@@ -223,6 +234,7 @@ const BackFloat = styled.button`
   &::-moz-focus-inner { border:0; }
   svg { width: 20px; height: 20px; }
 `;
+
 const ScrollArea = styled.div`
   flex: 1 1 auto; min-height: 0;
   padding: 0 16px calc(90px + env(safe-area-inset-bottom));
@@ -230,21 +242,34 @@ const ScrollArea = styled.div`
   scrollbar-width: none; -ms-overflow-style: none;
   &::-webkit-scrollbar { width: 0; height: 0; }
 `;
+
 const Grid = styled.div`
   display: grid; grid-template-columns: repeat(2, 1fr);
   gap: 14px; padding-top: 35px;
 `;
+
 const Card = styled.button`
   all: unset; background: #fff; border-radius: 12px; overflow: hidden;
   box-shadow: 0 20px 20px rgba(0,0,0,0.07); cursor: pointer;
 `;
+
 const Thumb = styled.img`
   width: 100%; height: 120px; object-fit: cover; display: block;
 `;
-const Meta = styled.div` padding: 10px 12px 12px; `;
-const Store = styled.div` color:#5d5d5d; font-size:11px; font-weight:500; margin-bottom:6px; `;
-const Title = styled.div` color:#141414; font-size:14px; font-weight:700; line-height:14px; margin-bottom:8px; `;
-const Due = styled.div` color:#cf4721; font-size:11px; font-weight:400; `;
+
+const Meta = styled.div` 
+padding: 10px 12px 12px; `;
+
+const Store = styled.div` 
+color:#5d5d5d; font-size:11px; font-weight:500; 
+margin-bottom:6px; `;
+
+const Title = styled.div` 
+color:#141414; font-size:14px; font-weight:700; 
+line-height:14px; margin-bottom:8px; `;
+
+const Due = styled.div` color:#cf4721; 
+font-size:11px; font-weight:400; `;
 
 /* ===== Modal ===== */
 const ModalBackdrop = styled.div`
@@ -252,8 +277,11 @@ const ModalBackdrop = styled.div`
   display: flex; align-items: center; justify-content: center; z-index: 999;
 `;
 const ModalCard = styled.div`
-  width: 320px; border-radius: 16px; background: #fff; padding: 16px;
+  width: 320px; border-radius: 16px; 
+  background: #fff; padding: 16px;
   text-align: center; box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+
+  
   .coupon-img { width:100%; height:160px; object-fit:cover; border-radius:10px; margin-bottom:12px; }
   .coupon-store { color:#5d5d5d; font-size:12px; margin-bottom:6px; }
   .coupon-name { color:#141414; font-size:16px; font-weight:700; margin-bottom:10px; }

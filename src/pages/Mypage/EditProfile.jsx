@@ -47,7 +47,7 @@ export default function EditProfile() {
   useEffect(() => {
     (async () => {
       try {
-        const me = await getUser(); // { nickname, email, imageUrl, myHashtags?: [{id,name}] ... }
+        const me = await getUser(); 
         setNickname(me?.nickname ?? "");
         setEmail(me?.email ?? "");
         setAvatarPreview(me?.imageUrl ?? "");

@@ -7,55 +7,60 @@ import { useEffect, useState } from "react";
 import { AiStoreGet } from "../../shared/api/openAI";
 import { PopularMissionGet } from "../../shared/api/mission";
 import { ExpiringStampGet } from "../../shared/api/stamp";
+import TextLogo from "../../assets/logos/text_danchu.svg?react";
+import Loading from "../../components/Loading";
 
 export default function Home() {
-  const [storeData,setStoreData]=useState();
-  const [missionData,setMissionData]=useState();
-  const [stampData,setStampData]=useState();
+  const [storeData, setStoreData] = useState("");
+  const [missionData, setMissionData] = useState("");
+  const [stampData, setStampData] = useState("");
+  const [loading,setLoading]=useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
-    try {
-      const storeResult = await AiStoreGet();
-      setStoreData(storeResult);
-    } catch (err) {
-      console.warn("AiStoreGet 실패:", err);
-      setStoreData(null); // 실패해도 기본값 세팅 가능
-    }
-
-    try {
-      const missionResult = await PopularMissionGet();
-      setMissionData(missionResult);
-    } catch (err) {
-      console.warn("PopularMissionGet 실패:", err);
-    }
-
-    try {
-      const stampResult = await ExpiringStampGet();
-      setStampData(stampResult);
-    } catch (err) {
-      console.warn("ExpiringStampGet 실패:", err);
-    }
-  };
+      setLoading(true);
+      try{
+        const result=await AiStoreGet();
+        setStoreData(result);
+      } catch(err){
+        console.warn("AiStoreGet 실패:", err);
+        setStoreData(null); // 실패해도 기본값 세팅 가능
+      }
+      try{
+        const result=await PopularMissionGet();
+        setMissionData(result);
+      } catch(err){
+        console.warn("PopularMissionGet 실패:", err);
+        setMissionData(null); // 실패해도 기본값 세팅 가능
+      }
+      try{
+        const result=await ExpiringStampGet();
+        setStampData(result);
+      } catch(err){
+        console.warn("ExpiringStampGet 실패:", err);
+        setStampData(null); // 실패해도 기본값 세팅 가능
+      }
+      setLoading(false);
+    };
     fetchData();
   }, []);
 
   return (
     <Page>
-      <TitleBar pageName="AI 추천" />
-      <Contents>
+      <TitleBar pageName={<TextLogo width="51.859px" height="26.878px" />} />
+      {!loading ? (
+        <Contents>
         <Text>
-          <span style={{ color: "#CE4927", fontWeight: "600" }}>김단추</span>
-          <span style={{ fontWeight: "600" }}>님을</span>
-          <br />
-          위한 맞춤형 추천
+          김단골<span style={{fontWeight:400}}>님을 위한</span> <br/>단추 &nbsp;
+          <span style={{ color: "#CE4927"}}>PICK</span>
         </Text>
-        <AiSuggestGroup data={storeData}/>
+        <AiSuggestGroup data={storeData} />
         <Box>
-          <TodayMission data={missionData}/>
-          <MyStamp data={stampData}/>
+          <TodayMission data={missionData} />
+          <MyStamp data={stampData} />
         </Box>
       </Contents>
+      ):<Loading/>}
     </Page>
   );
 }
@@ -72,17 +77,17 @@ const Contents = styled.div`
   overflow-y: auto;
   white-space: nowrap;
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;
-  gap: 30px;
+  gap: 25px;
 `;
 const Text = styled.div`
+  color: #141414;
   font-family: Pretendard;
   font-size: 24px;
   font-style: normal;
-  font-weight: 400;
-  line-height: 30px;
+  font-weight: 600;
+  line-height: 30px; /* 125% */
+  letter-spacing: -1px;
   text-align: left;
-
   margin-top: 31px;
   margin-left: 24px;
 `;
@@ -91,5 +96,5 @@ const Box = styled.div`
   flex-direction: column;
   gap: 30px;
   margin-left: 24px;
-  padding-bottom: 10px;
+  padding-bottom: 59px;
 `;

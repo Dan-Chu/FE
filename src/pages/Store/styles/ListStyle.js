@@ -4,6 +4,7 @@ export const Page = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
+  position: relative;
 `;
 export const SearchBar = styled.div`
   display: flex;
@@ -135,14 +136,19 @@ export const ListBox = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 24px;
+  height: 460px;
 `;
 export const ListPage = styled.div`
   display: flex;
   flex-direction: row;
   gap: 10px;
   align-items: center;
-  margin-left: 145px;
-  margin-top: 10px;
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: fit-content; /* 필요한 만큼만 차지 */
+  margin: 0; /* 기존 margin 제거 */
 
   &:hover {
     cursor: pointer;
@@ -155,5 +161,23 @@ export const PageNumber = styled.div`
   font-style: normal;
   font-weight: ${({ $now }) => ($now ? "600" : "400")};
   line-height: 0; /* 0% */
+  letter-spacing: -1px;
+`;
+export const SearchFail = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 130px;
+`;
+export const FailText = styled.div`
+  color: ${({ $color }) => $color};
+  text-align: center;
+  font-family: Pretendard;
+  font-size: ${({ $size }) => $size};
+  font-style: normal;
+  font-weight: 500;
+  line-height: ${({ $height }) => $height};
   letter-spacing: -1px;
 `;

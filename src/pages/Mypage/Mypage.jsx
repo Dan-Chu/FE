@@ -15,8 +15,8 @@ import { getUser } from "../../shared/api/user";
 export default function Mypage() {
   const nav = useNavigate();
 
-  const [nickname, setNickname] = useState("김단추");
-  const [email, setEmail] = useState("XXXXXX@skuniv.ac.kr");
+  const [nickname, setNickname] = useState("");
+  const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [myTags, setMyTags] = useState([]);
 
@@ -29,8 +29,8 @@ export default function Mypage() {
 
         if (ignore) return;
 
-        setNickname(me?.nickname ?? "김단추");
-        setEmail(me?.email ?? "XXXXXX@skuniv.ac.kr");
+        setNickname(me?.nickname ?? "");
+        setEmail(me?.email ?? "");
         setAvatar(me?.imageUrl || null);
 
         // 해시태그: 서버가 주는 필드명 여러가지 대응
@@ -52,8 +52,8 @@ export default function Mypage() {
         try {
           const saved = JSON.parse(localStorage.getItem("profile") || "null");
           if (saved) {
-            setNickname(saved.nickname ?? "김단추");
-            setEmail(saved.email ?? "XXXXXX@skuniv.ac.kr");
+            setNickname(saved.nickname ?? "");
+            setEmail(saved.email ?? "");
             setAvatar(saved.avatar ?? null);
 
             // 옛 로컬 포맷(인덱스만 저장) → 개수만큼 빈 태그명 생성 X

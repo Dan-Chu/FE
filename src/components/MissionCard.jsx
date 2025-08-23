@@ -1,12 +1,18 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
-export default function MissionCard(data) {
+export default function MissionCard({data}) {
+  const navigate = useNavigate();
+
+  const toMission = () => {
+    navigate("/mission");
+  };
   return (
     <Card>
       <Text>{data.storeName}</Text>
       <Mission>
         <MissionName>{data.title}</MissionName>
-        <Button>참여하기</Button>
+        <Button onClick={() => toMission()}>참여하기</Button>
       </Mission>
       <RewardText>보상: {data.reward}</RewardText>
     </Card>
@@ -53,6 +59,9 @@ const MissionName = styled.span`
   letter-spacing: -1px;
 `;
 const Button = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 74px;
   height: 35px;
   flex-shrink: 0;
@@ -67,7 +76,7 @@ const Button = styled.div`
   line-height: 30px; /* 214.286% */
   letter-spacing: -1px;
 
-    &:hover{
+  &:hover {
     cursor: pointer;
   }
 `;
@@ -81,5 +90,5 @@ const RewardText = styled.div`
   line-height: 30px;
   letter-spacing: -1px;
   height: 30px;
-  margin-top: 15px; 
+  margin-top: 15px;
 `;

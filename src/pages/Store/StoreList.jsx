@@ -5,6 +5,7 @@ import RightButton from "../../assets/icons/nextpage_button.svg?react";
 import StoreCard from "./components/StoreCard";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import Close from "../../assets/icons/close_button.svg?react";
+import Fail from "../../assets/icons/search_fail_icon.svg?react";
 import FilterType from "./components/FilterType";
 import {
   Page,
@@ -20,6 +21,8 @@ import {
   ListBox,
   ListPage,
   PageNumber,
+  SearchFail,
+  FailText,
 } from "./styles/ListStyle";
 import { useEffect, useState } from "react";
 import {
@@ -29,6 +32,7 @@ import {
 } from "../../shared/api/store";
 import { HashtagsGet } from "../../shared/api/hashtag";
 import MyLocation from "./location";
+import Loading from "../../components/Loading";
 
 export default function StoreList() {
   const location = MyLocation();
@@ -40,6 +44,8 @@ export default function StoreList() {
   const hashtags = HashtagsGet();
   const [selectFilter, setSelectFilter] = useState([]);
   const [debouncedSearch, setDebouncedSearch] = useState(searchName);
+  const [maxPage, setMaxPage] = useState();
+  const [loading,setLoading]=useState(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -53,16 +59,36 @@ export default function StoreList() {
 
   useEffect(() => {
     const fetchData = async () => {
+      let result;
+      setLoading(true);
       if (!debouncedSearch) {
         // 검색어 없으면 그냥 기본 리스트
+        
         if (!location.lat || !location.lng) return;
-        const result = await StoreListGet(page - 1, location.lat, location.lng);
+        result = await StoreListGet(page - 1, location.lat, location.lng);
+        setData(result);
+      } else if (debouncedSearch) {
+        // 검색어 있으면 검색 API 호출
+        if (!location.lat || !location.lng) return;
+        result = await SearchStoreGet(
+          debouncedSearch,
+          page - 1,
+          location.lat,
+          location.lng
+        );
         setData(result);
       } else {
-        // 검색어 있으면 검색 API 호출
-        const result = await SearchStoreGet(debouncedSearch, page - 1);
+        if (!location.lat || !location.lng) return;
+        result = await FilterStoreGet(
+          selectFilter,
+          location.lat,
+          location.lng,
+          page - 1
+        );
         setData(result);
       }
+      setLoading(false);
+      setMaxPage(result.totalPages);
     };
 
     fetchData();
@@ -75,8 +101,22 @@ export default function StoreList() {
   };
 
   const filterApply = async () => {
-    const result = await FilterStoreGet(selectFilter);
-    setData(result);
+    let result
+    setLoading(true);
+    if (selectFilter.length > 0) {
+      result = await FilterStoreGet(
+        selectFilter,
+        location.lat,
+        location.lng,
+        page - 1
+      );
+      setData(result);
+    } else {
+      result = await StoreListGet(0, location.lat, location.lng);
+      setData(result);
+    }
+    setLoading(false);
+    setMaxPage(result.totalPages);
   };
 
   const filterPlus = (hashtag) => {
@@ -87,6 +127,10 @@ export default function StoreList() {
       }
       return [...prev, hashtag.name];
     });
+  };
+
+  const filterOn = () => {
+    setFilter(!filter);
   };
 
   const pageOn = (what) => {
@@ -106,14 +150,13 @@ export default function StoreList() {
     }
   };
 
-  const filterOn = () => {
-    setFilter(!filter);
-  };
-
   const pageChange = (upDown) => {
     if (upDown) {
-      setPageCount(pageCount + 4);
-      setPage(pageCount + 4);
+      if (pageCount + 4 <= maxPage) {
+        setPageCount(pageCount + 4);
+        setPage(pageCount + 4);
+        return;
+      }
       return;
     } else if (pageCount == 1) {
       return;
@@ -175,8 +218,9 @@ export default function StoreList() {
         </Modal>
       )}
       <ListBox>
-        {data && data.length > 0 ? (
-          data.map((i) => (
+        {!loading ? (
+          data.content && data.content.length > 0 ? (
+          data.content.map((i) => (
             <StoreCard
               key={i.store.id}
               id={i.store.id}
@@ -185,32 +229,51 @@ export default function StoreList() {
             />
           ))
         ) : (
-          <p>가게가 없습니다.</p>
-        )}
+          <SearchFail>
+            <Fail />
+            <FailText $color="#464646" $size="24px" $height="30px">검색결과가 없습니다.</FailText>
+            <FailText $color="#5D5D5D" $size="14px" $height="24px">
+              다른 검색어를 입력하시거나<br/>철자와 띄어쓰기를 확인해보세요.
+            </FailText>
+          </SearchFail>
+        )
+        ):<Loading/>}
       </ListBox>
       <ListPage>
         <LeftButton onClick={() => pageChange(false)} />
         <PageNumber onClick={() => pageOn(1)} $now={page == pageCount ? 1 : 0}>
           {pageCount}
         </PageNumber>
-        <PageNumber
-          onClick={() => pageOn(2)}
-          $now={page == pageCount + 1 ? 1 : 0}
-        >
-          {pageCount + 1}
-        </PageNumber>
-        <PageNumber
-          onClick={() => pageOn(3)}
-          $now={page == pageCount + 2 ? 1 : 0}
-        >
-          {pageCount + 2}
-        </PageNumber>
-        <PageNumber
-          onClick={() => pageOn(4)}
-          $now={page == pageCount + 3 ? 1 : 0}
-        >
-          {pageCount + 3}
-        </PageNumber>
+        {pageCount + 1 <= maxPage ? (
+          <PageNumber
+            onClick={() => pageOn(2)}
+            $now={page == pageCount + 1 ? 1 : 0}
+          >
+            {pageCount + 1}
+          </PageNumber>
+        ) : (
+          ""
+        )}
+        {pageCount + 2 <= maxPage ? (
+          <PageNumber
+            onClick={() => pageOn(3)}
+            $now={page == pageCount + 2 ? 1 : 0}
+          >
+            {pageCount + 2}
+          </PageNumber>
+        ) : (
+          ""
+        )}
+        {pageCount + 3 <= maxPage ? (
+          <PageNumber
+            onClick={() => pageOn(4)}
+            $now={page == pageCount + 3 ? 1 : 0}
+          >
+            {pageCount + 3}
+          </PageNumber>
+        ) : (
+          ""
+        )}
         <RightButton onClick={() => pageChange(true)} />
       </ListPage>
     </Page>

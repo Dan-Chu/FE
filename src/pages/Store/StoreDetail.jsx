@@ -31,10 +31,11 @@ export default function StoreDetail() {
         가게정보
       </Header>
       <Contents>
-        <OpenClose>{data.open ? <Open /> : <Close />}</OpenClose>
         <StoreImg src={data.mainImageUrl} />
         <TextBox>
-          <StoreName>{data.name}</StoreName>
+          <StoreName>
+            {data.name} {data.open ? <Open /> : <Close />}
+          </StoreName>
           <StoreInfo>{data.description}</StoreInfo>
           <HashtagBox>
             {data.hashtags && data.hashtags.length > 0 ? (
@@ -55,7 +56,7 @@ export default function StoreDetail() {
           메뉴
           <MenuBox>
             {data.menu && data.menu.length > 0 ? (
-              data.menu.map((menu) => <MenuCard key={menu.id} data={menu}/>)
+              data.menu.map((menu) => <MenuCard key={menu.id} data={menu} />)
             ) : (
               <p>메뉴가 없습니다.</p>
             )}
@@ -85,7 +86,7 @@ const Header = styled.div`
   justify-content: flex-start;
   align-items: center;
   gap: 121px;
-  height: 80px;
+  height: 50px;
 `;
 const Contents = styled.div`
   display: flex;
@@ -95,12 +96,12 @@ const Contents = styled.div`
   overflow-y: auto;
   white-space: nowrap;
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;
+  padding-top: 30px;
 `;
 const OpenClose = styled.div``;
 const StoreImg = styled.img`
   width: 345px;
-  height: 282px;
+  height: 320px;
   flex-shrink: 0;
   border-radius: 12px;
   background: url(<path-to-image>) lightgray 50% / cover no-repeat;
@@ -115,6 +116,9 @@ const TextBox = styled.div`
   width: 345px;
 `;
 const StoreName = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
   color: #141414;
   font-family: Pretendard;
   font-size: 24px;

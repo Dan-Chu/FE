@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import stampEmpty from "../assets/icons/stamp_empty.svg";
 import stampFilled from "../assets/icons/stamp_filled.svg";
 import stampLastEmpty from "../assets/icons/stamp_last_empty.svg";
 import stampLastFilled from "../assets/icons/stamp_last_filled.svg";
@@ -16,12 +15,12 @@ export default function MainStampCard({ store, disabled, onClaim }) {
   const { storeName, stamps = 0, hasUnclaimedReward, cyclesCompleted = 0 } = store;
   const completed = hasUnclaimedReward || stamps >= 10;
 
-  // ✅ 카드 밖으로 나가지 않도록 최대 3개까지만 표시(필요 시 4개 이상도 쉽게 확장 가능)
+  // 카드 밖으로 나가지 않도록 최대 3개까지만 표시(필요 시 4개 이상도 쉽게 확장 가능)
   const needlesToShow = Math.min(cyclesCompleted, 3);
 
   return (
     <Card $completed={completed} $disabled={disabled}>
-      {/* ✅ 상단 우측 바늘 오버레이 */}
+      {/* 상단 우측 바늘 오버레이 */}
       {needlesToShow > 0 && (
         <NeedleWrap aria-hidden="true">
           {Array.from({ length: needlesToShow }).map((_, i) => (
@@ -38,25 +37,41 @@ export default function MainStampCard({ store, disabled, onClaim }) {
       {/* 상단 정보 */}
       <Head>
         <div>
-          <Store>가게이름</Store>
           <Title>{storeName}</Title>
           <Desc>스탬프 10개 모으면 아메리카노 1잔 무료!</Desc>
         </div>
       </Head>
 
       {/* 스탬프 그리드 */}
-      <Grid aria-label={`적립 ${Math.min(stamps, 10)}/10`}>
-        {Array.from({ length: 10 }).map((_, i) => {
-          const isLast = i === 9;
-          const filled = completed ? true : i < stamps;
+<Grid aria-label={`적립 ${Math.min(stamps, 10)}/10`}>
+  {Array.from({ length: 10 }).map((_, i) => {
+    const isLast = i === 9;
+    const n = Number(stamps) || 0;
+    const filled1to9 = i < Math.min(n, 9);
+    const lastDone   = n >= 10;
 
-          const src = isLast
-            ? filled ? stampLastFilled : stampLastEmpty
-            : filled ? stampFilled : stampEmpty;
+    return (
+      // 마지막 칸만 배경 제거
+      <Cell
+        key={i}
+        $noBg={isLast}              // 마지막 칸만 네모 제거 + overflow 보이게
+        $corner={isLast ? 60 : 22}  // 아이콘 크기
+      >
+        {isLast ? (
+          lastDone
+            ? <MarkCorner src={stampLastFilled} alt="" />
+            : <MarkCorner src={stampLastEmpty}  alt="" />
+        ) : (
+          filled1to9 && <MarkCenter src={stampFilled} alt="" />
+        )}
+      </Cell>
+    );
+  })}
+</Grid>
 
-          return <SIcon key={i} src={src} alt="stamp" />;
-        })}
-      </Grid>
+
+
+
 
       {/* 완료 → 카드 내부 CTA */}
       {hasUnclaimedReward && (
@@ -71,12 +86,12 @@ export default function MainStampCard({ store, disabled, onClaim }) {
   );
 }
 
-/* ===== styles (네가 쓰던 버전 + 바늘 스타일 추가) ===== */
+/* ===== styles ===== */
 
 /* 카드 */
 const Card = styled.div`
   width: 100%;
-  position: relative;              /* ✅ 바늘 오버레이 기준 */
+  position: relative;              
   border-radius: 12px;
   background: #fff;
   border: 1px solid #eee;
@@ -94,7 +109,7 @@ const Card = styled.div`
   }
 `;
 
-/* ✅ 바늘 오버레이 */
+/* 바늘 오버레이 */
 const NeedleWrap = styled.div`
   position: absolute;
   top: 10px;
@@ -102,11 +117,11 @@ const NeedleWrap = styled.div`
   display: flex;
   flex-direction: row-reverse;     /* 오른쪽부터 쌓이게 */
   gap: 4px;                        /* 바늘 간격 */
-  pointer-events: none;            /* 터치 방해 X */
-  max-width: calc(3 * 18px + 2 * 4px);  /* 3개 기준 안전폭 */
+  pointer-events: none;            
+  max-width: calc(3 * 18px + 2 * 4px);  
 `;
 
-/* ✅ 바늘 아이콘: 살짝 각도 변화로 겹쳐 보여도 자연스럽게 */
+/* 바늘 아이콘: 살짝 각도 변화로 겹쳐 보여도 자연스럽게 */
 const NeedleIcon = styled.img`
   width: 18px;
   height: 18px;
@@ -158,27 +173,41 @@ const Grid = styled.div`
   gap: var(--gap-y) var(--gap-x);
   place-items: center;
 `;
-const SIcon = styled.img`
+
+const Cell = styled.div`
+ --corner: ${({ $corner }) => ($corner ? `${$corner}px` : '22px')};
   width: var(--cell);
   height: var(--cell);
-  display: block;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  background: #f9e9e7;
+
+  /* 마지막 칸(네모 없애고, 크게 그려도 안 잘리게) */
+  ${({ $noBg }) => $noBg && `
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+  `}
 `;
 
-/* CTA, 푸터 */
-const ClaimBar = styled.button`
-  margin-top: 12px;
-  width: 100%;
-  height: 36px;
-  border: 0;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #f46a3d 0%, #e34e27 100%);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
+const MarkCenter = styled.img`
+  position: absolute; inset: 0; margin: auto;
+  width: 72%; height: 72%; object-fit: contain; pointer-events: none;
 `;
-const Foot = styled.div`
-  margin-top: 8px;
-  color: #9a9a9a;
-  font-size: 11px;
+
+const MarkCorner = styled.img`
+  position: absolute; right: 0px; bottom: -2px;
+  width: var(--corner); height: var(--corner);
+  object-fit: contain; pointer-events: none;
+`;
+
+
+const LastTile = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;  /* 타일 원본 비율 유지 */
+  pointer-events: none;
 `;

@@ -1,8 +1,23 @@
 import styled from "styled-components";
+import { useEffect, useState } from "react";
 
-export default function FilterType({key,hashtag, selected, onClick}) {
+export default function FilterType({ hashtag, selected, onClick }) {
+  const [onType, setOnType] = useState(selected);
+
+  // 부모에서 props로 내려주는 selected 값이 변하면 동기화
+  useEffect(() => {
+    setOnType(selected);
+  }, [selected]);
+
+  const handleClick = () => {
+    // 내부 상태 토글
+    setOnType((prev) => !prev);
+    // 부모에게 알림
+    onClick(hashtag);
+  };
+
   return (
-    <Filter onClick={() => onClick} $on={selected}>
+    <Filter onClick={handleClick} $on={onType}>
       {hashtag}
     </Filter>
   );
