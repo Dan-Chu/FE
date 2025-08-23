@@ -34,6 +34,7 @@ import {
 import { HashtagsGet } from "../../shared/api/hashtag";
 import MyLocation from "./location";
 import Loading from "../../components/Loading";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 export default function StoreList() {
   const location = MyLocation();
@@ -87,7 +88,8 @@ export default function StoreList() {
     };
   }, [searchName]);
 
-  useEffect(() => {//페이지, 검색어 변환에 따라 데이터 적용
+  useEffect(() => {
+    //페이지, 검색어 변환에 따라 데이터 적용
     const fetchData = async () => {
       if (!dataSize) return;
       let result;
@@ -123,10 +125,7 @@ export default function StoreList() {
           setData(result);
         }
       } else {
-        result = await NoneDistanceListGet(
-          page - 1,
-          dataSize
-        );
+        result = await NoneDistanceListGet(page - 1, dataSize);
         setData(result);
       }
       setLoading(false);
@@ -174,11 +173,6 @@ export default function StoreList() {
       }
       return [...prev, hashtag.name];
     });
-  };
-
-  const filterOn = () => {
-    //필터 모달창 on/off
-    setFilter(!filter);
   };
 
   const pageOn = (what) => {
@@ -230,43 +224,61 @@ export default function StoreList() {
         />
         <Search onClick={() => search(searchName)} />
       </SearchBar>
-      <Filter onClick={() => filterOn()}>
+      <Filter onClick={() => setFilter(true)}>
         <FilterIcon />
         필터
       </Filter>
-      {filter && (
-        <Modal>
-          <ModalBox>
-            <ModalHeader>
-              필터
-              <Close onClick={() => filterOn()} />
-            </ModalHeader>
-            <TypeBox>
-              {hashtags && hashtags.length > 0 ? (
-                hashtags.map((hashtag) => (
-                  <FilterType
-                    key={hashtag.id}
-                    hashtag={hashtag.name}
-                    selected={selectFilter.includes(hashtag.name)}
-                    onClick={() => filterPlus(hashtag)}
-                  />
-                ))
-              ) : (
-                <p>필터가 없습니다.</p>
-              )}
-            </TypeBox>
-            <ApplyButton
-              onClick={() => {
-                filterOn();
-                filterApply();
+      <AnimatePresence mode="wait">
+        {filter && (
+          <Modal>
+            <Motion.div
+              key="filter-modal"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                display: "flex",
+                justifyContent: "center",
               }}
             >
-              적용하기
-            </ApplyButton>
-            <SwipeBar />
-          </ModalBox>
-        </Modal>
-      )}
+              <ModalBox>
+                <ModalHeader>
+                  필터
+                  <Close onClick={() => setFilter(false)} />
+                </ModalHeader>
+                <TypeBox>
+                  {hashtags && hashtags.length > 0 ? (
+                    hashtags.map((hashtag) => (
+                      <FilterType
+                        key={hashtag.id}
+                        hashtag={hashtag.name}
+                        selected={selectFilter.includes(hashtag.name)}
+                        onClick={() => filterPlus(hashtag)}
+                      />
+                    ))
+                  ) : (
+                    <p>필터가 없습니다.</p>
+                  )}
+                </TypeBox>
+                <ApplyButton
+                  onClick={() => {
+                    setFilter(false);
+                    filterApply();
+                  }}
+                >
+                  적용하기
+                </ApplyButton>
+                <SwipeBar />
+              </ModalBox>
+            </Motion.div>
+          </Modal>
+        )}
+      </AnimatePresence>
       <ListBox ref={listRef}>
         {/*listRef에 노드 전달*/}
         {!loading ? (
