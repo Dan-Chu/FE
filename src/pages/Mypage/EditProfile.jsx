@@ -4,6 +4,8 @@ import styled from "styled-components";
 import TitleBar from "../../components/TitleBar";
 import { useNavigate } from "react-router-dom";
 import BackIcon from "../../assets/icons/back_mypage.svg?react";
+import PushOn from "../../assets/icons/push_on.svg?react";
+import PushOff from "../../assets/icons/push_off.svg?react";
 
 import basicProfile from "../../assets/images/basic_profile.svg";
 import { PhotoPickButton } from "../../components/Button";
@@ -29,8 +31,17 @@ export default function EditProfile() {
   const [avatarFile, setAvatarFile] = useState(null);
 
   // 해시태그
-  const allTags = HashtagsGet();                    // [{id, name, ...}]
+  const allTags = HashtagsGet(); // [{id, name, ...}]
   const [selected, setSelected] = useState(new Set()); // 선택된 태그 id 집합
+
+  //알림 동의
+  const [push, setPush] = useState(
+    localStorage.getItem("push") === "true" // 최초에 localStorage에서 불러오기
+  );
+
+  useEffect(() => {
+    localStorage.setItem("push", push);
+  }, [push]); // push 값이 변할 때마다 localStorage에 저장
 
   // dataURL → File
   const dataURLtoFile = (dataUrl, filename = "avatar.png") => {
@@ -73,9 +84,7 @@ export default function EditProfile() {
   const saveAll = async () => {
     try {
       // 1) 선택된 id -> 태그 이름으로 변환
-      const chosen = allTags.filter((t) =>
-        selected.has(t.id ?? t.hashtagId)
-      );
+      const chosen = allTags.filter((t) => selected.has(t.id ?? t.hashtagId));
       const hashtagsPayload = chosen
         .map((t) => (t.name ?? t.title ?? t.hashtag ?? "").trim())
         .filter(Boolean)
@@ -210,6 +219,15 @@ export default function EditProfile() {
           {allTags.length === 0 && <Empty>해시태그가 없습니다.</Empty>}
         </TagGrid>
 
+        <PushBox>
+          푸시성 알림 동의
+          {push ? (
+            <PushOn onClick={() => setPush(false)} />
+          ) : (
+            <PushOff onClick={() => setPush(true)} />
+          )}
+        </PushBox>
+
         <SaveButton onClick={saveAll}>변경 사항 한번에 저장하기</SaveButton>
 
         {/* 하단 링크 */}
@@ -243,6 +261,7 @@ const Wrap = styled.div`
   min-height: 0;
   padding: 0 24px 0;
   overflow-y: auto;
+  height: 100%;
 
   &::-webkit-scrollbar {
     width: 0;
@@ -250,8 +269,6 @@ const Wrap = styled.div`
   }
   scrollbar-width: none;
   -ms-overflow-style: none;
-
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 `;
 
 const Head = styled.div`
@@ -339,6 +356,7 @@ const FieldLabel = styled.div`
   width: 72px;
   color: #5d5d5d;
   font-weight: 600;
+  font-family: Pretendard;
 `;
 
 const Input = styled.input`
@@ -348,6 +366,7 @@ const Input = styled.input`
   border-radius: 10px;
   font-size: 15px;
   outline: none;
+  font-family: Pretendard;
   &:focus {
     border-color: #ff5a2f;
     box-shadow: 0 0 0 3px #ff5a2f22;
@@ -361,6 +380,7 @@ const ReadOnly = styled.div`
   background: #f6f7f7;
   color: #333;
   font-size: 15px;
+  font-family: Pretendard;
 `;
 
 const Divider = styled.div`
@@ -371,7 +391,7 @@ const Divider = styled.div`
 
 const DottedHr = styled.div`
   border-bottom: 1px dashed #e0e0e0;
-  margin: 18px 0 12px;
+  margin: 28px 0 22px;
 `;
 
 const SectionTitle = styled.h3`
@@ -379,13 +399,21 @@ const SectionTitle = styled.h3`
   font-size: 18px;
   color: #141414;
   font-weight: 600;
+  font-family: Pretendard;
+  text-align: left;
 `;
 
 const TagGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px 12px;
+  gap: 13px 10px;
+  grid-auto-rows: 31px;
   margin-bottom: 18px;
+  height: calc(100dvh - 620px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
 `;
 
 const TagBtn = styled.button`
@@ -402,6 +430,7 @@ const TagBtn = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  font-family: Pretendard;
 
   &:focus-visible {
     outline: none;
@@ -429,15 +458,16 @@ const Empty = styled.div`
 
 const SaveButton = styled.button`
   width: 100%;
-  height: 65px;
+  height: 50px;
   margin-top: 5px;
   margin-bottom: 16px;
   border: 0;
   border-radius: 12px;
   background: #cf4721;
   color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
+  font-family: Pretendard;
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
@@ -463,8 +493,25 @@ const FooterLinks = styled.div`
   gap: 10px;
   justify-content: center;
   color: #9b9b9b;
+  font-size: 12px;
   & a {
     color: inherit;
     text-decoration: none;
   }
+`;
+
+const PushBox = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 35px;
+  margin-bottom: 35px;
+
+  color: #141414;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 125% */
+  letter-spacing: -1px;
 `;

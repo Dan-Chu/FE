@@ -157,7 +157,7 @@ export default function StoreList() {
       );
       setData(result);
     } else {
-      result = await StoreListGet(0, location.lat, location.lng);
+      result = await StoreListGet(0, location.lat, location.lng,dataSize);
       setData(result);
     }
     setLoading(false);

@@ -88,6 +88,7 @@ const Page = styled.div`
   justify-content: center;
   gap: 20px;
   padding-left: 23px;
+  padding-right: 23px;
   padding-top: 46px;
 `;
 const Text = styled.div`
@@ -207,7 +208,7 @@ const Close = styled.div`
     cursor: pointer;
   }
 `;
-export const Modal = styled.div`
+const Modal = styled.div`
   position: fixed;
   top: 0;
   left: 0;
