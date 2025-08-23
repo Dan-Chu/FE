@@ -208,6 +208,7 @@ const Info = styled.div`
   flex-direction: column;
   gap: 4px;
   text-align: left;
+  font-family: Pretendard;
 `;
 
 const Name = styled.div`
@@ -268,6 +269,7 @@ const TagChip = styled.div`
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
+  font-family: Pretendard;
 `;
 
 const Divider = styled.div`
