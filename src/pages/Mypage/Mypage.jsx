@@ -185,8 +185,8 @@ const Profile = styled.div`
   grid-template-columns: 70px 1fr auto;
   align-items: center;
   column-gap: 12px;
-  padding: 8px 0 14px;
   justify-items: start;
+  margin-bottom: 15px;
 `;
 
 const Avatar = styled.div`
@@ -200,7 +200,6 @@ const Avatar = styled.div`
     height: 100%;
     object-fit: cover;
   }
-  margin: 12px 0 30px;
 `;
 
 const Info = styled.div`
@@ -208,7 +207,6 @@ const Info = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 12px 0 30px;
   text-align: left;
 `;
 
@@ -318,7 +316,7 @@ const ItemSmall = styled(Item)``;
 const TicketButton = styled.button`
   width: 100%;
   height: 130px;
-  margin: 40px 0 40px;              
+  margin: 40px 0 20px;              
   background: url(${mycoupon}) center / 100% 100% no-repeat;
   border: 0;
   cursor: pointer;
