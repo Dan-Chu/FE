@@ -165,6 +165,7 @@ export default function EditProfile() {
         </BackFloat>
         <TitleBar pageName="내 정보" centered hideLogo />
 
+        <ScrollArea>
         <Head>
           <AvatarWrap>
             <Avatar
@@ -247,6 +248,7 @@ export default function EditProfile() {
             <PushOff onClick={() => setPush(true)} />
           )}
         </PushBox>
+        </ScrollArea>
 
         <SaveButton onClick={saveAll} disabled={!email || !!emailError}>
           변경 사항 한번에 저장하기
@@ -427,12 +429,7 @@ const TagGrid = styled.div`
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 13px 10px;
   grid-auto-rows: 31px;
-  margin-bottom: 18px;
-  height: calc(100dvh - 620px);
-  overflow-x: hidden;
-  overflow-y: auto;
-  white-space: nowrap;
-  scrollbar-width: none; /* Firefox */
+  height: 300px;
 `;
 
 const TagBtn = styled.button`
@@ -536,4 +533,11 @@ const PushBox = styled.div`
   font-weight: 500;
   line-height: 20px; /* 125% */
   letter-spacing: -1px;
+`;
+const ScrollArea = styled.div`
+height: calc(100dvh - 200px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
 `;
