@@ -13,12 +13,12 @@ import { getCoupons, useCoupon as apiUseCoupon } from "../../shared/api/coupon";
 export default function CouponPage() {
   const nav = useNavigate();
 
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState("");
-  const [coupons, setCoupons]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [coupons, setCoupons] = useState([]);
 
-  const [selected, setSelected] = useState(null);  // 상세 모달용 객체(클릭한 쿠폰)
-  const [askCode, setAskCode]   = useState(false); // 코드 입력 모달
+  const [selected, setSelected] = useState(null); // 상세 모달용 객체(클릭한 쿠폰)
+  const [askCode, setAskCode] = useState(false); // 코드 입력 모달
   const [showUsed, setShowUsed] = useState(false); // 사용 완료 모달
 
   const fmtDate = (iso) => {
@@ -32,15 +32,17 @@ export default function CouponPage() {
 
   /** 서버 응답을 화면용 뷰모델로 통일 */
   const toVM = (x) => ({
-    id:        x.id ?? x.couponId ?? x.uuid,
-    store:     x.storeName ?? x.store?.name ?? "가게",
-    title:     x.title ?? x.name ?? x.couponName ?? "쿠폰",
+    id: x.id ?? x.couponId ?? x.uuid,
+    store: x.storeName ?? x.store?.name ?? "가게",
+    title: x.title ?? x.name ?? x.couponName ?? "쿠폰",
     // 상세/보상/설명 텍스트 최대한 흡수
-    desc:      x.description ?? x.benefit ?? x.reward ?? x.rewardName ?? "",
-    due:       fmtDate(x.expirationDate ?? x.expireAt ?? x.expiredAt),
-    image:     x.imageUrl ?? x.image ?? x.thumbnailUrl ?? "",
+    desc: x.description ?? x.benefit ?? x.reward ?? x.rewardName ?? "",
+    due: fmtDate(x.expirationDate ?? x.expireAt ?? x.expiredAt),
+    image: x.imageUrl ?? x.image ?? x.thumbnailUrl ?? "",
     // ← 명시적으로 false일 때만 불필요. 그 외엔 기본적으로 '필요'
-    needCode:  !([x.needCode, x.requiresCode, x.requireCode].some(v => v === false)),
+    needCode: ![x.needCode, x.requiresCode, x.requireCode].some(
+      (v) => v === false
+    ),
     sampleCode: x.authCode ?? x.code ?? x.couponCode ?? "",
   });
 
@@ -51,16 +53,18 @@ export default function CouponPage() {
       try {
         setLoading(true);
         setError("");
-        const res  = await getCoupons();
-        const list =
-          Array.isArray(res?.data)      ? res.data :
-          Array.isArray(res?.data?.data)? res.data.data : [];
+        const res = await getCoupons();
+        const list = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res?.data?.data)
+          ? res.data.data
+          : [];
         if (!ignore) setCoupons(list.map(toVM));
       } catch (e) {
         const msg = axios.isAxiosError(e)
-          ? (e.response?.status === 401
-              ? "로그인이 필요합니다."
-              : (e.response?.data?.message ?? "쿠폰을 불러오지 못했어요."))
+          ? e.response?.status === 401
+            ? "로그인이 필요합니다."
+            : e.response?.data?.message ?? "쿠폰을 불러오지 못했어요."
           : "쿠폰을 불러오지 못했어요.";
         if (!ignore) setError(msg);
         if (axios.isAxiosError(e) && e.response?.status === 401) {
@@ -72,7 +76,9 @@ export default function CouponPage() {
         if (!ignore) setLoading(false);
       }
     })();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [nav]);
 
   /** 상세 모달의 '사용하기' */
@@ -88,22 +94,27 @@ export default function CouponPage() {
     if (!selected?.id) return;
     try {
       const code = String(authCode ?? "")
-   .replace(/\s|-/g, "")   // 내부 공백/하이픈 제거
-   .toUpperCase();         // (영문 대비)
- if (!code) { alert("인증코드를 입력하세요."); return; }
- await apiUseCoupon(selected.id, code);
+        .replace(/\s|-/g, "") // 내부 공백/하이픈 제거
+        .toUpperCase(); // (영문 대비)
+      if (!code) {
+        alert("인증코드를 입력하세요.");
+        return;
+      }
+      await apiUseCoupon(selected.id, code);
       setAskCode(false);
       setSelected(null);
       setShowUsed(true);
       // 목록 새로고침(상태 갱신)
-      const res  = await getCoupons();
-      const list =
-        Array.isArray(res?.data)      ? res.data :
-        Array.isArray(res?.data?.data)? res.data.data : [];
+      const res = await getCoupons();
+      const list = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.data)
+        ? res.data.data
+        : [];
       setCoupons(list.map(toVM));
     } catch (e) {
       const msg = axios.isAxiosError(e)
-        ? (e.response?.data?.message ?? "쿠폰 사용에 실패했어요.")
+        ? e.response?.data?.message ?? "쿠폰 사용에 실패했어요."
         : "쿠폰 사용에 실패했어요.";
       alert(msg);
       console.error("[CouponUse] ", e?.response?.status, e?.response?.data);
@@ -135,7 +146,9 @@ export default function CouponPage() {
 
       <ScrollArea>
         {loading && <div style={{ padding: 24 }}>불러오는 중…</div>}
-        {!loading && error && <div style={{ padding: 24, color: "#cf4721" }}>{error}</div>}
+        {!loading && error && (
+          <div style={{ padding: 24, color: "#cf4721" }}>{error}</div>
+        )}
 
         {!loading && !error && coupons.length === 0 && (
           <div style={{ padding: 24 }}>사용 가능한 쿠폰이 없어요.</div>
@@ -146,9 +159,11 @@ export default function CouponPage() {
             {coupons.map((c) => (
               <Card
                 key={c.id}
-                type="button"
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={(e) => { e.currentTarget.blur(); setSelected(c); }}
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  setSelected(c);
+                }}
               >
                 {c.image ? <Thumb src={c.image} alt="" /> : <Thumb as="div" />}
                 <Meta>
@@ -166,15 +181,25 @@ export default function CouponPage() {
       {selected && !askCode && !showUsed && (
         <ModalBackdrop onClick={() => setSelected(null)}>
           <ModalCard onClick={(e) => e.stopPropagation()}>
-            <CouponClose><CloseButton onClick={() => setSelected(null)} /></CouponClose>
-            <CouponInfo $size="16px" $weight="500">{selected.store}</CouponInfo>
-            <CouponInfo $size="32px" $weight="700">{selected.title}</CouponInfo>
+            <CouponClose>
+              <CloseButton onClick={() => setSelected(null)} />
+            </CouponClose>
+            <CouponInfo $size="16px" $weight="500">
+              {selected.store}
+            </CouponInfo>
+            <CouponInfo $size="32px" $weight="700">
+              {selected.title}
+            </CouponInfo>
             {!!selected.desc && <CouponDesc>{selected.desc}</CouponDesc>}
             {selected.image && <CouponImg src={selected.image} alt="" />}
             {!!selected.sampleCode && (
-              <CouponHint>* 테스트용 인증코드 {selected.sampleCode}입니다.</CouponHint>
+              <CouponHint>
+                * 테스트용 인증코드 {selected.sampleCode}입니다.
+              </CouponHint>
             )}
-            <UseBtn type="button" onClick={handleUseClick}>사용하기</UseBtn>
+            <UseBtn type="button" onClick={handleUseClick}>
+              사용하기
+            </UseBtn>
           </ModalCard>
         </ModalBackdrop>
       )}
@@ -207,78 +232,227 @@ const Page = styled.div`
 `;
 
 const PageHeader = styled.header`
-  position: sticky; top: 0; z-index: 30; background: #faf8f8;
-  height: 48px; padding: 0 16px;
-  display: grid; grid-template-columns: 48px 1fr 48px; align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #faf8f8;
+  height: 48px;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
 `;
-const HeaderLeft = styled.div`grid-column: 1/2; display: flex; align-items: center;`;
-const HeaderCenter = styled.div`grid-column: 2/3; display: flex; justify-content: center;`;
-const HeaderRight = styled.div`grid-column: 3/4; display: flex; justify-content: flex-end;`;
+const HeaderLeft = styled.div`
+  grid-column: 1/2;
+  display: flex;
+  align-items: center;
+`;
+const HeaderCenter = styled.div`
+  grid-column: 2/3;
+  display: flex;
+  justify-content: center;
+`;
+const HeaderRight = styled.div`
+  grid-column: 3/4;
+  display: flex;
+  justify-content: flex-end;
+`;
 
 const BackFloat = styled.button`
-  position: absolute; left: -20px; top: 4px; width: 100px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  background: transparent; border: 0; cursor: pointer; outline: none;
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 100px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  outline: none;
   -webkit-tap-highlight-color: transparent;
-  &:focus,&:focus-visible,&:active{ outline: none; box-shadow: none; }
-  &::-moz-focus-inner{ border: 0; }
-  svg { width: 20px; height: 20px; }
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    box-shadow: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
+  }
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const ScrollArea = styled.div`
-  flex: 1 1 auto; min-height: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 0 16px calc(90px + env(safe-area-inset-bottom));
-  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
-  scrollbar-width: none; -ms-overflow-style: none;
-  &::-webkit-scrollbar { width:0; height:0; }
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 `;
 
 const Grid = styled.div`
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 14px; padding-top: 35px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding-top: 35px;
 `;
-const Card = styled.button`
-  all: unset; background: #fff; border-radius: 12px; overflow: hidden;
-  box-shadow: 0 20px 20px rgba(0,0,0,.07); cursor: pointer;
+const Card = styled.div`
+  width: 162px;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 20px rgba(0, 0, 0, 0.07);
+  position: relative;
+  cursor: pointer;
+    &::before {
+    content: "";
+    position: absolute;
+    left: -10px;  /* 카드 바깥쪽에서 반쯤 들어오게 */
+    top: 170px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f0f0f0; /* 바깥 배경색(페이지 배경색과 같게) */
+  }
+
+  /* 오른쪽 원 */
+  &::after {
+    content: "";
+    position: absolute;
+    right: -10px;
+    top: 170px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f0f0f0;
+  }
 `;
 const Thumb = styled.img`
-  width: 100%; height: 120px; object-fit: cover; display: block;
+  width: 172px;
+  height: 125px;
+  flex-shrink: 0;
+  border-radius: 8px 8px 0 0;
+  background: url(<path-to-image>) lightgray 50% / cover no-repeat;
 `;
-const Meta = styled.div` padding: 10px 12px 12px; `;
-const Store = styled.div` color:#5d5d5d; font-size:11px; font-weight:500; margin-bottom:6px; `;
-const Title = styled.div` color:#141414; font-size:14px; font-weight:700; line-height:14px; margin-bottom:8px; `;
-const Due = styled.div` color:#cf4721; font-size:11px; font-weight:400; `;
+const Meta = styled.div`
+  width: 162px;
+  height: 103px;
+  padding: 10px 12px 15px;
+  text-align: left;
+  font-family: Pretendard;
+  background: #fff;
+  position: relative;
+  background: transparent;
+`;
+const Store = styled.div`
+  color: #5d5d5d;
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 6px;
+`;
+const Title = styled.div`
+  color: #141414;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 14px;
+  margin-bottom: 8px;
+`;
+const Due = styled.div`
+  color: #cf4721;
+  font-size: 11px;
+  font-weight: 400;
+`;
 
 /* Modal */
 const ModalBackdrop = styled.div`
-  position: fixed; inset: 0; background: rgba(0,0,0,.45);
-  display: flex; align-items: center; justify-content: center; z-index: 999;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 `;
 const ModalCard = styled.div`
-  position: relative; display: flex; flex-direction: column; align-items: center;
-  width: 276px; min-height: 315px; border-radius: 15px; background: #fff;
-  box-shadow: 0 4px 4px rgba(0,0,0,.15); padding: 20px 0 68px; gap: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 276px;
+  min-height: 315px;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
+  padding: 20px 0 68px;
+  gap: 10px;
 `;
-const CouponClose = styled.div` display:flex; width:240px; justify-content:flex-end; `;
+const CouponClose = styled.div`
+  display: flex;
+  width: 240px;
+  justify-content: flex-end;
+`;
 const CouponInfo = styled.div`
-  color:#ce4927; text-align:center; font-family:Pretendard;
-  font-size:${({ $size }) => $size}; font-weight:${({ $weight }) => $weight};
-  line-height:${({ $size }) => $size}; letter-spacing:-1px;
+  color: #ce4927;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: ${({ $size }) => $size};
+  font-weight: ${({ $weight }) => $weight};
+  line-height: ${({ $size }) => $size};
+  letter-spacing: -1px;
 `;
 const CouponDesc = styled.div`
-  color:#6b6b6b; font-size:13px; line-height:18px; text-align:center;
-  padding: 0 16px; white-space: pre-wrap;
+  color: #6b6b6b;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+  padding: 0 16px;
+  white-space: pre-wrap;
 `;
 const CouponHint = styled.div`
-  color:#8f8f8f; font-size:12px; line-height:16px; text-align:center; margin-bottom: 20px;
+  color: #8f8f8f;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+  margin-bottom: 20px;
 `;
 const CouponImg = styled.img`
-  width: 160px; height: 160px; border-radius: 12px; object-fit: cover;
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  object-fit: cover;
 `;
 const UseBtn = styled.button`
-  position: absolute; left: 0; right: 0; bottom: 0;
-  height: 56px; border: 0; border-radius: 0 0 12px 12px;
-  background: #cf4721; color:#fff; font-size:20px; font-weight:700; cursor:pointer;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  border: 0;
+  border-radius: 0 0 12px 12px;
+  background: #cf4721;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  &:focus,&:active,&:focus-visible{ outline:none; box-shadow:none; }
+  &:focus,
+  &:active,
+  &:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
 `;

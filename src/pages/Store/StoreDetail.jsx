@@ -57,8 +57,9 @@ export default function StoreDetail() {
             </HashtagBox>
           </TextBox>
           <InfoBox>
-            • 가게 주소 - {data.address} <br />• 영업시간 - {data.openTime} ~{" "}
-            {data.closeTime} <br />• 전화번호 - {data.phoneNumber} <br />
+            <div>• 가게 주소 - {data.address}</div>
+            <div>• 영업시간 - {data.openTime} ~ {data.closeTime} </div>
+            <div>• 전화번호 - {data.phoneNumber} </div>
           </InfoBox>
           <Bar />
           <Menu>
@@ -179,7 +180,8 @@ const InfoBox = styled.div`
   display: flex;
   flex-direction: column;
   width: 344px;
-  height: 126px;
+  min-height: 126px;
+  height: auto;
   flex-shrink: 0;
   border-radius: 12px;
   background: #ffedd6;
@@ -194,7 +196,7 @@ const InfoBox = styled.div`
   font-style: normal;
   font-weight: 500;
   line-height: 25px; /* 178.571% */
-  letter-spacing: -1px;
+  letter-spacing: 0
 `;
 const Bar = styled.div`
   width: 100%;
