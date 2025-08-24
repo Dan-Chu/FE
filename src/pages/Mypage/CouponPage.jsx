@@ -144,7 +144,7 @@ export default function CouponPage() {
         {!loading && !error && coupons.length > 0 && (
           <Grid>
             {coupons.map((c) => (
-              <Car
+              <Card
                 key={c.id}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
@@ -156,7 +156,7 @@ export default function CouponPage() {
                   <Title>{c.title}</Title>
                   {c.due && <Due>{c.due}</Due>}
                 </Meta>
-              </Car>
+              </Card>
             ))}
           </Grid>
         )}
@@ -256,22 +256,21 @@ const ModalBackdrop = styled.div`
 `;
 const ModalCard = styled.div`
   position: relative; display: flex; flex-direction: column; align-items: center;
-  width: 326px; min-height: 415px; border-radius: 15px; background: #fff;
+  width: 276px; min-height: 315px; border-radius: 15px; background: #fff;
   box-shadow: 0 4px 4px rgba(0,0,0,.15); padding: 20px 0 68px; gap: 10px;
 `;
-const CouponClose = styled.div` display:flex; width:280px; justify-content:flex-end; `;
+const CouponClose = styled.div` display:flex; width:240px; justify-content:flex-end; `;
 const CouponInfo = styled.div`
   color:#ce4927; text-align:center; font-family:Pretendard;
   font-size:${({ $size }) => $size}; font-weight:${({ $weight }) => $weight};
   line-height:${({ $size }) => $size}; letter-spacing:-1px;
-  margin-top: clamp(10px, 3vh, 24px);
 `;
 const CouponDesc = styled.div`
   color:#6b6b6b; font-size:13px; line-height:18px; text-align:center;
   padding: 0 16px; white-space: pre-wrap;
 `;
 const CouponHint = styled.div`
-  color:#8f8f8f; font-size:12px; line-height:16px; text-align:center;
+  color:#8f8f8f; font-size:12px; line-height:16px; text-align:center; margin-bottom: 20px;
 `;
 const CouponImg = styled.img`
   width: 160px; height: 160px; border-radius: 12px; object-fit: cover;
