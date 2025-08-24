@@ -383,7 +383,7 @@ const FieldLabel = styled.div`
 
 const Input = styled.input`
   flex: 1;
-  width: auto;
+  width: 100%;
   padding: 10px 12px;
   border: 1px solid #e6e6e6;
   border-radius: 10px;
