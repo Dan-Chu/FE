@@ -70,7 +70,7 @@ export default function App() {
 const Phone = styled.div`
   position: relative;
   width: 393px;
-  height: 100vh;
+  height: 100dvh;
   margin-left: auto;
   margin-right: auto;
   background-color: #faf8f8;
@@ -82,7 +82,7 @@ const Phone = styled.div`
 
 const Contents = styled.div`
   padding-top: 21px;
-  height: 674px;
+  height: calc(100dvh - 91px);
 `;
 
 /* ✅ Nav가 없을 때: 하단 패딩 제거 */

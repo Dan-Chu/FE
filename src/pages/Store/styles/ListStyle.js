@@ -1,12 +1,13 @@
 import styled from "styled-components";
 
-export const Page = styled.div`
+export const Page = styled.div`//페이지 전체
   display: flex;
   flex-direction: column;
   gap: 15px;
   position: relative;
+  height: 100%;
 `;
-export const SearchBar = styled.div`
+export const SearchBar = styled.div`//검색어 박스
   display: flex;
   width: 333px;
   height: 44px;
@@ -18,12 +19,12 @@ export const SearchBar = styled.div`
   align-items: center;
   padding-left: 10px;
 `;
-export const Input = styled.input`
+export const Input = styled.input`//입력 박스
   width: 289px;
   outline: none;
   border: none;
 `;
-export const Filter = styled.div`
+export const Filter = styled.div`//필터 모달 버튼
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +50,7 @@ export const Filter = styled.div`
     cursor: pointer;
   }
 `;
-export const Modal = styled.div`
+export const Modal = styled.div`//모달 전체
   position: fixed;
   top: 0;
   left: 0;
@@ -60,7 +61,7 @@ export const Modal = styled.div`
   justify-content: center;
   z-index: 1000;
 `;
-export const ModalBox = styled.div`
+export const ModalBox = styled.div`//모달 안에 필터 박스
   display: flex;
   flex-direction: column;
   width: 369px;
@@ -73,7 +74,7 @@ export const ModalBox = styled.div`
   padding-left: 24px;
   margin-top: auto;
 `;
-export const ModalHeader = styled.div`
+export const ModalHeader = styled.div`//모달 필터 헤더
   display: flex;
   justify-content: space-between;
   width: 345px;
@@ -86,7 +87,7 @@ export const ModalHeader = styled.div`
   line-height: 30px; /* 166.667% */
   letter-spacing: -1px;
 `;
-export const TypeBox = styled.div`
+export const TypeBox = styled.div`//모달 필터 해시태그 박스
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   margin-top: 48px;
@@ -100,7 +101,7 @@ export const TypeBox = styled.div`
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;
 `;
-export const ApplyButton = styled.div`
+export const ApplyButton = styled.div`//모달 필터 적용 버튼
   display: flex;
   width: 345px;
   height: 50px;
@@ -123,7 +124,7 @@ export const ApplyButton = styled.div`
     cursor: pointer;
   }
 `;
-export const SwipeBar = styled.div`
+export const SwipeBar = styled.div`//모달 디자인용 하단바
   width: 140px;
   height: 6px;
   border-radius: 20px;
@@ -132,19 +133,19 @@ export const SwipeBar = styled.div`
   margin-top: auto;
   margin-bottom: 16px;
 `;
-export const ListBox = styled.div`
+export const ListBox = styled.div`//가게 리스트 박스
   display: flex;
   flex-direction: column;
   margin-left: 24px;
-  height: 460px;
+  height: calc(100% - 230px);
 `;
-export const ListPage = styled.div`
+export const ListPage = styled.div`//가게 리스트 페이지네이션 박스
   display: flex;
   flex-direction: row;
   gap: 10px;
   align-items: center;
   position: absolute;
-  bottom: -30px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   width: fit-content; /* 필요한 만큼만 차지 */
@@ -154,7 +155,7 @@ export const ListPage = styled.div`
     cursor: pointer;
   }
 `;
-export const PageNumber = styled.div`
+export const PageNumber = styled.div`//가게 페이지 버튼
   color: ${({ $now }) => ($now ? "#5D5D5D" : "#BDBDBD")};
   font-family: Pretendard;
   font-size: 14px;
@@ -163,7 +164,7 @@ export const PageNumber = styled.div`
   line-height: 0; /* 0% */
   letter-spacing: -1px;
 `;
-export const SearchFail = styled.div`
+export const SearchFail = styled.div`//자료 없을 때 나오는 박스
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -171,7 +172,7 @@ export const SearchFail = styled.div`
   gap: 10px;
   margin-top: 130px;
 `;
-export const FailText = styled.div`
+export const FailText = styled.div`//자료 없을 때 나오는 문구
   color: ${({ $color }) => $color};
   text-align: center;
   font-family: Pretendard;

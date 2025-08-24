@@ -9,5 +9,9 @@ export const getCoupons = () => api.get("/coupons");
  * - 코드가 필요한 경우 body에 code(또는 Swagger 스키마 이름)로 전달
  */
 export const useCoupon = (couponId, authCode) => {
-  return api.post(`/coupons/${couponId}/use`, { authCode });
+  return api.post(
+    `/coupons/${couponId}/use`,
+    { authCode },
+    { headers: { "Content-Type": "application/json" } }
+  );
 };

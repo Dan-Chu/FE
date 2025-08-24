@@ -23,10 +23,9 @@ export default function Mypage() {
   useEffect(() => {
     let ignore = false;
 
-    (async () => {
+    const fetchMe = async () => {
       try {
-        const me = await getUser(); 
-
+        const me = await getUser();
         if (ignore) return;
 
         setNickname(me?.nickname ?? "");
@@ -34,19 +33,22 @@ export default function Mypage() {
         setAvatar(me?.imageUrl || null);
 
         // 해시태그: 서버가 주는 필드명 여러가지 대응
-       const rawTags = me?.myHashtags ?? me?.hashtags ?? [];
-       const names = Array.isArray(rawTags)
-       ? rawTags
-      .map((t) =>
-        (t?.name ?? t?.tagName ?? t?.keyword ?? t?.title ?? (typeof t === "string" ? t : ""))
-          .toString()
-          .trim()
-          .replace(/^#+/, "")
-      )
-      .filter(Boolean)
-       : [];
-      setMyTags(names);
-
+        const rawTags = me?.myHashtags ?? me?.hashtags ?? [];
+        const names = Array.isArray(rawTags)
+          ? rawTags
+              .map((t) =>
+                (t?.name ??
+                  t?.tagName ??
+                  t?.keyword ??
+                  t?.title ??
+                  (typeof t === "string" ? t : ""))
+                  .toString()
+                  .trim()
+                  .replace(/^#+/, "")
+              )
+              .filter(Boolean)
+          : [];
+        setMyTags(names);
       } catch (e) {
         // ❗ API 실패 시에만 예전 localStorage 폴백 사용 (더미 UI 방지)
         try {
@@ -56,23 +58,31 @@ export default function Mypage() {
             setEmail(saved.email ?? "");
             setAvatar(saved.avatar ?? null);
 
-            // 옛 로컬 포맷(인덱스만 저장) → 개수만큼 빈 태그명 생성 X
-            // 실제 표시용 태그는 별도 저장되어 있었다면 그것만 사용
             const legacy = JSON.parse(localStorage.getItem("myTags") || "[]");
-            if (Array.isArray(legacy) && legacy.length) {
-              setMyTags(legacy.map(String));
-            } else {
-              setMyTags([]); // 더미(#해시태그)로 채우지 않음
-            }
-            return;
+            setMyTags(Array.isArray(legacy) ? legacy.map(String) : []);
           }
-        } catch (_) {}
-        // 폴백도 없으면 빈 상태 유지
+        } catch (_) {
+          /* 무시 */
+        }
       }
-    })();
+    };
+
+    fetchMe();
+
+    // 👇 다른 화면에서 프로필 저장 후 알려줄 때
+    const onProfileUpdated = () => fetchMe();
+    window.addEventListener("profile:updated", onProfileUpdated);
+
+    // 탭 전환 후 복귀 시 최신화(선택)
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchMe();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       ignore = true;
+      window.removeEventListener("profile:updated", onProfileUpdated);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
@@ -85,7 +95,11 @@ export default function Mypage() {
       <ScrollArea>
         <Profile>
           <Avatar>
-            <img src={avatar || basicProfile} alt="" />
+            <img
+              src={avatar || basicProfile}
+              alt="프로필"
+              onError={(e) => (e.currentTarget.src = basicProfile)}
+            />
           </Avatar>
 
           <Info>
@@ -104,13 +118,12 @@ export default function Mypage() {
           </TagGrid>
         )}
 
-<TicketButton
-  onClick={() => nav("/mypage/coupons")}
-  aria-label="나의 쿠폰함 확인하기"
->
-  내 쿠폰함 확인하기
-</TicketButton>
-
+        <TicketButton
+          onClick={() => nav("/mypage/coupons")}
+          aria-label="나의 쿠폰함 확인하기"
+        >
+          내 쿠폰함 확인하기
+        </TicketButton>
 
         <Divider />
 
@@ -156,16 +169,11 @@ const Header = styled.div`
 const ScrollArea = styled.div`
   flex: 1 1 auto;
   min-height: 0;
-
   overflow-y: auto;
   overflow-x: hidden;
-
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
-
-  /* 스크롤바 숨김 */
   scrollbar-width: none;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
@@ -173,8 +181,6 @@ const ScrollArea = styled.div`
     height: 0 !important;
     display: none !important;
   }
-
-  /* 오버레이 스크롤바 마스킹 */
   --sbw: 14px;
   margin-right: calc(var(--sbw) * -1);
   padding-right: calc(24px + var(--sbw));
@@ -185,8 +191,8 @@ const Profile = styled.div`
   grid-template-columns: 70px 1fr auto;
   align-items: center;
   column-gap: 12px;
-  padding: 8px 0 14px;
   justify-items: start;
+  margin-bottom: 15px;
 `;
 
 const Avatar = styled.div`
@@ -200,7 +206,6 @@ const Avatar = styled.div`
     height: 100%;
     object-fit: cover;
   }
-  margin: 12px 0 30px;
 `;
 
 const Info = styled.div`
@@ -208,8 +213,8 @@ const Info = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 12px 0 30px;
   text-align: left;
+  font-family: Pretendard;
 `;
 
 const Name = styled.div`
@@ -235,10 +240,8 @@ const EditBtn = styled(EditCircleButton)`
   margin-left: 12px;
   flex-shrink: 0;
   transform: translateX(+15px);
-
   outline: none;
   -webkit-tap-highlight-color: transparent;
-
   &:focus,
   &:focus-visible,
   &:active {
@@ -270,6 +273,7 @@ const TagChip = styled.div`
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
+  font-family: Pretendard;
 `;
 
 const Divider = styled.div`
@@ -318,17 +322,13 @@ const ItemSmall = styled(Item)``;
 const TicketButton = styled.button`
   width: 100%;
   height: 130px;
-  margin: 40px 0 40px;              
+  margin: 40px 0 20px;
   background: url(${mycoupon}) center / 100% 100% no-repeat;
   border: 0;
   cursor: pointer;
-
   text-indent: -9999px;
   overflow: hidden;
-
-  /* 포커스/탭 하이라이트 제거*/
   outline: none;
   -webkit-tap-highlight-color: transparent;
   &:focus { outline: none; }
 `;
-

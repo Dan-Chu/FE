@@ -34,7 +34,7 @@ const Page = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fffcf8;
-  height: 100vh;
+  height: 100dvh;
   padding-left: 44px;
   padding-top: 148px;
 `;

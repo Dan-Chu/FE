@@ -24,15 +24,17 @@ import {
   SearchFail,
   FailText,
 } from "./styles/ListStyle";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   StoreListGet,
   SearchStoreGet,
   FilterStoreGet,
+  NoneDistanceListGet,
 } from "../../shared/api/store";
 import { HashtagsGet } from "../../shared/api/hashtag";
 import MyLocation from "./location";
 import Loading from "../../components/Loading";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 export default function StoreList() {
   const location = MyLocation();
@@ -45,9 +47,38 @@ export default function StoreList() {
   const [selectFilter, setSelectFilter] = useState([]);
   const [debouncedSearch, setDebouncedSearch] = useState(searchName);
   const [maxPage, setMaxPage] = useState();
-  const [loading,setLoading]=useState(null);
+  const [loading, setLoading] = useState(null);
+  const [dataSize, setDataSize] = useState(0);
+  const [listEl, setListEl] = useState(null); // DOM 노드 보관
+
+  const listRef = useCallback((node) => {
+    //콜백 ref: DOM에 붙는 순간 node가 들어옴
+    setListEl(node); // mount 시 node, unmount 시 null
+  }, []);
 
   useEffect(() => {
+    if (!listEl) return;
+
+    const compute = () => {
+      const h = listEl.getBoundingClientRect().height;
+      setDataSize(Math.max(1, Math.floor(h / 146))); // 최소 1 보정
+    };
+
+    compute(); // 최초 1회 측정
+
+    const ro = new ResizeObserver(compute); // 크기 변화 추적
+    ro.observe(listEl);
+
+    window.addEventListener("resize", compute); // 윈도우 리사이즈도 추적(선택)
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [listEl]);
+
+  useEffect(() => {
+    //디바운싱 검색어 변환 및 적용
     const handler = setTimeout(() => {
       setDebouncedSearch(searchName);
     }, 500); // 0.5초 동안 입력 없을 때만 반영
@@ -58,33 +89,43 @@ export default function StoreList() {
   }, [searchName]);
 
   useEffect(() => {
+    //페이지, 검색어 변환에 따라 데이터 적용
     const fetchData = async () => {
+      if (!dataSize) return;
       let result;
       setLoading(true);
-      if (!debouncedSearch) {
-        // 검색어 없으면 그냥 기본 리스트
-        
-        if (!location.lat || !location.lng) return;
-        result = await StoreListGet(page - 1, location.lat, location.lng);
-        setData(result);
-      } else if (debouncedSearch) {
-        // 검색어 있으면 검색 API 호출
-        if (!location.lat || !location.lng) return;
-        result = await SearchStoreGet(
-          debouncedSearch,
-          page - 1,
-          location.lat,
-          location.lng
-        );
-        setData(result);
+      if (location.lat && location.lng) {
+        if (!debouncedSearch) {
+          // 검색어 없으면 그냥 기본 리스트
+          result = await StoreListGet(
+            page - 1,
+            location.lat,
+            location.lng,
+            dataSize
+          );
+          setData(result);
+        } else if (debouncedSearch) {
+          // 검색어 있으면 검색 API 호출
+          result = await SearchStoreGet(
+            debouncedSearch,
+            page - 1,
+            location.lat,
+            location.lng,
+            dataSize
+          );
+          setData(result);
+        } else {
+          result = await FilterStoreGet(
+            selectFilter,
+            location.lat,
+            location.lng,
+            page - 1,
+            dataSize
+          );
+          setData(result);
+        }
       } else {
-        if (!location.lat || !location.lng) return;
-        result = await FilterStoreGet(
-          selectFilter,
-          location.lat,
-          location.lng,
-          page - 1
-        );
+        result = await NoneDistanceListGet(page - 1, dataSize);
         setData(result);
       }
       setLoading(false);
@@ -92,27 +133,31 @@ export default function StoreList() {
     };
 
     fetchData();
-  }, [page, debouncedSearch, location]);
+  }, [page, debouncedSearch, location, dataSize]);
 
   const search = async (name) => {
+    //화면에 검색어 보여줌
     if (!name) return;
     setPage(1);
     setSearchName(name);
   };
 
   const filterApply = async () => {
-    let result
+    //필터 적용하여 데이터 산출
+    let result;
+    setPage(1);
     setLoading(true);
     if (selectFilter.length > 0) {
       result = await FilterStoreGet(
         selectFilter,
         location.lat,
         location.lng,
-        page - 1
+        page - 1,
+        dataSize
       );
       setData(result);
     } else {
-      result = await StoreListGet(0, location.lat, location.lng);
+      result = await StoreListGet(0, location.lat, location.lng,dataSize);
       setData(result);
     }
     setLoading(false);
@@ -120,6 +165,7 @@ export default function StoreList() {
   };
 
   const filterPlus = (hashtag) => {
+    //필터에 해시태그 추가
     setSelectFilter((prev) => {
       // 이미 선택된 해시태그라면 제거
       if (prev.includes(hashtag.name)) {
@@ -129,11 +175,8 @@ export default function StoreList() {
     });
   };
 
-  const filterOn = () => {
-    setFilter(!filter);
-  };
-
   const pageOn = (what) => {
+    //현재 페이지 보여주기
     switch (what) {
       case 1:
         setPage(pageCount);
@@ -151,6 +194,7 @@ export default function StoreList() {
   };
 
   const pageChange = (upDown) => {
+    //페이지네이션 숫자 변환
     if (upDown) {
       if (pageCount + 4 <= maxPage) {
         setPageCount(pageCount + 4);
@@ -180,64 +224,89 @@ export default function StoreList() {
         />
         <Search onClick={() => search(searchName)} />
       </SearchBar>
-      <Filter onClick={() => filterOn()}>
+      <Filter onClick={() => setFilter(true)}>
         <FilterIcon />
         필터
       </Filter>
-      {filter && (
-        <Modal>
-          <ModalBox>
-            <ModalHeader>
-              필터
-              <Close onClick={() => filterOn()} />
-            </ModalHeader>
-            <TypeBox>
-              {hashtags && hashtags.length > 0 ? (
-                hashtags.map((hashtag) => (
-                  <FilterType
-                    key={hashtag.id}
-                    hashtag={hashtag.name}
-                    selected={selectFilter.includes(hashtag.name)}
-                    onClick={() => filterPlus(hashtag)}
-                  />
-                ))
-              ) : (
-                <p>필터가 없습니다.</p>
-              )}
-            </TypeBox>
-            <ApplyButton
-              onClick={() => {
-                filterOn();
-                filterApply();
+      <AnimatePresence mode="wait">
+        {filter && (
+          <Modal>
+            <Motion.div
+              key="filter-modal"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                display: "flex",
+                justifyContent: "center",
               }}
             >
-              적용하기
-            </ApplyButton>
-            <SwipeBar />
-          </ModalBox>
-        </Modal>
-      )}
-      <ListBox>
+              <ModalBox>
+                <ModalHeader>
+                  필터
+                  <Close onClick={() => setFilter(false)} />
+                </ModalHeader>
+                <TypeBox>
+                  {hashtags && hashtags.length > 0 ? (
+                    hashtags.map((hashtag) => (
+                      <FilterType
+                        key={hashtag.id}
+                        hashtag={hashtag.name}
+                        selected={selectFilter.includes(hashtag.name)}
+                        onClick={() => filterPlus(hashtag)}
+                      />
+                    ))
+                  ) : (
+                    <p>필터가 없습니다.</p>
+                  )}
+                </TypeBox>
+                <ApplyButton
+                  onClick={() => {
+                    setFilter(false);
+                    filterApply();
+                  }}
+                >
+                  적용하기
+                </ApplyButton>
+                <SwipeBar />
+              </ModalBox>
+            </Motion.div>
+          </Modal>
+        )}
+      </AnimatePresence>
+      <ListBox ref={listRef}>
+        {/*listRef에 노드 전달*/}
         {!loading ? (
           data.content && data.content.length > 0 ? (
-          data.content.map((i) => (
-            <StoreCard
-              key={i.store.id}
-              id={i.store.id}
-              data={i.store}
-              distance={i.distanceKm}
-            />
-          ))
+            data.content.map((i) => (
+              <StoreCard
+                key={i.store.id}
+                id={i.store.id}
+                data={i.store}
+                distance={i.distanceKm}
+              />
+            ))
+          ) : (
+            <SearchFail>
+              <Fail />
+              <FailText $color="#464646" $size="24px" $height="30px">
+                검색결과가 없습니다.
+              </FailText>
+              <FailText $color="#5D5D5D" $size="14px" $height="24px">
+                다른 검색어를 입력하시거나
+                <br />
+                철자와 띄어쓰기를 확인해보세요.
+              </FailText>
+            </SearchFail>
+          )
         ) : (
-          <SearchFail>
-            <Fail />
-            <FailText $color="#464646" $size="24px" $height="30px">검색결과가 없습니다.</FailText>
-            <FailText $color="#5D5D5D" $size="14px" $height="24px">
-              다른 검색어를 입력하시거나<br/>철자와 띄어쓰기를 확인해보세요.
-            </FailText>
-          </SearchFail>
-        )
-        ):<Loading/>}
+          <Loading />
+        )}
       </ListBox>
       <ListPage>
         <LeftButton onClick={() => pageChange(false)} />

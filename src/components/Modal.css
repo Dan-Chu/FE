@@ -124,17 +124,42 @@
 }
 .modal-code-input::placeholder{ color:#C9C9C9; letter-spacing:0; }
 
-.modal-button-group{ margin-top:14px; display:flex; gap:10px; }
-.btn-confirm{
-  flex:1 1 auto; height:48px; border-radius:12px; border:0; cursor:pointer;
-  background:#E8512A; color:#FFF; font:700 15px/48px Pretendard, system-ui, sans-serif;
+.modal-button-group{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
 }
+
+/* 공통: 탭/클릭 하이라이트 제거 */
+.btn-confirm,
+.btn-cancel{
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  border: 0;
+}
+
+/* 마우스/터치 클릭 시 포커스 테두리 제거 */
+.btn-confirm:focus,
+.btn-confirm:active,
+.btn-cancel:focus,
+.btn-cancel:active{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Firefox 내부 포커스 테두리 제거 */
+.btn-confirm::-moz-focus-inner,
+.btn-cancel::-moz-focus-inner{
+  border: 0;
+}
+
 .nowrap{ white-space:nowrap; }
 
-/* 인증코드 확인 버튼 */
+
 /* ===== 백드롭: 화면 중앙 정렬 ===== */
 .modal-backdrop,
 .modal-wrapper,
+
 
 /* ===== 모달 본체 ===== */
 .modal-code {
@@ -232,6 +257,40 @@
 .dc-modal-shell:has(.modal-code) {
   left: calc(50% + 14px) !important;  /* ← 숫자만 조절 */
 } 
+
+/* === 미션 상세 모달 CTA 포커스 테두리 제거(마우스/터치) === */
+/* 두 버튼 공통 초기화 */
+.mission-cta .cta {
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0 !important;
+  outline: none !important;
+  /* 필요시 포커스가 부모에 가지 않도록 */
+}
+
+/* 클릭/포커스 상태 전부 무효화 */
+.mission-cta .cta:focus,
+.mission-cta .cta:active,
+.mission-cta .cta:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Firefox 버튼 내부 테두리 제거 */
+.mission-cta .cta::-moz-focus-inner {
+  border: 0 !important;
+}
+
+/* 혹시 포커스가 래퍼로 가는 경우 대비 */
+.mission-cta:focus,
+.mission-skin:focus,
+.modal-code:focus {
+  outline: none !important;
+}
+
 
 
 /* 쿠폰 성공 모달 */
