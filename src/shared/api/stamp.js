@@ -7,7 +7,7 @@ const unwrap = (res) =>
 
 /** 스탬프 전체 조회 **/
 export const StampListGet = async () => {
-  const res = await api.get("/stamps");           
+  const res = await api.get("/stamps");
   return unwrap(res) ?? [];
 };
 
@@ -15,8 +15,9 @@ export const StampListGet = async () => {
 export const StampPlus = async (authCode) => {
   try {
     const code = String(authCode ?? "").trim();
-    if (!code) return false;                      // 비어있으면 실패 처리
-    const res = await api.post("/stamps", { authCode: code });
+    if (!code) return false;
+    // ✅ 핵심: 백엔드가 어떤 키를 쓰든 맞게 '둘 다' 보냄
+    const res = await api.post("/stamps", { code, authCode: code });
     return res.status >= 200 && res.status < 300;
   } catch (e) {
     console.error("[StampPlus] ", e?.response?.status, e?.response?.data);
