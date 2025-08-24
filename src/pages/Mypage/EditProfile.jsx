@@ -296,7 +296,7 @@ const Wrap = styled.div`
 const Head = styled.div`
   display: flex;
   justify-content: center;
-  margin: 24px 0 12px;
+  margin: 10px 0 12px;
 `;
 
 const BackFloat = styled.button`
@@ -375,7 +375,7 @@ const Row = styled.div`
 `;
 
 const FieldLabel = styled.div`
-  width: 72px;
+  width: 52px;
   color: #5d5d5d;
   font-weight: 600;
   font-family: Pretendard;
@@ -383,6 +383,7 @@ const FieldLabel = styled.div`
 
 const Input = styled.input`
   flex: 1;
+  width: auto;
   padding: 10px 12px;
   border: 1px solid #e6e6e6;
   border-radius: 10px;
@@ -399,16 +400,6 @@ const HelperError = styled.div`
   color: #e7502a;
   font-size: 12px;
   margin: 6px 0 0 86px; /* 라벨(72px)+gap(14px) 정렬 */
-`;
-
-const ReadOnly = styled.div`
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #f6f7f7;
-  color: #333;
-  font-size: 15px;
-  font-family: Pretendard;
 `;
 
 const Divider = styled.div`
@@ -534,8 +525,8 @@ const FooterLinks = styled.div`
 const PushBox = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-top: 35px;
-  margin-bottom: 35px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 
   color: #141414;
   text-align: center;
