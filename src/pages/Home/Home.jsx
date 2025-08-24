@@ -15,7 +15,7 @@ export default function Home() {
   const [storeData, setStoreData] = useState("");
   const [missionData, setMissionData] = useState("");
   const [stampData, setStampData] = useState("");
-  const [loading,setLoading]=useState(null);
+  const [loading,setLoading]=useState(true);
   const [nickname,setNickname]=useState("김")
 
   useEffect(() => {

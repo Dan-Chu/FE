@@ -144,7 +144,7 @@ export default function CouponPage() {
         {!loading && !error && coupons.length > 0 && (
           <Grid>
             {coupons.map((c) => (
-              <Card
+              <Car
                 key={c.id}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
@@ -156,7 +156,7 @@ export default function CouponPage() {
                   <Title>{c.title}</Title>
                   {c.due && <Due>{c.due}</Due>}
                 </Meta>
-              </Card>
+              </Car>
             ))}
           </Grid>
         )}
