@@ -17,6 +17,7 @@ import Loading from "../../components/Loading";
 
 export default function MissionPage() {
   const navigate = useNavigate();
+
   const [isMissionOpen, setIsMissionOpen] = useState(false);
   const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
@@ -60,34 +61,43 @@ export default function MissionPage() {
     setRewardById((prev) => ({ ...prev, ...next }));
   };
 
+  // 데이터 로드
   const getData = async () => {
     setLoading(true);
     try {
-      const result = await AiMissionGet();
-      setAiMissionData(result);
-      if (result?.missionId) fetchRewards([result.missionId]); // AI 카드 보상 채우기
-    } catch (err) {
-      console.warn("AiMissionGet 실패:", err);
-    }
-    try {
-      const list = await MissionListGet();
-      setMissionData(list);
-      fetchRewards(list?.map((m) => m.id) ?? []); // 일반 카드들 보상 채우기
-    } catch (err) {
-      console.warn("MissionListGet 실패:", err);
-    }
-    try {
-      const count = await CompleteMissionGet();
-      setCompleteMission(count ?? 0);
-    } catch (err) {
-      console.warn("CompleteMissionGet 실패:", err);
-    }
-    setLoading(false);
-    try {
-      const user = await getUser();
-      setNickname(user?.nickname ?? user?.name ?? user?.nickName ?? "");
-    } catch (err) {
-      console.warn("getUser 실패:", err);
+      // 병렬 로드로 초기 렌더 빠르게
+      const [ai, list, count, user] = await Promise.allSettled([
+        AiMissionGet(),
+        MissionListGet(),
+        CompleteMissionGet(),
+        getUser(),
+      ]);
+
+      if (ai.status === "fulfilled") {
+        setAiMissionData(ai.value);
+        if (ai.value?.missionId) fetchRewards([ai.value.missionId]); // AI 카드 보상 채우기
+      }
+
+      if (list.status === "fulfilled") {
+        setMissionData(list.value);
+        fetchRewards(list.value?.map((m) => m.id) ?? []); // 일반 카드들 보상 채우기
+      }
+
+      if (count.status === "fulfilled") {
+        setCompleteMission(count.value ?? 0);
+      }
+
+      if (user.status === "fulfilled") {
+        // 응답 키가 달라도 닉네임 뽑아쓰기
+        const u = user.value ?? {};
+        const nick =
+          u.nickname ?? u.name ?? u.nickName ?? u.displayName ?? u.username ?? "";
+        setNickname(String(nick).trim());
+      }
+    } catch (_) {
+      // 개별 try-catch 처리되어 있으므로 여기선 무시
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,7 +110,10 @@ export default function MissionPage() {
     setMissionDetailData(result);
     setIsMissionOpen(true);
   };
+
   const toMypage = () => navigate(`/mypage`);
+
+  const displayName = nickname || "단골";
 
   return (
     <Page>
@@ -110,8 +123,9 @@ export default function MissionPage() {
 
       {!loading ? (
         <ScrollArea>
+          {/* 상단 히어로 - 닉네임 연동 ✅ */}
           <Hero>
-            <span className="nick">김단추</span>
+            <span className="nick">{displayName}</span>
             <span className="plain">님의</span>
             <br />
             <span className="plain">완료한 미션&nbsp;</span>
@@ -119,82 +133,82 @@ export default function MissionPage() {
             <span className="plain">&nbsp;개</span>
           </Hero>
 
-        {/* AI 추천 카드 */}
-        {aiMissionData ? (
-          <MissionCard className="is-ai" key={aiMissionData.missionId}>
-            <AiPill>AI 추천</AiPill>
-            <CardReset>
-              <MainMissionCard
-                onClick={() => missionDetail(aiMissionData.missionId)}
-                data={{
-                  ...aiMissionData,
-                  // 상세에서 채운 보상 주입
-                  rewardName: rewardById[aiMissionData.missionId] ?? "",
-                }}
-                recommended={true}
-              />
-            </CardReset>
-          </MissionCard>
-        ) : (
-          <FailBox>
-            <FlagLogo width="117px" height="106px" />
-            <FailText>
-              {`${nickname || "김단골"}님의 `}
-              <span style={{ color: "#CE4927" }}>취향</span>을
-              <br />
-              알려주세요!
-            </FailText>
-            <FailButton onClick={() => toMypage()}>
-              해시태그 설정하러가기
-            </FailButton>
-          </FailBox>
-        )}
-
-        <Divider />
-
-        {/* 일반 카드들 */}
-        <CardList>
-          {missionData && missionData.length > 0 ? (
-            missionData.map((m) => (
-              <MissionCard key={m.id}>
-                <CardReset>
-                  <MainMissionCard
-                    onClick={() => missionDetail(m.id)}
-                    data={{
-                      ...m,
-                      // 상세에서 채운 보상 주입
-                      rewardName: rewardById[m.id] ?? "",
-                    }}
-                    recommended={false}
-                  />
-                </CardReset>
-              </MissionCard>
-            ))
+          {/* AI 추천 카드 */}
+          {aiMissionData ? (
+            <MissionCard className="is-ai" key={aiMissionData.missionId}>
+              <AiPill>AI 추천</AiPill>
+              <CardReset>
+                <MainMissionCard
+                  onClick={() => missionDetail(aiMissionData.missionId)}
+                  data={{
+                    ...aiMissionData,
+                    // 상세에서 채운 보상 주입
+                    rewardName: rewardById[aiMissionData.missionId] ?? "",
+                  }}
+                  recommended={true}
+                />
+              </CardReset>
+            </MissionCard>
           ) : (
-            <p>미션이 없습니다.</p>
+            <FailBox>
+              <FlagLogo width="117px" height="106px" />
+              <FailText>
+                {`${displayName}님의 `}
+                <span style={{ color: "#CE4927" }}>취향</span>을
+                <br />
+                알려주세요!
+              </FailText>
+              <FailButton onClick={() => toMypage()}>
+                해시태그 설정하러가기
+              </FailButton>
+            </FailBox>
           )}
-        </CardList>
-      </ScrollArea>
+
+          <Divider />
+
+          {/* 일반 카드들 */}
+          <CardList>
+            {missionData && missionData.length > 0 ? (
+              missionData.map((m) => (
+                <MissionCard key={m.id}>
+                  <CardReset>
+                    <MainMissionCard
+                      onClick={() => missionDetail(m.id)}
+                      data={{
+                        ...m,
+                        // 상세에서 채운 보상 주입
+                        rewardName: rewardById[m.id] ?? "",
+                      }}
+                      recommended={false}
+                    />
+                  </CardReset>
+                </MissionCard>
+              ))
             ) : (
+              <p>미션이 없습니다.</p>
+            )}
+          </CardList>
+        </ScrollArea>
+      ) : (
         <Loading />
       )}
 
       {/* 모달들 */}
       {isMissionOpen && (
-      <MissionModal
-        mission={{
-          image: missionDetailData?.rewardImageUrl,
-          title: missionDetailData?.title,
-          store: missionDetailData?.storeName,
-          reward: missionDetailData?.description,
-          storeId: missionDetailData?.storeId,
-        }}
-        onClose={() => setIsMissionOpen(false)}
-        onSubmit={() => {
-          setIsMissionOpen(false);
-          setIsCodeInputOpen(true);
-        }}
-       />
+        <MissionModal
+          mission={{
+            image: missionDetailData?.rewardImageUrl,
+            title: missionDetailData?.title,
+            store: missionDetailData?.storeName,
+            reward: missionDetailData?.description,
+            storeId: missionDetailData?.storeId,
+          }}
+          onClose={() => setIsMissionOpen(false)}
+          onSubmit={() => {
+            setIsMissionOpen(false);
+            setIsCodeInputOpen(true);
+          }}
+        />
       )}
 
       {isCodeInputOpen && (
@@ -208,6 +222,7 @@ export default function MissionPage() {
           authCode={missionDetailData?.storeAuthCode}
         />
       )}
+
       {isSuccessOpen && (
         <CouponSuccessModal onClose={() => setIsSuccessOpen(false)} />
       )}
@@ -239,27 +254,13 @@ const Header = styled.div`
 const ScrollArea = styled.div`
   flex: 1 1 auto;
   min-height: 0;
-
-  /* 세로 스크롤만 */
   overflow-y: auto;
   overflow-x: hidden;
-
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-
-  /* 하단 네비 여백 + 좌우 24 */
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
-
-  /* 스크롤바 숨김 */
-  scrollbar-width: none; /* Firefox */
-  &::-webkit-scrollbar {
-    /* Chrome/Safari */
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-  }
-
-  /* 오버레이 스크롤바 마스킹(항상 표시 옵션 대비) */
+  scrollbar-width: none;
+  &::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
   --sbw: 14px;
   margin-right: calc(var(--sbw) * -1);
   padding-right: calc(24px + var(--sbw));
@@ -269,32 +270,14 @@ const Hero = styled.div`
   margin: 12px 0 37px;
   line-height: 30px;
   text-align: left;
-
-  .nick {
-    color: #ce4927;
-    font: 600 24px/30px Pretendard, system-ui, sans-serif;
-  }
-  .plain {
-    color: #141414;
-    font: 600 24px/30px Pretendard, system-ui, sans-serif;
-  }
-  .count {
-    color: #cf4721;
-    font: 500 24px/30px Pretendard, system-ui, sans-serif;
-  }
-
-  /* 두 번째 줄은 500으로 */
-  br + .plain,
-  .count ~ .plain {
-    font-weight: 500;
-  }
+  .nick { color:#ce4927; font:600 24px/30px Pretendard, system-ui, sans-serif; }
+  .plain { color:#141414; font:600 24px/30px Pretendard, system-ui, sans-serif; }
+  .count { color:#cf4721; font:500 24px/30px Pretendard, system-ui, sans-serif; }
+  br + .plain, .count ~ .plain { font-weight: 500; }
 `;
 
 const Divider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #d9d9d9;
-  margin: 30px 0 30px;
+  width: 100%; height: 1px; background: #d9d9d9; margin: 30px 0 30px;
 `;
 
 const MissionCard = styled.div`
@@ -303,132 +286,51 @@ const MissionCard = styled.div`
   padding: 16px 5px;
   position: relative;
 
-  &.is-ai > div > button > div:first-child {
-    /* MainMissionCard의 내부 배지(BadgeWrap)가 첫 번째 div라서 */
-    display: none !important; /* ← 내부 "AI추천" 배지 숨김 */
-  }
+  &.is-ai > div > button > div:first-child { display: none !important; }
+  &.is-ai { background:#ffcec0; border:1.5px solid #eb1f00; }
 
-  &.is-ai {
-    background: #ffcec0;
-    border: 1.5px solid #eb1f00;
-  }
-
-  /* Row가 카드 전체 폭을 차지하도록 */
-  & > div > button > div:last-child {
-    width: 100%;
-    display: flex;
-  }
-
-  /* TextCol: 세 줄 왼쪽 정렬 + 간격 */
+  & > div > button > div:last-child { width:100%; display:flex; }
   & > div > button > div:last-child > div:first-child {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* 가게이름 · 미션내용 · 보상 사이 간격 */
-    flex: 1 1 auto;
-    min-width: 0;
-    align-items: flex-start; /* 아이템 왼쪽 정렬 */
-    text-align: left !important;
-    width: 100%;
+    display:flex; flex-direction:column; gap:20px;
+    flex:1 1 auto; min-width:0; align-items:flex-start; text-align:left !important; width:100%;
   }
+  & > div > button > div:last-child > div:first-child > * { align-self:stretch; margin:0; }
+  & > div > button { padding-top:7px !important; padding-bottom:2px !important; }
 
-  /* 각 줄이 컨테이너 폭을 꽉 채우게 */
-  & > div > button > div:last-child > div:first-child > * {
-    align-self: stretch;
-    margin: 0;
-  }
-
-  /* 카드 높이 유지: 늘어난 간격만큼 내부 패딩 조절 */
-  & > div > button {
-    padding-top: 7px !important;
-    padding-bottom: 2px !important;
-  }
-
-  /* 보상 텍스트(세 번째 줄) 자간/단어 간격 살짝 줄이기 */
   & > div > button > div:last-child > div:first-child > div:nth-child(3) {
-    letter-spacing: -0.3px; /* 숫자만 조절: -0.2 ~ -0.6px 추천 */
-    word-spacing: -1px; /* 선택: 단어 사이도 조금만 좁힘 */
-    font-kerning: normal; /* 커닝 활성화 */
-    text-rendering: optimizeLegibility;
+    letter-spacing:-0.3px; word-spacing:-1px; font-kerning:normal; text-rendering:optimizeLegibility;
   }
 `;
 
 const AiPill = styled.div`
-  position: absolute;
-  top: -30px;
-  left: 12px;
-  height: 28px;
-  padding: 0 10px;
-  display: inline-flex;
-  align-items: center;
-  background: #eb1f00;
-  border: 1px solid #e8512a;
-  color: #fff;
-  font: 700 14px/26px Pretendard, system-ui, sans-serif;
-  border-radius: 8px 8px 0 0;
+  position:absolute; top:-30px; left:12px; height:28px; padding:0 10px;
+  display:inline-flex; align-items:center; background:#eb1f00; border:1px solid #e8512a;
+  color:#fff; font:700 14px/26px Pretendard, system-ui, sans-serif; border-radius:8px 8px 0 0;
 `;
 
 const CardReset = styled.div`
-  /* 내부 카드 배경/테두리/섀도우 제거 */
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 0 !important;
-
-  & * {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: 0 !important;
-  }
+  background: transparent !important; box-shadow:none !important; border:0 !important;
+  & * { background: transparent !important; box-shadow:none !important; border:0 !important; }
 `;
 
 const CardList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display:flex; flex-direction:column; gap:12px;
 `;
+
 const FailBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 20px;
-  width: 345px;
-  height: 313px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.1);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px;
+  width:345px; height:313px; flex-shrink:0; border-radius:12px; background:#fff;
+  box-shadow:0 4px 6px 0 rgba(0,0,0,0.1);
 `;
+
 const FailText = styled.div`
-  color: #141414;
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 24px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 30px; /* 125% */
-  letter-spacing: -1px;
-  text-align: center;
+  color:#141414; text-align:center; font-family:Pretendard; font-size:24px; font-weight:700;
+  line-height:30px; letter-spacing:-1px; text-align:center;
 `;
+
 const FailButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 244px;
-  height: 45px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  background: #e8512a;
-
-  color: #fff;
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 30px; /* 214.286% */
-  letter-spacing: -1px;
-
-  &:hover {
-    cursor: pointer;
-  }
+  display:flex; align-items:center; justify-content:center; width:244px; height:45px; flex-shrink:0;
+  border-radius:12px; background:#e8512a; color:#fff; text-align:center; font-family:Pretendard;
+  font-size:14px; font-weight:500; line-height:30px; letter-spacing:-1px;
+  &:hover { cursor:pointer; }
 `;
