@@ -99,6 +99,7 @@ const Header = styled.div`
   align-items: center;
   gap: 121px;
   height: 50px;
+  padding-bottom: 15px;
 `;
 const Contents = styled.div`
   display: flex;
@@ -206,7 +207,8 @@ const Menu = styled.div`
   flex-direction: column;
   text-align: left;
   gap: 30px;
-  margin-left: 24px;
+  padding-left: 24px;
+  padding-right: 24px;
 
   color: #141414;
   font-family: Pretendard;
@@ -219,4 +221,5 @@ const Menu = styled.div`
 const MenuBox = styled.div`
   display: flex;
   flex-direction: column;
+  padding-bottom: 40px;
 `;

@@ -34,6 +34,7 @@ export default function TitleBar({
 const Bar = styled.header`
   height: 41px;
   padding: 0 24px;
+  padding-bottom: 15px;
   display: grid;
   grid-template-columns: 1fr auto 1fr; /* 가운데 타이틀 중앙 */
   align-items: center;

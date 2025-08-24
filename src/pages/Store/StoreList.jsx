@@ -1,7 +1,9 @@
 import TitleBar from "../../components/TitleBar";
 import Search from "../../assets/icons/search.svg?react";
-import LeftButton from "../../assets/icons/beforepage_button.svg?react";
-import RightButton from "../../assets/icons/nextpage_button.svg?react";
+import BeforeButton from "../../assets/icons/beforepage_button.svg?react";
+import NextButton from "../../assets/icons/nextpage_button.svg?react";
+import RightButton from "../../assets/icons/page_plus4.svg?react";
+import LeftButton from "../../assets/icons/page_minus4.svg?react";
 import StoreCard from "./components/StoreCard";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import Close from "../../assets/icons/close_button.svg?react";
@@ -157,7 +159,7 @@ export default function StoreList() {
       );
       setData(result);
     } else {
-      result = await StoreListGet(0, location.lat, location.lng,dataSize);
+      result = await StoreListGet(0, location.lat, location.lng, dataSize);
       setData(result);
     }
     setLoading(false);
@@ -207,6 +209,14 @@ export default function StoreList() {
     }
     setPageCount(pageCount - 4);
     setPage(pageCount - 4);
+  };
+  const pagePlus = (upDown) => {
+    if(upDown) {
+      if(page== maxPage) return;
+      setPage(page + 1);}
+    else {
+      if(page==1) return;
+      setPage(page-1);}
   };
 
   return (
@@ -310,6 +320,7 @@ export default function StoreList() {
       </ListBox>
       <ListPage>
         <LeftButton onClick={() => pageChange(false)} />
+        <BeforeButton onClick={() => pagePlus(false)} />
         <PageNumber onClick={() => pageOn(1)} $now={page == pageCount ? 1 : 0}>
           {pageCount}
         </PageNumber>
@@ -343,6 +354,7 @@ export default function StoreList() {
         ) : (
           ""
         )}
+        <NextButton onClick={() => pagePlus(true)} />
         <RightButton onClick={() => pageChange(true)} />
       </ListPage>
     </Page>
