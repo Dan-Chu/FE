@@ -7,13 +7,14 @@ export default function MenuCard({data}) {
         <MenuName>{data.name}</MenuName>
         <Price>{data.priceFormatted}</Price>
       </TextBox>
-      <MenuImg src={data.imageUrl} />
+      {data.imageUrl && <MenuImg src={data.imageUrl} />}
     </Card>
   );
 }
 
 const Card = styled.div`
   display: flex;
+  height: 80px;
   padding-top: 15px;
   padding-bottom: 15px;
   padding-right: 22px;

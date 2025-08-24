@@ -233,7 +233,6 @@ const Header = styled.div`
   z-index: 20;
   background: #faf8f8;
   box-shadow: none;
-  margin: 0px 0 17px;
 `;
 
 const ScrollArea = styled.div`
