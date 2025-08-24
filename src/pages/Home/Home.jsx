@@ -61,7 +61,7 @@ export default function Home() {
         <Contents>
         <Text>
           {nickname}<span style={{fontWeight:400}}>님을 위한</span> <br/>단추 &nbsp;
-          <span style={{ color: "#CE4927"}}>PICK</span>
+          <span style={{ color: "#CE4927"}}>PICK!</span>
         </Text>
         <AiSuggestGroup data={storeData} />
         <Box>
