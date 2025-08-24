@@ -25,6 +25,7 @@ export default function EditProfile() {
   // 프로필 기본 정보
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   // 아바타(미리보기 / 파일)
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -34,14 +35,13 @@ export default function EditProfile() {
   const allTags = HashtagsGet(); // [{id, name, ...}]
   const [selected, setSelected] = useState(new Set()); // 선택된 태그 id 집합
 
-  //알림 동의
+  // 알림 동의
   const [push, setPush] = useState(
     localStorage.getItem("push") === "true" // 최초에 localStorage에서 불러오기
   );
-
   useEffect(() => {
     localStorage.setItem("push", push);
-  }, [push]); // push 값이 변할 때마다 localStorage에 저장
+  }, [push]);
 
   // dataURL → File
   const dataURLtoFile = (dataUrl, filename = "avatar.png") => {
@@ -58,7 +58,7 @@ export default function EditProfile() {
   useEffect(() => {
     (async () => {
       try {
-        const me = await getUser(); // { nickname, email, imageUrl, myHashtags?: [{id,name}] ... }
+        const me = await getUser();
         setNickname(me?.nickname ?? "");
         setEmail(me?.email ?? "");
         setAvatarPreview(me?.imageUrl ?? "");
@@ -80,9 +80,20 @@ export default function EditProfile() {
     });
   };
 
+  // 이메일 입력/검증
+  const onChangeEmail = (e) => {
+    const v = e.target.value;
+    setEmail(v);
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    setEmailError(ok || v === "" ? "" : "이메일 형식이 올바르지 않습니다.");
+  };
+
   // 저장: multipart/form-data (userRequest JSON + imageFile)
   const saveAll = async () => {
     try {
+      if (!email) return alert("이메일을 입력해주세요.");
+      if (emailError) return alert("이메일 형식을 확인해주세요.");
+
       // 1) 선택된 id -> 태그 이름으로 변환
       const chosen = allTags.filter((t) => selected.has(t.id ?? t.hashtagId));
       const hashtagsPayload = chosen
@@ -95,8 +106,6 @@ export default function EditProfile() {
         nickname,
         email,
         hashtags: hashtagsPayload,
-        // 필요 시 서버가 id 목록을 받는 구현도 대비 가능
-        // hashtagIds: chosen.map((t) => t.id ?? t.hashtagId),
       };
 
       const fd = new FormData();
@@ -107,8 +116,10 @@ export default function EditProfile() {
       if (avatarFile) fd.append("imageFile", avatarFile);
 
       await updateUser(fd);
+
+      // 마이페이지가 새로 마운트되도록 이동 → 최신 이메일 바로 반영
       alert("저장 완료!");
-      nav(-1);
+      nav("/mypage", { replace: true });
     } catch (e) {
       console.log("PUT /users error:", e?.response?.status, e?.response?.data);
       alert(
@@ -189,8 +200,17 @@ export default function EditProfile() {
           <Divider />
           <Row>
             <FieldLabel>이메일</FieldLabel>
-            <ReadOnly>{email}</ReadOnly>
+            <Input
+              type="email"
+              value={email}
+              onChange={onChangeEmail}
+              placeholder="이메일을 입력하세요"
+              autoComplete="email"
+              inputMode="email"
+              aria-invalid={!!emailError}
+            />
           </Row>
+          {emailError && <HelperError>{emailError}</HelperError>}
         </Card>
 
         <DottedHr />
@@ -228,7 +248,9 @@ export default function EditProfile() {
           )}
         </PushBox>
 
-        <SaveButton onClick={saveAll}>변경 사항 한번에 저장하기</SaveButton>
+        <SaveButton onClick={saveAll} disabled={!email || !!emailError}>
+          변경 사항 한번에 저장하기
+        </SaveButton>
 
         {/* 하단 링크 */}
         <FooterLinks>
@@ -373,6 +395,12 @@ const Input = styled.input`
   }
 `;
 
+const HelperError = styled.div`
+  color: #e7502a;
+  font-size: 12px;
+  margin: 6px 0 0 86px; /* 라벨(72px)+gap(14px) 정렬 */
+`;
+
 const ReadOnly = styled.div`
   flex: 1;
   padding: 10px 12px;
@@ -471,6 +499,9 @@ const SaveButton = styled.button`
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
+
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  pointer-events: ${({ disabled }) => (disabled ? "none" : "auto")};
 
   &:focus,
   &:focus-visible,

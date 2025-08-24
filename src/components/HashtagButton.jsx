@@ -1,4 +1,3 @@
-// src/components/HashtagButton.jsx
 import styled from "styled-components";
 
 /** 해시태그 토글 버튼 (상태는 부모가 관리)
@@ -15,7 +14,7 @@ export default function HashtagButton({ on = false, children = "해시태그", .
 }
 
 const Btn = styled.button`
-  min-width: 78px;          /* 한 줄 유지 */
+  min-width: 78px;          
   height: 31px;
   padding: 0 12px;
   border-radius: 18px;

@@ -11,7 +11,7 @@ import {
 } from "../../components/Modal";
 import { AiMissionGet } from "../../shared/api/openAI";
 import { MissionListGet, MissionDetailGet } from "../../shared/api/mission";
-import { CompleteMissionGet } from "../../shared/api/user";
+import { getUser, CompleteMissionGet } from "../../shared/api/user";
 import FlagLogo from "../../assets/logos/flag_logo.svg?react";
 import Loading from "../../components/Loading";
 
@@ -20,11 +20,17 @@ export default function MissionPage() {
   const [isMissionOpen, setIsMissionOpen] = useState(false);
   const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+
   const [aiMissionData, setAiMissionData] = useState();
   const [missionData, setMissionData] = useState();
   const [missionDetailData, setMissionDetailData] = useState();
-  const [completeMission, setCompleteMission] = useState();
+
+  const [completeMission, setCompleteMission] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [nickname, setNickname] = useState("");
+
+  // 상세에서 보상만 모아두는 맵 { [id]: rewardName }
+  const [rewardById, setRewardById] = useState({});
 
   // 바깥 스크롤 잠금
   useEffect(() => {
@@ -32,27 +38,57 @@ export default function MissionPage() {
     return () => document.body.classList.remove("no-body-scroll");
   }, []);
 
+  // 상세 응답에서 보상 텍스트 정규화
+  const normalizeRewardName = (detail) =>
+    detail?.rewardName ??
+    detail?.reward ??
+    detail?.rewardText ??
+    detail?.description ??
+    "";
+
+  // 여러 개 id에 대해 상세 호출해서 보상만 채우기
+  const fetchRewards = async (ids = []) => {
+    if (!ids?.length) return;
+    const results = await Promise.all(
+      ids.map((id) => MissionDetailGet(id).catch(() => null))
+    );
+    const next = {};
+    results.forEach((detail, i) => {
+      const id = ids[i];
+      if (detail) next[id] = normalizeRewardName(detail);
+    });
+    setRewardById((prev) => ({ ...prev, ...next }));
+  };
+
   const getData = async () => {
     setLoading(true);
     try {
       const result = await AiMissionGet();
       setAiMissionData(result);
+      if (result?.missionId) fetchRewards([result.missionId]); // AI 카드 보상 채우기
     } catch (err) {
       console.warn("AiMissionGet 실패:", err);
     }
     try {
-      const result = await MissionListGet();
-      setMissionData(result);
+      const list = await MissionListGet();
+      setMissionData(list);
+      fetchRewards(list?.map((m) => m.id) ?? []); // 일반 카드들 보상 채우기
     } catch (err) {
       console.warn("MissionListGet 실패:", err);
     }
     try {
-      const result = await CompleteMissionGet();
-      setCompleteMission(result);
+      const count = await CompleteMissionGet();
+      setCompleteMission(count ?? 0);
     } catch (err) {
       console.warn("CompleteMissionGet 실패:", err);
     }
     setLoading(false);
+    try {
+      const user = await getUser();
+      setNickname(user?.nickname ?? user?.name ?? user?.nickName ?? "");
+    } catch (err) {
+      console.warn("getUser 실패:", err);
+    }
   };
 
   useEffect(() => {
@@ -64,9 +100,7 @@ export default function MissionPage() {
     setMissionDetailData(result);
     setIsMissionOpen(true);
   };
-  const toMypage = () => {
-    navigate(`/mypage`);
-  };
+  const toMypage = () => navigate(`/mypage`);
 
   return (
     <Page>
@@ -85,74 +119,84 @@ export default function MissionPage() {
             <span className="plain">&nbsp;개</span>
           </Hero>
 
-          {/* AI 추천 카드 */}
-          {aiMissionData ? (
-            <MissionCard className="is-ai" key={aiMissionData.missionId}>
-              <AiPill>AI 추천</AiPill>
-              <CardReset>
-                <MainMissionCard
-                  onClick={() => missionDetail(aiMissionData.missionId)}
-                  data={aiMissionData}
-                  recommended={true}
-                />
-              </CardReset>
-            </MissionCard>
-          ) : (
-            <FailBox>
-              <FlagLogo width="117px" height="106px" />
-              <FailText>
-                김단골님의 <span style={{ color: "#CE4927" }}>취향</span>을
-                <br />
-                알려주세요!
-              </FailText>
-              <FailButton onClick={() => toMypage()}>
-                해시태그 설정하러가기
-              </FailButton>
-            </FailBox>
-          )}
-          <Divider />
+        {/* AI 추천 카드 */}
+        {aiMissionData ? (
+          <MissionCard className="is-ai" key={aiMissionData.missionId}>
+            <AiPill>AI 추천</AiPill>
+            <CardReset>
+              <MainMissionCard
+                onClick={() => missionDetail(aiMissionData.missionId)}
+                data={{
+                  ...aiMissionData,
+                  // 상세에서 채운 보상 주입
+                  rewardName: rewardById[aiMissionData.missionId] ?? "",
+                }}
+                recommended={true}
+              />
+            </CardReset>
+          </MissionCard>
+        ) : (
+          <FailBox>
+            <FlagLogo width="117px" height="106px" />
+            <FailText>
+              {`${nickname || "김단골"}님의 `}
+              <span style={{ color: "#CE4927" }}>취향</span>을
+              <br />
+              알려주세요!
+            </FailText>
+            <FailButton onClick={() => toMypage()}>
+              해시태그 설정하러가기
+            </FailButton>
+          </FailBox>
+        )}
 
-          {/* 일반 카드들 */}
-          <CardList>
-            {missionData && missionData.length > 0 ? (
-              missionData.map((data) => (
-                <MissionCard>
-                  <CardReset>
-                    <MainMissionCard
-                      key={data.id}
-                      onClick={() => missionDetail(data.id)}
-                      data={data}
-                      recommended={false}
-                    />
-                  </CardReset>
-                </MissionCard>
-              ))
+        <Divider />
+
+        {/* 일반 카드들 */}
+        <CardList>
+          {missionData && missionData.length > 0 ? (
+            missionData.map((m) => (
+              <MissionCard key={m.id}>
+                <CardReset>
+                  <MainMissionCard
+                    onClick={() => missionDetail(m.id)}
+                    data={{
+                      ...m,
+                      // 상세에서 채운 보상 주입
+                      rewardName: rewardById[m.id] ?? "",
+                    }}
+                    recommended={false}
+                  />
+                </CardReset>
+              </MissionCard>
+            ))
+          ) : (
+            <p>미션이 없습니다.</p>
+          )}
+        </CardList>
+      </ScrollArea>
             ) : (
-              <p>미션이 없습니다.</p>
-            )}
-          </CardList>
-        </ScrollArea>
-      ) : (
         <Loading />
       )}
 
       {/* 모달들 */}
       {isMissionOpen && (
-        <MissionModal
-          mission={{
-            image: missionDetailData?.rewardImageUrl,
-            title: missionDetailData?.title,
-            store: missionDetailData?.storeName,
-            reward: missionDetailData?.description,
-            storeId: missionDetailData?.storeId,
-          }}
-          onClose={() => setIsMissionOpen(false)}
-          onSubmit={() => {
-            setIsMissionOpen(false);
-            setIsCodeInputOpen(true);
-          }}
-        />
+      <MissionModal
+        mission={{
+          image: missionDetailData?.rewardImageUrl,
+          title: missionDetailData?.title,
+          store: missionDetailData?.storeName,
+          reward: missionDetailData?.description,
+          storeId: missionDetailData?.storeId,
+        }}
+        onClose={() => setIsMissionOpen(false)}
+        onSubmit={() => {
+          setIsMissionOpen(false);
+          setIsCodeInputOpen(true);
+        }}
+       />
       )}
+
       {isCodeInputOpen && (
         <CodeInputModal
           onClose={() => setIsCodeInputOpen(false)}
@@ -161,7 +205,7 @@ export default function MissionPage() {
             setIsCodeInputOpen(false);
             setIsSuccessOpen(true);
           }}
-          authCode={missionDetailData.storeAuthCode}
+          authCode={missionDetailData?.storeAuthCode}
         />
       )}
       {isSuccessOpen && (

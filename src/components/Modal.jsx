@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import "./Modal.css";
 import styled from "styled-components";
 import couponUse from "../assets/images/coupon_use.svg";
+import missionSkin from "../assets/images/missionmodal.svg";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 /* 공통 래퍼 */
 const ModalWrapper = ({ children, onClose }) => {
@@ -18,19 +20,20 @@ const ModalWrapper = ({ children, onClose }) => {
     };
   }, [onClose]);
 
-  return (
-    <div
-      className="modal-backdrop"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+  // viewport 최상단(body)로 포털 렌더
+  const node = (
+    <div className="dc-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="dc-modal-shell" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
   );
+
+  // 클라이언트에서만 포털
+  return typeof document !== "undefined" ? createPortal(node, document.body) : node;
 };
+
+export default ModalWrapper;
 
 /* ---------------- 일일미션 전용 모달 3종 ---------------- */
 
@@ -43,34 +46,42 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
   };
   return (
     <ModalWrapper onClose={onClose}>
-      <div className="mission-modal">
-        <img src={mission.image} alt="" className="mission-image" />
-        <div className="mission-title">{mission.title}</div>
-        <div className="mission-store">{mission.store}</div>
-        <div className="mission-desc">{mission.reward}</div>
+      <div className="mission-skin">
+        {/* 배경(svg) */}
+        <img className="mission-bg" src={missionSkin} alt="" draggable="false" />
 
-        <div className="mission-btn-group">
-          <button
-            type="button"
-            className="mission-btn mission-btn-store"
-            onClick={() => toStoreDetail(mission.storeId)}
-          >
-            가게 더보기
-          </button>
-          <button
-            type="button"
-            className="mission-btn mission-btn-code"
-            onClick={onSubmit}
-          >
-            인증코드 입력
-          </button>
+        {/* 내용 오버레이 */}
+        <div className="mission-body">
+          <img src={mission.image} alt="" className="mission-image" />
+          
+          <div>
+            <div className="mission-title">{mission.title}</div>
+            <div className="mission-store">{mission.store}</div>
+            <div className="mission-desc">{mission.reward}</div>
+          </div>
         </div>
+    <div className="mission-cta">
+      <button
+        type="button"
+        className="cta cta-left"
+        onClick={() => toStoreDetail(mission.storeId)}
+        aria-label="가게 더보기"
+      />
+      <button
+        type="button"
+        className="cta cta-right"
+        onClick={onSubmit}
+        aria-label="인증코드 입력"
+      />
+    </div>
+
       </div>
     </ModalWrapper>
   );
 };
 
 import { MissionComplete } from "../shared/api/mission";
+
 // 2) 인증코드 입력 모달(일일미션)
 export const CodeInputModal = ({
   onClose,
@@ -116,7 +127,7 @@ export const CodeInputModal = ({
   );
 };
 
-// ✅ 3) 공용: 쿠폰함 성공 모달 (일일미션/스탬프 모두 재사용)
+// 3) 공용: 쿠폰함 성공 모달 (일일미션/스탬프 모두 재사용)
 export const CouponSuccessModal = ({ onClose }) => {
   return (
     <ModalWrapper onClose={onClose}>
@@ -161,7 +172,7 @@ export const StampCodeModal = ({ onClose, onSubmit }) => {
         <h3 className="stamp-title">단골 도장 꾹!</h3>
 
         {/* * 테스트용 인증코드 입니다. */}
-        <p className="stamp-hint">* 테스트용 인증코드 ????입니다.</p>
+        <p className="stamp-hint">* 테스트용 인증코드는 스탬프 카드를 누르면 뜹니다.</p>
 
         {/* AAAA 스타일의 대형 입력 */}
         <input
@@ -176,7 +187,7 @@ export const StampCodeModal = ({ onClose, onSubmit }) => {
         />
 
         <button className="btn-confirm" onClick={submit}>
-          "확인"
+          확인
         </button>
       </div>
     </ModalWrapper>
@@ -277,19 +288,18 @@ export const CouponUseModal = ({ onClose }) => {
   );
 };
 
-// 이 모달만의 스타일 (다른 CSS 파일 필요 X)
+// 모달 스타일
 const UseWrap = styled.div`
   position: relative;
-  width: min(320px, 90vw);   /* 모달 가로 폭 */
-  /* 그림자/라운드는 이미지 자체에 있으면 생략 가능 */
+  width: min(320px, 90vw);   
 
   img {
     display: block;
     width: 100%;
     height: auto;
-    border-radius: 16px;     /* 이미지에 둥근 모서리 있으면 맞춰줘 */
+    border-radius: 16px;     
     user-select: none;
-    pointer-events: none;    /* 클릭은 아래 투명버튼이 받게 */
+    pointer-events: none;    
   }
 
   .btn-close {
@@ -298,7 +308,7 @@ const UseWrap = styled.div`
     right: 0;
     bottom: 0;
 
-    /* ⬇️ 이미지의 빨간 '닫기' 바 영역만큼 높이 설정 */
+    /* 이미지의 빨간 '닫기' 바 영역만큼 높이  */
     height: 56px;
 
     background: transparent;
