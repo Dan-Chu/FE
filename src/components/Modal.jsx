@@ -82,50 +82,69 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
 
 import { MissionComplete } from "../shared/api/mission";
 
-// 2) 인증코드 입력 모달(일일미션)
+// CodeInputModal (일일미션/쿠폰 공용)
 export const CodeInputModal = ({
   onClose,
   onSubmit,
   hint = "예시 코드는 0000 입니다",
-  authCode,
+  authCode,            // 미션 모드에서만 사용
+  mode = "mission",    // "mission" | "coupon"
 }) => {
   const [code, setCode] = useState("");
 
-  const handleSubmit = async () => {
-    const result = await MissionComplete(code, authCode);
-    if (code.length === 4) {
-      if (result) onSubmit();
-      else alert("올바른 코드를 입력해주세요.");
-    } else alert("4자리 숫자를 입력해주세요!");
+  const normalize = (s) => String(s ?? "").replace(/\s|-/g, "").toUpperCase();
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.();
+    const c = normalize(code);
+
+    // 4자리 제한 유지(필요시 조정)
+    if (c.length !== 4) {
+      alert("4자리 코드를 입력해주세요.");
+      return;
+    }
+
+    if (mode === "mission") {
+      // 기존 동작: 일일미션 검증 성공 시에만 부모로 전달
+      const ok = await MissionComplete(c, authCode);
+      if (!ok) {
+        alert("올바른 코드를 입력해주세요.");
+        return;
+      }
+      onSubmit?.(c);
+    } else {
+      // 쿠폰 모드: 검증은 부모(API)가 한다 → 바로 값 전달
+      onSubmit?.(c);
+    }
   };
 
   return (
     <ModalWrapper onClose={onClose}>
-      <div className="modal-code">
+      <div className="modal-code" onClick={(e) => e.stopPropagation()}>
         <h3 className="modal-title">인증코드를 입력해주세요</h3>
-
         {hint && <p className="modal-hint">{hint}</p>}
 
-        <input
-          className="modal-code-input"
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          maxLength={4}
-          inputMode="numeric"
-          placeholder="4자리 숫자"
-          autoFocus
-        />
-
-        <div className="modal-button-group">
-          <button className="btn-confirm" onClick={handleSubmit}>
-            확인
-          </button>
-        </div>
+        <form onSubmit={handleSubmit}>
+          <input
+            className="modal-code-input"
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} /* 숫자만 */
+            maxLength={4}
+            inputMode="numeric"
+            placeholder="4자리 숫자"
+            autoFocus
+          />
+          <div className="modal-button-group">
+            <button type="button" className="btn-cancel" onClick={onClose}>취소</button>
+            <button type="submit" className="btn-confirm">확인</button>
+          </div>
+        </form>
       </div>
     </ModalWrapper>
   );
 };
+
 
 // 3) 공용: 쿠폰함 성공 모달 (일일미션/스탬프 모두 재사용)
 export const CouponSuccessModal = ({ onClose }) => {
@@ -143,6 +162,7 @@ export const CouponSuccessModal = ({ onClose }) => {
     </ModalWrapper>
   );
 };
+
 
 /* ---------------- 스탬프 전용 모달 3종 ---------------- */
 import StampHero from "../assets/images/stamp_modal.svg";
@@ -274,6 +294,8 @@ export const AlreadyExistsModal = ({ storeName = "", onClose }) => {
     </ModalWrapper>
   );
 };
+
+
 
 /* ----- 쿠폰 사용 성공적 모달 ㄹㅇ내 인생 마지막 모달 ----- */
 export const CouponUseModal = ({ onClose }) => {

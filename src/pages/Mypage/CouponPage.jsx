@@ -207,6 +207,7 @@ export default function CouponPage() {
       {/* 코드 입력 모달(필요한 경우만) */}
       {askCode && !showUsed && (
         <CodeInputModal
+          mode="coupon"
           hint="가게에서 받은 인증코드를 입력하세요"
           onClose={() => setAskCode(false)}
           onSubmit={handleSubmitCode}
