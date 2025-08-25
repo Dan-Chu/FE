@@ -5,12 +5,14 @@ import Navar from "../../components/Navar";
 import MainStampCard from "../../components/MainStampCard";
 import {
   AlreadyExistsModal,
+  CodeInputModal,
   CouponSuccessModal,
 } from "../../components/Modal";
 import { StampCircleButton } from "../../components/Button";
 import { StampListGet, StampPlus, StampReward } from "../../shared/api/stamp";
 import axios from "axios";
 import Loading from "../../components/Loading";
+import { CodeMadal } from "../../components/ModalStyle";
 
 /* 서버에서 어떤 이름으로 오든 id 추출 */
 const pickId = (x = {}) =>
@@ -221,7 +223,7 @@ export default function StampPage() {
 
       {/* 전역 스탬프 적립 */}
       {modalType === "stamp" && (
-        <StampCodeModal onClose={closeModal} onSubmit={handleSubmitStamp} />
+        <CodeInputModal mode="stamp" onClose={closeModal} onSubmit={handleSubmitStamp} />
       )}
 
       {/* (옵션) 이미 보상 대기중 알림 */}
