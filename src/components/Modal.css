@@ -28,11 +28,29 @@
   border-radius:16px;
 }
 
+.mission-skin .mission-title{
+  padding-left: 12px;          /* 필요하면 10~14px로 미세조정 */
+  text-indent: 0 !important;   /* ✅ 첫줄 들여쓰기 제거 */
+  margin-left: 0 !important;   /* 혹시 남아있을 여백도 초기화 */
+  text-align: left;
+
+  /* 기존 줄바꿈/클램프 유지 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden; text-overflow: ellipsis; white-space: normal;
+
+  /* ⭐ 붙여쓰기 보존 + 이상한 줄바꿈 방지 */
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+
 /* 내용 영역(상단~버튼바 위까지) */
 .mission-skin .mission-body{
   position:absolute;
-  top:22px; left:20px; right:20px; bottom:68px; /* 하단 버튼바 높이 보존 */
-  display:grid; grid-template-columns:104px 1fr; column-gap:14px;
+  top:22px; left:20px; right:20px; bottom:68px;
+  display:grid;
+  grid-template-columns:140px 1fr;   /* ← 이미지 폭과 맞춤 */
+  column-gap:14px;
   align-items:flex-start;
 }
 
@@ -47,36 +65,50 @@
 
 /* 우측 텍스트 */
 .mission-right{
-  display:flex; flex-direction:column;
-  justify-content:center;             /* 수직 가운데(=조금 내려온 느낌) */
-  padding-top:6px;                    /* 추가 하강 */
+  display:grid;
+  grid-template-rows:auto auto 1fr; /* 제목(최대2줄) / 가게명 / 설명 */
+  row-gap:6px;
+  align-content:start;
+  padding-top:0;
 }
 
+
 .mission-title{
-  padding-top:30px; 
-  padding-left: 40px;
-  height: 20px;
+  padding-left: 10px;
   color:#CE4927;
-  font: 700 18px/22px Pretendard, system-ui, sans-serif;
-  letter-spacing:-0.5px; 
-  margin:0 0 4px;
-  display:-webkit-box; 
-  -webkit-box-orient:vertical; overflow:hidden;
-}
+  font:700 18px/24px Pretendard, system-ui, sans-serif;
+  letter-spacing:-0.5px;
+  margin:0;                          /* 아래 간격은 grid row-gap이 담당 */
+  /* ✅ 최대 2줄 + 말줄임 */
+  display:-webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: keep-all;              /* 한글 음절 끊김 방지 */
+  overflow-wrap: break-word; /* NBSP 존중, 필요한 경우에만 단어 분리 */
+  margin-top: 10px;
+ }
+
 .mission-store{
+  padding-left: 50px;
   color:#8B8B8B;
-  padding-left: 40px;
-  font: 600 12px/16px Pretendard, system-ui, sans-serif;
-  margin:0 0 30px;
+  font:600 12px/16px Pretendard, system-ui, sans-serif;
+  margin:0; 
+  margin-top: 10px;
 }
+
 .mission-desc{
-  padding-left: 40px;
   color:#141414;
   font: 500 13px/18px Pretendard, system-ui, sans-serif;
   letter-spacing:-0.3px;
-  display:-webkit-box; 
-  -webkit-box-orient:vertical; 
-  overflow:hidden;
+  display:-webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 15px;
 }
 
 /* 하단 버튼 두 칸(배경은 svg, 텍스트/클릭만 오버레이) */
@@ -96,6 +128,43 @@
 }
 .mission-cta .cta-left{ color:#FFFFFF; }   /* 왼쪽(주황 배경) */
 .mission-cta .cta-right{ color:#6A6A6A; }  /* 오른쪽(회색 배경) */
+
+/* ===== PATCH: 미션 타이틀 2줄 정렬(⭐) & 위치 미세조정 ===== */
+
+.mission-skin .mission-right .mission-title{
+  /* 네가 이미 살짝 오른쪽/아래로 준 느낌 유지 + 걸이 들여쓰기로 1·2줄 정렬 */
+  --base-pad: 12px;   /* ← 살짝 오른쪽(10~14px에서 취향대로 조절) */
+  --hang: 26px;       /* ← ⭐+공백 폭. 24~28px 사이에서 미세조정 */
+
+  padding-left: calc(var(--base-pad) + var(--hang)) !important;
+  text-indent: calc(-1 * var(--hang)) !important; /* 첫 줄만 왼쪽으로 당겨 1·2줄 시작선 동일 */
+  margin-top: 10px;                                /* 너가 내려둔 여백 유지 */
+
+  color:#CE4927;
+  font:700 18px/24px Pretendard, system-ui, sans-serif;
+  letter-spacing:-0.5px;
+
+  /* 2줄 고정 + 말줄임 */
+  display:-webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space: normal;
+
+  /* 줄바꿈 안정화 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 혹시 남아있는 이전 규칙 영향 제거(왼쪽 밀림 방지) */
+.mission-skin .mission-title{ text-indent: 0 !important; margin-left: 0 !important; }
+
+/* 네가 세팅해둔 다른 요소 간격은 그대로 사용 */
+.mission-skin .mission-right .mission-store{ padding-left: 50px; margin-top: 10px; }
+.mission-skin .mission-right .mission-desc { margin-top: 15px; }
+
+
 
 
 

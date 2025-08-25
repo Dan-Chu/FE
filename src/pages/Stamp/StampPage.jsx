@@ -1,10 +1,13 @@
-// src/pages/Mypage/StampPage.jsx
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import TitleBar from "../../components/TitleBar";
 import Navar from "../../components/Navar";
 import MainStampCard from "../../components/MainStampCard";
-import { StampCodeModal, RewardCodeModal, AlreadyExistsModal, CouponSuccessModal } from "../../components/Modal";
+import {
+  StampCodeModal,
+  AlreadyExistsModal,
+  CouponSuccessModal,
+} from "../../components/Modal";
 import { StampCircleButton } from "../../components/Button";
 import { StampListGet, StampPlus, StampReward } from "../../shared/api/stamp";
 import axios from "axios";
@@ -12,14 +15,23 @@ import Loading from "../../components/Loading";
 
 /** 서버 응답 → 카드 VM (백엔드 필드명 흡수) */
 const toVM = (x = {}) => {
-  const id = x.id ?? x.stampId ?? x.uuid ?? x.storeStampId ?? null;
+  const id =
+    x.stampId ?? x.storeStampId ?? x.store?.stampId ?? x.id ?? x.uuid ?? null;
+
   const storeName = x.storeName ?? x.store?.name ?? x.name ?? "가게";
   const stamps = Number(x.currentCount ?? x.stampCount ?? x.count ?? 0);
   const required = Number(x.requiredCount ?? x.goal ?? 10);
   const cyclesCompleted = Number(x.cyclesCompleted ?? x.completed ?? 0);
-  const hasUnclaimedReward = Boolean(
-    x.hasUnclaimedReward ?? x.rewardAvailable ?? (required > 0 && stamps >= required)
-  );
+
+  const status = (x.status ?? "").toString().toUpperCase();
+  const hasUnclaimedReward = status
+    ? status === "READY_TO_CLAIM"
+    : Boolean(
+        x.hasUnclaimedReward ??
+          x.rewardAvailable ??
+          (required > 0 && stamps >= required)
+      );
+
   return { id, storeName, stamps, required, cyclesCompleted, hasUnclaimedReward };
 };
 
@@ -28,8 +40,10 @@ export default function StampPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [modalType, setModalType] = useState(null); // 'stamp' | 'claim' | 'exists' | 'success' | null
-  const [activeIdx, setActiveIdx] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'stamp' | 'exists' | 'success' | null
+
+  // 보상 직후 “바늘” 띄울 카드 기억
+  const [needleMap, setNeedleMap] = useState({}); // { [stampId]: true }
 
   const fetchedRef = useRef(false);
   const submitLock = useRef(false);
@@ -43,9 +57,21 @@ export default function StampPage() {
       const list = await StampListGet();
       const vms = (Array.isArray(list) ? list : []).map(toVM);
       setStores(vms);
+
+      // 서버 최신 상태에 맞춰 needleMap 정리 (보상 직후 remainder===1 일 때만 유지)
+      setNeedleMap((prev) => {
+        const next = { ...prev };
+        for (const s of vms) {
+          const rem = s.required > 0 ? s.stamps % s.required : s.stamps;
+          if (rem !== 1) delete next[s.id];
+        }
+        return next;
+      });
+
+      return vms;
     } catch (e) {
       const msg = axios.isAxiosError(e)
-        ? (e.response?.data?.message ?? "스탬프를 불러오지 못했어요.")
+        ? e.response?.data?.message ?? "스탬프를 불러오지 못했어요."
         : "스탬프를 불러오지 못했어요.";
       setError(msg);
       console.error("[StampList] ", e?.response?.status, e?.response?.data);
@@ -61,27 +87,24 @@ export default function StampPage() {
   }, []);
 
   const openGlobalStamp = () => setModalType("stamp");
-  const openClaim = (idx) => { setActiveIdx(idx); setModalType("claim"); };
 
   /** 스탬프 적립 제출 */
   const handleSubmitStamp = async (code) => {
     const authCode = String(code ?? "").trim();
-    if (!authCode) { alert("인증코드를 입력하세요."); return; }
+    if (!authCode) return alert("인증코드를 입력하세요.");
     if (submitLock.current) return;
     submitLock.current = true;
 
     try {
-      const ok = await StampPlus(authCode);   // 200~299 → true, 4xx/5xx → false
-      // ✅ 성공/실패와 무관하게 항상 새로고침해서 서버 상태 반영
+      const { ok, status } = await StampPlus(authCode);
       setModalType(null);
-      setActiveIdx(null);
       await load();
-      // 약간의 반영 지연 대비
       setTimeout(load, 300);
 
       if (!ok) {
-        // 실패(예: 409 보상대기)인 경우 안내만
-        alert("인증코드가 올바르지 않거나 보상 대기 중이에요. 필요 시 보상 수령을 진행해주세요.");
+        if (status === 409) alert("보상 대기 중인 스탬프가 있어요. 보상 수령을 진행해주세요.");
+        else if (status === 400) alert("인증코드가 올바르지 않습니다.");
+        else alert("스탬프 적립에 실패했어요.");
       }
     } catch (e) {
       const s = e?.response?.status;
@@ -93,20 +116,30 @@ export default function StampPage() {
     }
   };
 
-  /** 보상 수령 제출 */
-  const handleSubmitClaim = async () => {
-    if (activeIdx == null) return;
-    const target = stores[activeIdx];
-    if (!target?.id) { alert("스탬프 정보를 찾을 수 없어요."); return; }
+  /** 보상 수령 → 즉시 발급(POST /stamps/{stampId}/use) */
+  const handleClaimClick = async (idx) => {
+    if (idx == null) return;
+    const target = stores[idx];
+    if (!target?.id && target?.id !== 0) {
+      alert("스탬프 정보를 찾을 수 없어요.");
+      return;
+    }
     if (claimLock.current) return;
     claimLock.current = true;
 
     try {
       const ok = await StampReward(target.id);
-      if (!ok) { alert("보상 수령에 실패했어요."); return; }
-      setModalType(null);
-      setActiveIdx(null);
-      setTimeout(() => setModalType("success"), 0);
+      if (!ok) {
+        alert("보상 수령에 실패했어요.");
+        return;
+      }
+
+      // 이 카드에 바늘 표시 예약
+      setNeedleMap((p) => ({ ...p, [target.id]: true }));
+
+      // 성공 모달만 띄우고 이동은 X
+      setModalType("success");
+
       await load();
       setTimeout(load, 300);
     } catch (e) {
@@ -122,7 +155,12 @@ export default function StampPage() {
     }
   };
 
-  const closeModal = () => { setModalType(null); setActiveIdx(null); };
+  /** 성공 모달 닫기 → 그냥 닫기 (이동 없음) */
+  const handleCloseSuccess = () => {
+    setModalType(null);
+  };
+
+  const closeModal = () => setModalType(null);
 
   return (
     <Page>
@@ -136,20 +174,33 @@ export default function StampPage() {
       </Header>
 
       <ScrollArea>
-        {loading && <Loading/>}
-        {!loading && error && <div style={{ padding: 24, color: "#cf4721" }}>{error}</div>}
+        {loading && <Loading />}
+        {!loading && error && (
+          <div style={{ padding: 24, color: "#cf4721" }}>{error}</div>
+        )}
 
         {!loading && !error && (
           <List>
-            {stores.map((store, idx) => (
-              <MainStampCard
-                key={(store.id ?? store.storeName) + "_" + idx}
-                store={store}
-                onClaim={() => openClaim(idx)}
-              />
-            ))}
-            {stores.length === 0 && <div style={{ padding: 24 }}>아직 적립된 스탬프가 없어요.</div>}
-          </List>
+  {stores.map((store, idx) => {
+    // 서버가 보상 직후 count=1로 보내면 remainder가 1이 됩니다.
+    const rem = store.required > 0 ? store.stamps % store.required : store.stamps;
+    // 우리가 예약했고(reward 성공), remainder도 1이면 카드에 needle 표시
+    const showNeedle = !!needleMap[store.id] && rem === 1;
+
+    return (
+      <MainStampCard
+        key={(store.id ?? store.storeName) + "_" + idx}
+        store={store}                 // 원본 값을 그대로 넘깁니다 (보정은 카드 내부에서 처리)
+        needle={showNeedle}        
+        onClaim={() => handleClaimClick(idx)}
+      />
+    );
+  })}
+  {stores.length === 0 && (
+    <div style={{ padding: 24 }}>아직 적립된 스탬프가 없어요.</div>
+  )}
+</List>
+
         )}
       </ScrollArea>
 
@@ -160,25 +211,15 @@ export default function StampPage() {
         <StampCodeModal onClose={closeModal} onSubmit={handleSubmitStamp} />
       )}
 
-      {/* 보상 수령 */}
-      {modalType === "claim" && activeIdx != null && (
-        <RewardCodeModal
-          storeName={stores[activeIdx]?.storeName ?? ""}
-          onClose={closeModal}
-          onSubmit={handleSubmitClaim}
-        />
-      )}
-
       {/* (옵션) 이미 보상 대기중 알림 */}
-      {modalType === "exists" && activeIdx != null && (
-        <AlreadyExistsModal
-          storeName={stores[activeIdx]?.storeName ?? ""}
-          onClose={closeModal}
-        />
+      {modalType === "exists" && (
+        <AlreadyExistsModal storeName="-" onClose={closeModal} />
       )}
 
-      {/* 보상 수령 성공 */}
-      {modalType === "success" && <CouponSuccessModal onClose={closeModal} />}
+      {/* 보상 수령 성공 — 확인 누르면 닫기만 */}
+      {modalType === "success" && (
+        <CouponSuccessModal onClose={handleCloseSuccess} />
+      )}
     </Page>
   );
 }
@@ -189,18 +230,55 @@ const Page = styled.div`
   max-width: 390px;
   height: 100dvh;
   margin: 0 auto;
-  display: flex; flex-direction: column;
-  background: #faf8f8; overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #faf8f8;
+  overflow: hidden;
 `;
-const Header = styled.div` position: sticky; top: 0; z-index: 20; background: #faf8f8; box-shadow: none; margin: 0 0 37px; `;
-const HeaderInner = styled.div` position: relative; padding: 0; min-height: 60px; `;
-const TopRight = styled.div` position: absolute; right: 24px; top: 50%; transform: translateY(-50%); z-index: 1; margin: 37px 0; `;
+const Header = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #faf8f8;
+  box-shadow: none;
+  margin: 0 0 37px;
+`;
+const HeaderInner = styled.div`
+  position: relative;
+  padding: 0;
+  min-height: 60px;
+`;
+const TopRight = styled.div`
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  margin: 37px 0;
+`;
 const ScrollArea = styled.div`
-  flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
-  scrollbar-width: none; -ms-overflow-style: none;
-  &::-webkit-scrollbar { width:0!important; height:0!important; display:none!important; }
-  --sbw:14px; margin-right: calc(var(--sbw)*-1); padding-right: calc(24px + var(--sbw));
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+  --sbw: 14px;
+  margin-right: calc(var(--sbw) * -1);
+  padding-right: calc(24px + var(--sbw));
 `;
-const List = styled.div` display:flex; flex-direction:column; gap:12px; padding-bottom:8px; align-items:center; `;
+const List = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+  align-items: center;
+`;
