@@ -97,13 +97,13 @@ export default function StoreList() {
       let result;
       setLoading(true);
       if (location.lat && location.lng) {
-        if (!debouncedSearch) {
-          // 검색어 없으면 그냥 기본 리스트
-          result = await StoreListGet(
+        if (selectFilter.length > 0) {
+          result = await FilterStoreGet(
+            selectFilter,
             page - 1,
+            dataSize,
             location.lat,
             location.lng,
-            dataSize
           );
           setData(result);
         } else if (debouncedSearch) {
@@ -111,24 +111,33 @@ export default function StoreList() {
           result = await SearchStoreGet(
             debouncedSearch,
             page - 1,
+            dataSize,
             location.lat,
-            location.lng,
-            dataSize
+            location.lng
           );
           setData(result);
         } else {
-          result = await FilterStoreGet(
-            selectFilter,
+          result = await StoreListGet(
+            page - 1,
             location.lat,
             location.lng,
-            page - 1,
             dataSize
           );
           setData(result);
         }
       } else {
-        result = await NoneDistanceListGet(page - 1, dataSize);
-        setData(result);
+        if (selectFilter.length > 0) {
+          // 검색어 없으면 그냥 기본 리스트
+          result = await FilterStoreGet(selectFilter, page - 1, dataSize);
+          setData(result);
+        } else if (debouncedSearch) {
+          // 검색어 있으면 검색 API 호출
+          result = await SearchStoreGet(debouncedSearch, page - 1, dataSize);
+          setData(result);
+        } else {
+          result = await NoneDistanceListGet(page - 1, dataSize);
+          setData(result);
+        }
       }
       setLoading(false);
       setMaxPage(result.totalPages);
@@ -149,18 +158,28 @@ export default function StoreList() {
     let result;
     setPage(1);
     setLoading(true);
-    if (selectFilter.length > 0) {
-      result = await FilterStoreGet(
-        selectFilter,
-        location.lat,
-        location.lng,
-        page - 1,
-        dataSize
-      );
-      setData(result);
+    if (location.lat && location.lng) {
+      if (selectFilter.length > 0) {
+        result = await FilterStoreGet(
+          selectFilter,
+          page - 1,
+          dataSize,
+          location.lat,
+          location.lng
+        );
+        setData(result);
+      } else {
+        result = await StoreListGet(0, location.lat, location.lng, dataSize);
+        setData(result);
+      }
     } else {
-      result = await StoreListGet(0, location.lat, location.lng, dataSize);
-      setData(result);
+      if (selectFilter.length > 0) {
+        result = await FilterStoreGet(selectFilter, page - 1, dataSize);
+        setData(result);
+      } else {
+        result = await NoneDistanceListGet(page - 1, dataSize);
+        setData(result);
+      }
     }
     setLoading(false);
     setMaxPage(result.totalPages);
@@ -210,25 +229,25 @@ export default function StoreList() {
     setPageCount(pageCount - 4);
     setPage(pageCount - 4);
   };
-  const pagePlus = (upDown) => {//다음페이지
-    if(upDown) {
-      if(page== maxPage) return;
-      if(page+1 == pageCount+4){
-        setPageCount(pageCount+4);
-        setPage(page+1);
+  const pagePlus = (upDown) => {
+    //다음페이지
+    if (upDown) {
+      if (page == maxPage) return;
+      if (page + 1 == pageCount + 4) {
+        setPageCount(pageCount + 4);
+        setPage(page + 1);
       } else {
-          setPage(page + 1);
+        setPage(page + 1);
       }
+    } else {
+      if (page == 1) return;
+      if (page == pageCount) {
+        setPageCount(pageCount - 4);
+        setPage(page - 1);
+      } else {
+        setPage(page - 1);
       }
-    else {
-      if(page==1) return;
-      if(page == pageCount){
-          setPageCount(pageCount-4);
-          setPage(page-1);
-      } else{
-        setPage(page-1);
-      }
-      }
+    }
   };
 
   return (

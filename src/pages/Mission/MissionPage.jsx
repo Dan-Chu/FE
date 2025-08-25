@@ -347,7 +347,7 @@ const CardReset = styled.div`
 `;
 
 const CardList = styled.div`
-  display:flex; flex-direction:column; gap:12px;
+  display:flex; flex-direction:column; gap:12px; padding-bottom: 20px;
 `;
 
 const FailBox = styled.div`
