@@ -6,7 +6,6 @@ import MainStampCard from "../../components/MainStampCard";
 import {
   AlreadyExistsModal,
   CouponSuccessModal,
-  CodeInputModal,
 } from "../../components/Modal";
 import { StampCircleButton } from "../../components/Button";
 import { StampListGet, StampPlus, StampReward } from "../../shared/api/stamp";
@@ -222,7 +221,7 @@ export default function StampPage() {
 
       {/* 전역 스탬프 적립 */}
       {modalType === "stamp" && (
-        <CodeInputModal mode="stamp" onClose={closeModal} onSubmit={handleSubmitStamp} />
+        <StampCodeModal onClose={closeModal} onSubmit={handleSubmitStamp} />
       )}
 
       {/* (옵션) 이미 보상 대기중 알림 */}
