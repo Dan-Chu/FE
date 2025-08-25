@@ -56,11 +56,10 @@
 
 /* 좌측 이미지 */
 .mission-image{
-  width:140px; height:140px;
+  width:126px; height:126px;
   border-radius:15px; 
   object-fit:cover; 
-  background:#eee;
-  margin-top: 8px; 
+  background:#eee; 
 }
 
 /* 우측 텍스트 */
