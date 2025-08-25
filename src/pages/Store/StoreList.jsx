@@ -98,13 +98,13 @@ export default function StoreList() {
       setLoading(true);
       if (location.lat && location.lng) {
         if (selectFilter.length > 0) {
-          result = await FilterStoreGet({
-            tags: selectFilter,
-            page: page - 1,
-            size: dataSize,
-            lat: location.lat,
-            lng: location.lng,
-          });
+          result = await FilterStoreGet(
+            selectFilter,
+            page - 1,
+            dataSize,
+            location.lat,
+            location.lng,
+          );
           setData(result);
         } else if (debouncedSearch) {
           // 검색어 있으면 검색 API 호출
