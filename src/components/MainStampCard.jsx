@@ -9,40 +9,42 @@ import needleIcon from "../assets/icons/needle.svg";
  * - store: { storeName, stamps, required, cyclesCompleted, hasUnclaimedReward, rewardText? }
  * - disabled?: boolean
  * - onClaim?: () => void
+ * - needle?: boolean        // 보상 직후 바늘 표시 (카드 내부 우측 끝)
  */
-export default function MainStampCard({ store, disabled, onClaim }) {
+export default function MainStampCard({ store, disabled, onClaim, needle = false }) {
   const {
     storeName = "가게",
     stamps = 0,
     cyclesCompleted = 0,
-    // ✅ 목표 개수는 API 값만 사용(동의어 흡수, 정말 없을 때만 표시용 10)
     required = store?.required ?? store?.requiredCount ?? store?.goal ?? 10,
-    // 서버가 플래그 안 줄 수도 있으므로 숫자 비교와 OR
     hasUnclaimedReward = false,
     rewardText = "",
   } = store ?? {};
 
-  const cap = Math.max(1, Number(required) || 10); // 표시용 안전값
-  const n   = Math.max(0, Number(stamps)   || 0);
+  const cap   = Math.max(1, Number(required) || 10);   // 총 칸 수
+  const nRaw  = Math.max(0, Number(stamps)   || 0);    // 서버 카운트
+  const rem   = cap > 0 ? (nRaw % cap) : nRaw;
 
-  // ✅ 수령 가능 판단: 서버 플래그 || 숫자 비교
-  const canClaim = Boolean(hasUnclaimedReward || (n >= cap));
-  const completed = canClaim; // 카드 스타일용
+  // 보상 직후 서버 count=1 → 화면에선 0개처럼 보이게 -1 보정
+  const showNeedle = !!needle && rem === 1;
+  const nForGrid   = showNeedle ? Math.max(0, nRaw - 1) : nRaw;
 
-  const needlesToShow = Math.min(Number(cyclesCompleted) || 0, 3);
+  // 수령 가능(READY) 상태면 꽉 찬 모습 + 버튼
+  const isReady    = hasUnclaimedReward || nRaw >= cap;
+  const n          = isReady ? cap : Math.min(nForGrid, cap);
+
+  const canClaim   = isReady;
+  const completed  = canClaim;
 
   return (
     <Card $completed={completed} $disabled={disabled}>
-      {/* 상단 우측 바늘 */}
-      {needlesToShow > 0 && (
-        <NeedleWrap aria-hidden="true">
-          {Array.from({ length: needlesToShow }).map((_, i) => (
-            <NeedleIcon key={i} src={needleIcon} alt="" $index={i} />
-          ))}
-        </NeedleWrap>
+      {/* 카드 내부 우측 끝 바늘 (하나) */}
+      {showNeedle && (
+        <NeedleOne aria-hidden="true">
+          <img src={needleIcon} alt="" />
+        </NeedleOne>
       )}
 
-      {/* 상단 정보 */}
       <Head>
         <div>
           <Title>{storeName}</Title>
@@ -50,23 +52,27 @@ export default function MainStampCard({ store, disabled, onClaim }) {
         </div>
       </Head>
 
-      {/* 스탬프 그리드 (API 목표 개수 기준) */}
       <Grid aria-label={`적립 ${Math.min(n, cap)}/${cap}`}>
         {Array.from({ length: cap }).map((_, i) => {
           const isLast   = i === cap - 1;
-          const filled   = i < Math.min(n, cap - 1);
-          const lastDone = n >= cap;
+          const filled   = i < Math.min(n, cap - 1); // 마지막 칸 제외 채움
+          const lastDone = n >= cap;                 // 코너(마지막) 채움 여부
           return (
-            <Cell key={i} $noBg={isLast} $corner={isLast ? 60 : 22}>
+            <Cell
+              key={i}
+              $noBg={isReady || isLast}   // READY면 모든 칸 배경 제거, 아니면 마지막 칸만 제거
+              $corner={isLast ? 60 : 22}
+            >
               {isLast
-                ? (lastDone ? <MarkCorner src={stampLastFilled} alt="" /> : <MarkCorner src={stampLastEmpty} alt="" />)
+                ? (lastDone
+                    ? <MarkCorner src={stampLastFilled} alt="" />
+                    : <MarkCorner src={stampLastEmpty} alt="" />)
                 : (filled && <MarkCenter src={stampFilled} alt="" />)}
             </Cell>
           );
         })}
       </Grid>
 
-      {/* 완료 → 카드 CTA (API 값으로만 판단) */}
       {canClaim && (
         <ClaimBar type="button" onClick={onClaim}>
           보상 수령하기
@@ -91,23 +97,54 @@ const Card = styled.div`
   --cell: 56px; --gap-x: 8px; --gap-y: 10px;
   @media (max-width:360px){ --cell:52px; --gap-x:6px; --gap-y:8px; }
 `;
-const NeedleWrap = styled.div`
-  position:absolute; top:10px; right:10px; display:flex; flex-direction:row-reverse; gap:4px; pointer-events:none;
+
+/* 카드 내부 '완전 오른쪽' 바늘 */
+const NeedleOne = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+  pointer-events: none;
+  img { display:block; width:100%; height:100%; }
 `;
-const NeedleIcon = styled.img`
-  width:18px; height:18px; display:block; filter:drop-shadow(0 1px 0 rgba(0,0,0,.12));
-  transform:${({$index})=>`rotate(${-10 + $index * 6}deg)`};
-`;
+
 const Head = styled.div` display:block; margin-bottom:8px; `;
 const Title = styled.div` color:#141414; font-size:18px; font-weight:700; line-height:24px; letter-spacing:-0.2px; margin:0 0 4px; text-align:left; `;
 const Desc = styled.div` color:#5D5D5D; font-size:14px; font-weight:500; line-height:20px; margin:0; text-align:left; `;
-const Grid = styled.div` margin-top:10px; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:var(--gap-y) var(--gap-x); place-items:center; `;
+
+const Grid = styled.div`
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0,1fr));
+  gap:var(--gap-y) var(--gap-x);
+  place-items:center;
+`;
+
 const Cell = styled.div`
   --corner:${({$corner})=>($corner?`${$corner}px`:'22px')};
-  width:var(--cell); height:var(--cell); border-radius:14px; position:relative; overflow:hidden; background:#f9e9e7;
-  ${({$noBg})=>$noBg && `background:transparent; border-radius:0; overflow:visible;`}
+  width:var(--cell);
+  height:var(--cell);
+  border-radius:14px;
+  position:relative;
+  overflow:hidden;
+  background:${({ $noBg }) => ($noBg ? "transparent" : "#f9e9e7")};
+  ${({$noBg}) => $noBg && `border-radius:0; overflow:visible;`}
 `;
-const MarkCenter = styled.img` position:absolute; inset:0; margin:auto; width:72%; height:72%; object-fit:contain; pointer-events:none; `;
-const MarkCorner = styled.img` position:absolute; right:0; bottom:-2px; width:var(--corner); height:var(--corner); object-fit:contain; pointer-events:none; `;
-const ClaimBar = styled.button` margin-top:12px; width:100%; height:40px; border-radius:10px; background:#ff6b4a; color:#fff; border:0; font-weight:700; cursor:pointer; `;
+
+const MarkCenter = styled.img`
+  position:absolute; inset:0; margin:auto;
+  width:72%; height:72%; object-fit:contain; pointer-events:none;
+`;
+const MarkCorner = styled.img`
+  position:absolute; right:0; bottom:-2px;
+  width:var(--corner); height:var(--corner); object-fit:contain; pointer-events:none;
+`;
+
+const ClaimBar = styled.button`
+  margin-top:12px; width:100%; height:40px;
+  border-radius:10px; background:#ff6b4a; color:#fff;
+  border:0; font-weight:700; cursor:pointer;
+`;
 const Foot = styled.div` margin-top:6px; color:#8b8b8b; font-size:12px; text-align:right; `;

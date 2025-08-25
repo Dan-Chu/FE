@@ -47,6 +47,16 @@ export default function MissionPage() {
     detail?.description ??
     "";
 
+  // 상세 응답에서 가게명 / 인증코드 추출 (키 유연 대응)
+  const getStoreName = (detail) =>
+    detail?.storeName ?? detail?.store?.name ?? detail?.store_title ?? "";
+  const getAuthCode = (detail) =>
+    detail?.storeAuthCode ??
+    detail?.authCode ??
+    detail?.store?.authCode ??
+    detail?.store_auth_code ??
+    "";
+
   // 여러 개 id에 대해 상세 호출해서 보상만 채우기
   const fetchRewards = async (ids = []) => {
     if (!ids?.length) return;
@@ -91,7 +101,12 @@ export default function MissionPage() {
         // 응답 키가 달라도 닉네임 뽑아쓰기
         const u = user.value ?? {};
         const nick =
-          u.nickname ?? u.name ?? u.nickName ?? u.displayName ?? u.username ?? "";
+          u.nickname ??
+          u.name ??
+          u.nickName ??
+          u.displayName ??
+          u.username ??
+          "";
         setNickname(String(nick).trim());
       }
     } catch (_) {
@@ -114,6 +129,17 @@ export default function MissionPage() {
   const toMypage = () => navigate(`/mypage`);
 
   const displayName = nickname || "단골";
+
+  // ✅ CodeInputModal에 넘길 동적 힌트 생성
+  const codeHint = (() => {
+    const name = getStoreName(missionDetailData);
+    const code = getAuthCode(missionDetailData);
+    if (!code) return ""; // 코드 없으면 힌트 숨김
+    // 쿠폰함처럼 한 줄 안내형
+    return `* 테스트용 인증코드 ${code}입니다.`; 
+    // 혹은 가게명까지 보여주려면 아래로 교체:
+    // return `* ${name} ${code} *`;
+  })();
 
   return (
     <Page>
@@ -211,15 +237,18 @@ export default function MissionPage() {
         />
       )}
 
+      {/* 인증코드 입력 모달: ✅ 동적 힌트/코드 전달 */}
       {isCodeInputOpen && (
         <CodeInputModal
           onClose={() => setIsCodeInputOpen(false)}
+          missionId={missionDetailData?.id}               // 경로 등에 필요하면 사용
+          authCode={getAuthCode(missionDetailData)}       // 모달 내부에서 검증/표시용
+          hint={codeHint}                                  // 화면 표시용 힌트(쿠폰함 스타일)
           onSubmit={() => {
             getData();
             setIsCodeInputOpen(false);
             setIsSuccessOpen(true);
           }}
-          authCode={missionDetailData?.storeAuthCode}
         />
       )}
 
@@ -259,7 +288,11 @@ const ScrollArea = styled.div`
   overscroll-behavior: contain;
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
   scrollbar-width: none;
-  &::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+  &::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
   --sbw: 14px;
   margin-right: calc(var(--sbw) * -1);
   padding-right: calc(24px + var(--sbw));
@@ -269,14 +302,17 @@ const Hero = styled.div`
   margin: 12px 0 37px;
   line-height: 30px;
   text-align: left;
-  .nick { color:#ce4927; font:600 24px/30px Pretendard, system-ui, sans-serif; }
-  .plain { color:#141414; font:600 24px/30px Pretendard, system-ui, sans-serif; }
-  .count { color:#cf4721; font:500 24px/30px Pretendard, system-ui, sans-serif; }
-  br + .plain, .count ~ .plain { font-weight: 500; }
+  .nick { color:#ce4927; font:600 24px/30px Pretendard,system-ui,sans-serif; }
+  .plain { color:#141414; font:600 24px/30px Pretendard,system-ui,sans-serif; }
+  .count { color:#cf4721; font:500 24px/30px Pretendard,system-ui,sans-serif; }
+  br + .plain, .count ~ .plain { font-weight:500; }
 `;
 
 const Divider = styled.div`
-  width: 100%; height: 1px; background: #d9d9d9; margin: 30px 0 30px;
+  width: 100%;
+  height: 1px;
+  background: #d9d9d9;
+  margin: 30px 0 30px;
 `;
 
 const MissionCard = styled.div`
@@ -285,7 +321,7 @@ const MissionCard = styled.div`
   padding: 16px 5px;
   position: relative;
 
-  &.is-ai > div > button > div:first-child { display: none !important; }
+  &.is-ai > div > button > div:first-child { display:none !important; }
   &.is-ai { background:#ffcec0; border:1.5px solid #eb1f00; }
 
   & > div > button > div:last-child { width:100%; display:flex; }
@@ -304,7 +340,7 @@ const MissionCard = styled.div`
 const AiPill = styled.div`
   position:absolute; top:-30px; left:12px; height:28px; padding:0 10px;
   display:inline-flex; align-items:center; background:#eb1f00; border:1px solid #e8512a;
-  color:#fff; font:700 14px/26px Pretendard, system-ui, sans-serif; border-radius:8px 8px 0 0;
+  color:#fff; font:700 14px/26px Pretendard,system-ui,sans-serif; border-radius:8px 8px 0 0;
 `;
 
 const CardReset = styled.div`
@@ -333,3 +369,4 @@ const FailButton = styled.div`
   font-size:14px; font-weight:500; line-height:30px; letter-spacing:-1px;
   &:hover { cursor:pointer; }
 `;
+
