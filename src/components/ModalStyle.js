@@ -84,3 +84,14 @@ export const Check = styled.div`
   line-height: 0; /* 0% */
   letter-spacing: -0.5px;
 `;
+export const ModalImg=styled.div`
+display: flex;
+width: 126px;
+height: 126px;
+aspect-ratio: 1/1;
+border-radius: 12px;
+background: #EAEAEA url(<path-to-image>) no-repeat center / cover;
+margin-top: 15px;
+justify-content: center;
+align-items: center;
+`

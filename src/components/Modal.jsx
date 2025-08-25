@@ -6,9 +6,18 @@ import missionSkin from "../assets/images/missionmodal.svg";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { MissionComplete } from "../shared/api/mission";
-import { CodeMadal,Close,HeadText,TestText,InputBox,Input,Check } from "./ModalStyle";
-import CloseButton from "../assets/icons/close_button.svg?react"
-import CardLogo from "../assets/logos/card_logo.svg?react"
+import {
+  CodeMadal,
+  Close,
+  HeadText,
+  TestText,
+  InputBox,
+  Input,
+  Check,
+  ModalImg,
+} from "./ModalStyle";
+import CloseButton from "../assets/icons/close_button.svg?react";
+import CardLogo from "../assets/logos/card_logo.svg?react";
 
 /* 공통 래퍼 */
 const ModalWrapper = ({ children, onClose }) => {
@@ -59,11 +68,22 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
     <ModalWrapper onClose={onClose}>
       <div className="mission-skin">
         {/* 배경(svg) */}
-        <img className="mission-bg" src={missionSkin} alt="" draggable="false" />
+        <img
+          className="mission-bg"
+          src={missionSkin}
+          alt=""
+          draggable="false"
+        />
 
         {/* 내용 오버레이 */}
         <div className="mission-body">
-          <img src={mission.image} alt="" className="mission-image" />
+          <ModalImg>
+            {mission.image ? (
+              <img src={mission.image} alt="" className="mission-image" />
+            ) : (
+              <CardLogo width="76px" height="76px" opacity="0.5" />
+            )}
+          </ModalImg>
           <div>
             <div className="mission-title">{mission.title}</div>
             <div className="mission-store">{mission.store}</div>
@@ -90,11 +110,11 @@ export const MissionModal = ({ mission, onClose, onSubmit }) => {
   );
 };
 
-// 2) CodeInputModal (일일미션/쿠폰 공용)
+// 2) CodeInputModal (일일미션)
 export const CodeInputModal = ({
   onClose,
   onSubmit,
-  hint = "예시 코드는 0000 입니다",
+  hint,
   missionData, // 미션 식별자 (경로 param)
   mode = "mission", // "mission" | "coupon"
 }) => {
@@ -115,7 +135,7 @@ export const CodeInputModal = ({
       return;
     }
 
-    if (mode === "mission") {
+    if (mode == "mission") {
       if (!missionData.id) {
         alert("미션 정보를 찾을 수 없어요. 다시 시도해주세요.");
         return;
@@ -140,28 +160,38 @@ export const CodeInputModal = ({
   return (
     <ModalWrapper onClose={onClose}>
       <CodeMadal className="modal-code" onClick={(e) => e.stopPropagation()}>
-        <Close><CloseButton/></Close>
-        <HeadText $size="24px" $weight="500">{missionData.storeName},</HeadText>
-        <HeadText $size="32px" $weight="700">{mode.equals("mission") ? "미션 인증 꾹!":"단골 도장 꾹!"}</HeadText>
-        {hint && <TestText>{hint}</TestText>}
+        <Close>
+          <CloseButton onClick={onClose} />
+        </Close>
+        <HeadText $size="24px" $weight="500">
+          {mode == "mission" ? missionData.storeName : ""}
+        </HeadText>
+        <HeadText $size="32px" $weight="700">
+          {mode == "mission" ? "미션 인증 꾹!" : "단골 도장 꾹!"}
+        </HeadText>
+        <TestText>
+          {mode == "mission" ? { hint } : "대풍족:0125 / 동방손칼국수:0123"}
+        </TestText>
 
         <form onSubmit={handleSubmit}>
           <InputBox>
-          <CardLogo width="69px" height="64px"/>
-          <Input
-            className="modal-code-input"
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} /* 숫자만 */
-            maxLength={4}
-            inputMode="numeric"
-            placeholder="0000"
-            autoFocus
-          />
+            <CardLogo width="69px" height="64px" />
+            <Input
+              className="modal-code-input"
+              type="text"
+              value={code}
+              onChange={(e) =>
+                setCode(e.target.value.replace(/\D/g, ""))
+              } /* 숫자만 */
+              maxLength={4}
+              inputMode="numeric"
+              placeholder="0000"
+              autoFocus
+            />
           </InputBox>
-            <Check type="submit" onClick={handleSubmit}>
-              확인
-            </Check>
+          <Check type="submit" onClick={handleSubmit}>
+            확인
+          </Check>
         </form>
       </CodeMadal>
     </ModalWrapper>

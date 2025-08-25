@@ -237,6 +237,7 @@ export default function MissionPage() {
       {/* 인증코드 입력 모달: ✅ 동적 힌트/코드 전달 */}
       {isCodeInputOpen && (
         <CodeInputModal
+        mode="mission"
           onClose={() => setIsCodeInputOpen(false)}
           missionData={missionDetailData}               // 경로 등에 필요하면 사용
           authCode={getAuthCode(missionDetailData)}       // 모달 내부에서 검증/표시용
