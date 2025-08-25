@@ -13,23 +13,44 @@ import { StampListGet, StampPlus, StampReward } from "../../shared/api/stamp";
 import axios from "axios";
 import Loading from "../../components/Loading";
 
-/** 서버 응답 → 카드 VM (백엔드 필드명 흡수) */
-const toVM = (x = {}) => {
-  const id =
-    x.stampId ?? x.storeStampId ?? x.store?.stampId ?? x.id ?? x.uuid ?? null;
+/* =========================
+   ✅ 바늘 로컬 영구 저장 유틸
+   ========================= */
+const NEEDLE_KEY = "needles_by_store";
+const readNeedles = () => {
+  try { return JSON.parse(localStorage.getItem(NEEDLE_KEY)) || {}; }
+  catch { return {}; }
+};
+const writeNeedles = (m) => localStorage.setItem(NEEDLE_KEY, JSON.stringify(m));
+const getNeedles  = (id) => (readNeedles()[id] || 0);
+const setNeedles  = (id, n) => { const m = readNeedles(); m[id] = n; writeNeedles(m); };
+const bumpNeedles = (id) => { const m = readNeedles(); m[id] = (m[id] || 0) + 1; writeNeedles(m); return m[id]; };
+
+/* 서버에서 어떤 이름으로 오든 id 뽑기 */
+const pickId = (x = {}) =>
+  x.stampId ?? x.storeStampId ?? x.store?.stampId ?? x.id ?? x.uuid ?? null;
+
+/** 서버 응답 → 카드 VM (백엔드 필드명 흡수 + 영구 바늘 머지) */
+const toVM = (x = {}, prev = {}) => {
+  const id = pickId(x);
 
   const storeName = x.storeName ?? x.store?.name ?? x.name ?? "가게";
-  const stamps = Number(x.currentCount ?? x.stampCount ?? x.count ?? 0);
-  const required = Number(x.requiredCount ?? x.goal ?? 10);
-  const cyclesCompleted = Number(x.cyclesCompleted ?? x.completed ?? 0);
+  const stamps    = Number(x.currentCount ?? x.stampCount ?? x.count ?? 0);
+  const required  = Number(x.requiredCount ?? x.goal ?? 10);
+
+  // 서버/로컬/이전 렌더 중 최댓값 유지 → 바늘 영구 보존
+  const serverCycles = Number(x.cyclesCompleted ?? x.completed ?? 0);
+  const localCycles  = id != null ? getNeedles(id) : 0;
+  const prevCycles   = Number(prev?.cyclesCompleted ?? 0);
+  const cyclesCompleted = Math.max(serverCycles, localCycles, prevCycles);
 
   const status = (x.status ?? "").toString().toUpperCase();
   const hasUnclaimedReward = status
     ? status === "READY_TO_CLAIM"
     : Boolean(
         x.hasUnclaimedReward ??
-          x.rewardAvailable ??
-          (required > 0 && stamps >= required)
+        x.rewardAvailable ??
+        (required > 0 && stamps >= required)
       );
 
   return { id, storeName, stamps, required, cyclesCompleted, hasUnclaimedReward };
@@ -39,36 +60,51 @@ export default function StampPage() {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [modalType, setModalType] = useState(null); // 'stamp' | 'exists' | 'success' | null
-
-  // 보상 직후 “바늘” 띄울 카드 기억
-  const [needleMap, setNeedleMap] = useState({}); // { [stampId]: true }
 
   const fetchedRef = useRef(false);
   const submitLock = useRef(false);
-  const claimLock = useRef(false);
+  const claimLock  = useRef(false);
 
-  /** 목록 로드 */
+  // ✅ 보상 직후 "서버가 1개로 보내는 것"을 화면에서만 0처럼 숨김
+  const [suppressMap, setSuppressMap] = useState({}); // { [stampId]: true }
+
+  /** 목록 로드 (서버값 ↔ 로컬 바늘값 최대치로 머지) */
   const load = async () => {
     try {
       setLoading(true);
       setError("");
       const list = await StampListGet();
-      const vms = (Array.isArray(list) ? list : []).map(toVM);
-      setStores(vms);
 
-      // 서버 최신 상태에 맞춰 needleMap 정리 (보상 직후 remainder===1 일 때만 유지)
-      setNeedleMap((prev) => {
+      let built = [];
+      setStores((prev) => {
+        const byId = new Map((prev || []).map((s) => [s.id, s]));
+        built = (Array.isArray(list) ? list : []).map((x) => {
+          const id = pickId(x);
+          return toVM(x, byId.get(id));
+        });
+        return built;
+      });
+
+      // 서버가 더 큰 바늘 값 주면 로컬에 반영
+      for (const s of built) {
+        if (s?.id != null && s.cyclesCompleted > getNeedles(s.id)) {
+          setNeedles(s.id, s.cyclesCompleted);
+        }
+      }
+
+      // ✅ suppressMap 유지/해제: rem===1(보상 직후 새 사이클)일 때만 유지
+      setSuppressMap((prev) => {
         const next = { ...prev };
-        for (const s of vms) {
-          const rem = s.required > 0 ? s.stamps % s.required : s.stamps;
+        for (const s of built) {
+          const cap = s.required > 0 ? s.required : 10;
+          const rem = cap > 0 ? (s.stamps % cap) : s.stamps;
           if (rem !== 1) delete next[s.id];
         }
         return next;
       });
 
-      return vms;
+      return built;
     } catch (e) {
       const msg = axios.isAxiosError(e)
         ? e.response?.data?.message ?? "스탬프를 불러오지 못했어요."
@@ -116,7 +152,7 @@ export default function StampPage() {
     }
   };
 
-  /** 보상 수령 → 즉시 발급(POST /stamps/{stampId}/use) */
+  /** 보상 수령 → 바늘 +1 영구 반영 + 즉시 UI 갱신 */
   const handleClaimClick = async (idx) => {
     if (idx == null) return;
     const target = stores[idx];
@@ -134,12 +170,30 @@ export default function StampPage() {
         return;
       }
 
-      // 이 카드에 바늘 표시 예약
-      setNeedleMap((p) => ({ ...p, [target.id]: true }));
+      // 1) 바늘 +1 (영구 저장)
+      const n = bumpNeedles(target.id);
 
-      // 성공 모달만 띄우고 이동은 X
+      // 2) 화면 즉시 반영 (스탬프는 0으로 시작)
+      setStores((prev) =>
+        prev.map((s) =>
+          s.id === target.id
+            ? {
+                ...s,
+                hasUnclaimedReward: false,
+                stamps: 0, // 새 사이클 0개부터
+                cyclesCompleted: Math.max(n, (s.cyclesCompleted ?? 0) + 1),
+              }
+            : s
+        )
+      );
+
+      // ✅ 2.5) 서버가 1개로 보내도 화면에선 0처럼 보이게 숨김 플래그 ON
+      setSuppressMap((p) => ({ ...p, [target.id]: true }));
+
+      // 3) 성공 모달
       setModalType("success");
 
+      // 4) 서버 재동기화
       await load();
       setTimeout(load, 300);
     } catch (e) {
@@ -155,11 +209,8 @@ export default function StampPage() {
     }
   };
 
-  /** 성공 모달 닫기 → 그냥 닫기 (이동 없음) */
-  const handleCloseSuccess = () => {
-    setModalType(null);
-  };
-
+  /** 성공 모달 닫기 */
+  const handleCloseSuccess = () => setModalType(null);
   const closeModal = () => setModalType(null);
 
   return (
@@ -181,26 +232,26 @@ export default function StampPage() {
 
         {!loading && !error && (
           <List>
-  {stores.map((store, idx) => {
-    // 서버가 보상 직후 count=1로 보내면 remainder가 1이 됩니다.
-    const rem = store.required > 0 ? store.stamps % store.required : store.stamps;
-    // 우리가 예약했고(reward 성공), remainder도 1이면 카드에 needle 표시
-    const showNeedle = !!needleMap[store.id] && rem === 1;
+            {stores.map((store, idx) => {
+              // ✅ claim 직후(서버 rem=1)면 화면에서만 1개 숨김
+              const cap = store.required > 0 ? store.required : 10;
+              const rem = cap > 0 ? (store.stamps % cap) : store.stamps;
+              const hideOne = !!suppressMap[store.id] && rem === 1;
+              const stampsForView = hideOne ? Math.max(0, store.stamps - 1) : store.stamps;
 
-    return (
-      <MainStampCard
-        key={(store.id ?? store.storeName) + "_" + idx}
-        store={store}                 // 원본 값을 그대로 넘깁니다 (보정은 카드 내부에서 처리)
-        needle={showNeedle}        
-        onClaim={() => handleClaimClick(idx)}
-      />
-    );
-  })}
-  {stores.length === 0 && (
-    <div style={{ padding: 24 }}>아직 적립된 스탬프가 없어요.</div>
-  )}
-</List>
-
+              return (
+                <MainStampCard
+                  key={(store.id ?? store.storeName) + "_" + idx}
+                  store={store}
+                  stampsForView={stampsForView}   // ✅ 표시용 덮어쓰기
+                  onClaim={() => handleClaimClick(idx)}
+                />
+              );
+            })}
+            {stores.length === 0 && (
+              <div style={{ padding: 24 }}>아직 적립된 스탬프가 없어요.</div>
+            )}
+          </List>
         )}
       </ScrollArea>
 
@@ -266,11 +317,7 @@ const ScrollArea = styled.div`
   padding: 0 24px calc(90px + env(safe-area-inset-bottom));
   scrollbar-width: none;
   -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-  }
+  &::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
   --sbw: 14px;
   margin-right: calc(var(--sbw) * -1);
   padding-right: calc(24px + var(--sbw));
