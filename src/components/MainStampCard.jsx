@@ -17,7 +17,6 @@ export default function MainStampCard({ store, stampsForView, disabled, onClaim 
     required = store?.required ?? store?.requiredCount ?? store?.goal ?? 10,
     cyclesCompleted = 0,
     hasUnclaimedReward = false,
-    rewardText = "",
   } = store ?? {};
 
   const cap = Math.max(1, Number(required) || 10);
@@ -26,13 +25,19 @@ export default function MainStampCard({ store, stampsForView, disabled, onClaim 
   const isReady = hasUnclaimedReward || nRaw >= cap;
   const n = isReady ? cap : Math.min(nRaw, cap);
 
-  // 바늘은 누적 횟수만큼 카드 우상단에 표시(최대 3개 + 초과분 배지)
-  const needlesToShow = Math.min(cyclesCompleted ?? 0, 3);
-  const extra = Math.max(0, (cyclesCompleted ?? 0) - 3);
+    // ✅ 바늘 개수 = 서버 방문/완성 횟수(cardNum 우선)
+  const needleCount = Math.max(
+    0,
+    Number(store?.cardNum ?? store?.cyclesCompleted ?? 0) || 0
+  );
+  const needlesToShow = Math.min(needleCount, 3);
+  const extra         = Math.max(0, needleCount - 3);
 
  // 남은 스탬프 표시 문구
   const prog = cap > 0 ? (nRaw % cap) : nRaw;   // 이번 사이클에서 채운 칸 수
   const left = isReady ? 0 : (cap - prog);      // 보상까지 남은 개수
+
+  
 
   return (
     <Card $completed={isReady} $disabled={disabled}>
