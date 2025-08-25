@@ -48,8 +48,6 @@ export default function MissionPage() {
     "";
 
   // 상세 응답에서 가게명 / 인증코드 추출 (키 유연 대응)
-  const getStoreName = (detail) =>
-    detail?.storeName ?? detail?.store?.name ?? detail?.store_title ?? "";
   const getAuthCode = (detail) =>
     detail?.storeAuthCode ??
     detail?.authCode ??
@@ -132,7 +130,6 @@ export default function MissionPage() {
 
   // ✅ CodeInputModal에 넘길 동적 힌트 생성
   const codeHint = (() => {
-    const name = getStoreName(missionDetailData);
     const code = getAuthCode(missionDetailData);
     if (!code) return ""; // 코드 없으면 힌트 숨김
     // 쿠폰함처럼 한 줄 안내형
@@ -241,7 +238,7 @@ export default function MissionPage() {
       {isCodeInputOpen && (
         <CodeInputModal
           onClose={() => setIsCodeInputOpen(false)}
-          missionId={missionDetailData?.id}               // 경로 등에 필요하면 사용
+          missionData={missionDetailData}               // 경로 등에 필요하면 사용
           authCode={getAuthCode(missionDetailData)}       // 모달 내부에서 검증/표시용
           hint={codeHint}                                  // 화면 표시용 힌트(쿠폰함 스타일)
           onSubmit={() => {

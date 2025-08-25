@@ -6,6 +6,9 @@ import missionSkin from "../assets/images/missionmodal.svg";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { MissionComplete } from "../shared/api/mission";
+import { CodeMadal,Close,HeadText,TestText,InputBox,Input,Check } from "./ModalStyle";
+import CloseButton from "../assets/icons/close_button.svg?react"
+import CardLogo from "../assets/logos/card_logo.svg?react"
 
 /* 공통 래퍼 */
 const ModalWrapper = ({ children, onClose }) => {
@@ -92,7 +95,7 @@ export const CodeInputModal = ({
   onClose,
   onSubmit,
   hint = "예시 코드는 0000 입니다",
-  missionId, // 미션 식별자 (경로 param)
+  missionData, // 미션 식별자 (경로 param)
   mode = "mission", // "mission" | "coupon"
 }) => {
   const [code, setCode] = useState("");
@@ -113,12 +116,12 @@ export const CodeInputModal = ({
     }
 
     if (mode === "mission") {
-      if (!missionId) {
+      if (!missionData.id) {
         alert("미션 정보를 찾을 수 없어요. 다시 시도해주세요.");
         return;
       }
       const { ok, status, data } = await MissionComplete({
-        missionId,
+        missionId: missionData.id,
         authCode: c,
       });
       if (!ok) {
@@ -136,31 +139,31 @@ export const CodeInputModal = ({
 
   return (
     <ModalWrapper onClose={onClose}>
-      <div className="modal-code" onClick={(e) => e.stopPropagation()}>
-        <h3 className="modal-title">인증코드를 입력해주세요</h3>
-        {hint && <p className="modal-hint">{hint}</p>}
+      <CodeMadal className="modal-code" onClick={(e) => e.stopPropagation()}>
+        <Close><CloseButton/></Close>
+        <HeadText $size="24px" $weight="500">{missionData.storeName},</HeadText>
+        <HeadText $size="32px" $weight="700">{mode.equals("mission") ? "미션 인증 꾹!":"단골 도장 꾹!"}</HeadText>
+        {hint && <TestText>{hint}</TestText>}
 
         <form onSubmit={handleSubmit}>
-          <input
+          <InputBox>
+          <CardLogo width="69px" height="64px"/>
+          <Input
             className="modal-code-input"
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} /* 숫자만 */
             maxLength={4}
             inputMode="numeric"
-            placeholder="4자리 숫자"
+            placeholder="0000"
             autoFocus
           />
-          <div className="modal-button-group">
-            <button type="button" className="btn-cancel" onClick={onClose}>
-              취소
-            </button>
-            <button type="submit" className="btn-confirm">
+          </InputBox>
+            <Check type="submit" onClick={handleSubmit}>
               확인
-            </button>
-          </div>
+            </Check>
         </form>
-      </div>
+      </CodeMadal>
     </ModalWrapper>
   );
 };
