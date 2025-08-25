@@ -210,13 +210,25 @@ export default function StoreList() {
     setPageCount(pageCount - 4);
     setPage(pageCount - 4);
   };
-  const pagePlus = (upDown) => {
+  const pagePlus = (upDown) => {//다음페이지
     if(upDown) {
       if(page== maxPage) return;
-      setPage(page + 1);}
+      if(page+1 == pageCount+4){
+        setPageCount(pageCount+4);
+        setPage(page+1);
+      } else {
+          setPage(page + 1);
+      }
+      }
     else {
       if(page==1) return;
-      setPage(page-1);}
+      if(page == pageCount){
+          setPageCount(pageCount-4);
+          setPage(page-1);
+      } else{
+        setPage(page-1);
+      }
+      }
   };
 
   return (
