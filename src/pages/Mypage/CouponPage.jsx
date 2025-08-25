@@ -7,6 +7,7 @@ import TitleBar from "../../components/TitleBar";
 import BackIcon from "../../assets/icons/back_mypage.svg?react";
 import CloseButton from "../../assets/icons/close_button.svg?react";
 import { CodeInputModal, CouponUseModal } from "../../components/Modal";
+import Loading from "../../components/Loading";
 
 import { getCoupons, useCoupon as apiUseCoupon } from "../../shared/api/coupon";
 
@@ -145,7 +146,7 @@ export default function CouponPage() {
       </PageHeader>
 
       <ScrollArea>
-        {loading && <div style={{ padding: 24 }}>불러오는 중…</div>}
+        {loading && <Loading/>}
         {!loading && error && (
           <div style={{ padding: 24, color: "#cf4721" }}>{error}</div>
         )}
