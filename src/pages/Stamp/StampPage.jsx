@@ -187,9 +187,6 @@ export default function StampPage() {
         )
       );
 
-      // ✅ 2.5) 서버가 1개로 보내도 화면에선 0처럼 보이게 숨김 플래그 ON
-      setSuppressMap((p) => ({ ...p, [target.id]: true }));
-
       // 3) 성공 모달
       setModalType("success");
 
@@ -233,17 +230,11 @@ export default function StampPage() {
         {!loading && !error && (
           <List>
             {stores.map((store, idx) => {
-              // ✅ claim 직후(서버 rem=1)면 화면에서만 1개 숨김
-              const cap = store.required > 0 ? store.required : 10;
-              const rem = cap > 0 ? (store.stamps % cap) : store.stamps;
-              const hideOne = !!suppressMap[store.id] && rem === 1;
-              const stampsForView = hideOne ? Math.max(0, store.stamps - 1) : store.stamps;
-
               return (
                 <MainStampCard
                   key={(store.id ?? store.storeName) + "_" + idx}
                   store={store}
-                  stampsForView={stampsForView}   // ✅ 표시용 덮어쓰기
+              
                   onClaim={() => handleClaimClick(idx)}
                 />
               );
