@@ -30,10 +30,6 @@ export default function MainStampCard({ store, stampsForView, disabled, onClaim 
   const needlesToShow = Math.min(cyclesCompleted ?? 0, 3);
   const extra = Math.max(0, (cyclesCompleted ?? 0) - 3);
 
- // 남은 스탬프 표시 문구
-  const prog = cap > 0 ? (nRaw % cap) : nRaw;   // 이번 사이클에서 채운 칸 수
-  const left = isReady ? 0 : (cap - prog);      // 보상까지 남은 개수
-
   return (
     <Card $completed={isReady} $disabled={disabled}>
       {/* 바늘 오버레이 */}
@@ -50,15 +46,10 @@ export default function MainStampCard({ store, stampsForView, disabled, onClaim 
 
       <Head>
         <div>
-           <Title>{storeName}</Title>
-          {/* 동적 문구: 보상까지 N개 남음 / 보상 수령 가능 */}
-          <Desc>
-            {isReady
-              ? "보상 수령 가능!"
-              : `보상까지 ${left}개 남음`}
-          </Desc>
+          <Title>{storeName}</Title>
+          <Desc>{rewardText || `스탬프 ${cap}개 모으면 보상!`}</Desc>
         </div>
-          </Head>
+      </Head>
 
       <Grid aria-label={`적립 ${Math.min(n, cap)}/${cap}`}>
         {Array.from({ length: cap }).map((_, i) => {
