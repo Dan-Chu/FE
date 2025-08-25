@@ -170,7 +170,7 @@ export const CodeInputModal = ({
           {mode == "mission" ? "미션 인증 꾹!" : "단골 도장 꾹!"}
         </HeadText>
         <TestText>
-          {mode == "mission" ? { hint } : "대풍족:0125 / 동방손칼국수:0123"}
+          {mode == "mission" ?  hint  : "대풍족:0125 / 동방손칼국수:0123"}
         </TestText>
 
         <form onSubmit={handleSubmit}>
